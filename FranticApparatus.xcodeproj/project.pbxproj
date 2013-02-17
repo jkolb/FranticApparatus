@@ -1,0 +1,502 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E553442A16D17ACB007BF606 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E553442916D17ACB007BF606 /* Foundation.framework */; };
+		E553442F16D17ACB007BF606 /* FranticApparatus.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553442E16D17ACB007BF606 /* FranticApparatus.h */; };
+		E553443116D17ACB007BF606 /* FranticApparatus.m in Sources */ = {isa = PBXBuildFile; fileRef = E553443016D17ACB007BF606 /* FranticApparatus.m */; };
+		E553443916D17ACB007BF606 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E553443816D17ACB007BF606 /* SenTestingKit.framework */; };
+		E553443B16D17ACB007BF606 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E553443A16D17ACB007BF606 /* UIKit.framework */; };
+		E553443C16D17ACB007BF606 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E553442916D17ACB007BF606 /* Foundation.framework */; };
+		E553443F16D17ACB007BF606 /* libFranticApparatus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E553442616D17ACB007BF606 /* libFranticApparatus.a */; };
+		E553444516D17ACB007BF606 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E553444316D17ACB007BF606 /* InfoPlist.strings */; };
+		E553444816D17ACB007BF606 /* FranticApparatusTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E553444716D17ACB007BF606 /* FranticApparatusTests.m */; };
+		E553445F16D17B4A007BF606 /* FAAbstractTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E553445316D17B4A007BF606 /* FAAbstractTask.m */; };
+		E553446016D17B4A007BF606 /* FABatchTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E553445516D17B4A007BF606 /* FABatchTask.m */; };
+		E553446116D17B4A007BF606 /* FAChainedBatchTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E553445716D17B4A007BF606 /* FAChainedBatchTask.m */; };
+		E553446216D17B4A007BF606 /* FAGenericTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E553445916D17B4A007BF606 /* FAGenericTask.m */; };
+		E553446316D17B4A007BF606 /* FAParallelBatchTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E553445B16D17B4A007BF606 /* FAParallelBatchTask.m */; };
+		E553446416D17B4A007BF606 /* FASequentialBatchTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E553445D16D17B4A007BF606 /* FASequentialBatchTask.m */; };
+		E553447016D17C1D007BF606 /* FAURLConnectionDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E553446716D17C1D007BF606 /* FAURLConnectionDataTask.m */; };
+		E553447116D17C1D007BF606 /* FAURLConnectionDownloadTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E553446916D17C1D007BF606 /* FAURLConnectionDownloadTask.m */; };
+		E553447216D17C1D007BF606 /* FAURLConnectionTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E553446B16D17C1D007BF606 /* FAURLConnectionTask.m */; };
+		E553447316D17C1D007BF606 /* FAURLConnectionStreamTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E553446D16D17C1D007BF606 /* FAURLConnectionStreamTask.m */; };
+		E553447416D17C1D007BF606 /* FAURLResult.m in Sources */ = {isa = PBXBuildFile; fileRef = E553446F16D17C1D007BF606 /* FAURLResult.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E553443D16D17ACB007BF606 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E553441E16D17ACB007BF606 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E553442516D17ACB007BF606;
+			remoteInfo = FranticApparatus;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E553442416D17ACB007BF606 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/${PRODUCT_NAME}";
+			dstSubfolderSpec = 16;
+			files = (
+				E553442F16D17ACB007BF606 /* FranticApparatus.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		E553442616D17ACB007BF606 /* libFranticApparatus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libFranticApparatus.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		E553442916D17ACB007BF606 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		E553442D16D17ACB007BF606 /* FranticApparatus-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FranticApparatus-Prefix.pch"; sourceTree = "<group>"; };
+		E553442E16D17ACB007BF606 /* FranticApparatus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FranticApparatus.h; sourceTree = "<group>"; };
+		E553443016D17ACB007BF606 /* FranticApparatus.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FranticApparatus.m; sourceTree = "<group>"; };
+		E553443716D17ACB007BF606 /* FranticApparatusTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FranticApparatusTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E553443816D17ACB007BF606 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		E553443A16D17ACB007BF606 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		E553444216D17ACB007BF606 /* FranticApparatusTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FranticApparatusTests-Info.plist"; sourceTree = "<group>"; };
+		E553444416D17ACB007BF606 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		E553444616D17ACB007BF606 /* FranticApparatusTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FranticApparatusTests.h; sourceTree = "<group>"; };
+		E553444716D17ACB007BF606 /* FranticApparatusTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FranticApparatusTests.m; sourceTree = "<group>"; };
+		E553445216D17B4A007BF606 /* FAAbstractTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAAbstractTask.h; sourceTree = "<group>"; };
+		E553445316D17B4A007BF606 /* FAAbstractTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAAbstractTask.m; sourceTree = "<group>"; };
+		E553445416D17B4A007BF606 /* FABatchTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FABatchTask.h; sourceTree = "<group>"; };
+		E553445516D17B4A007BF606 /* FABatchTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FABatchTask.m; sourceTree = "<group>"; };
+		E553445616D17B4A007BF606 /* FAChainedBatchTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAChainedBatchTask.h; sourceTree = "<group>"; };
+		E553445716D17B4A007BF606 /* FAChainedBatchTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAChainedBatchTask.m; sourceTree = "<group>"; };
+		E553445816D17B4A007BF606 /* FAGenericTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAGenericTask.h; sourceTree = "<group>"; };
+		E553445916D17B4A007BF606 /* FAGenericTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAGenericTask.m; sourceTree = "<group>"; };
+		E553445A16D17B4A007BF606 /* FAParallelBatchTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAParallelBatchTask.h; sourceTree = "<group>"; };
+		E553445B16D17B4A007BF606 /* FAParallelBatchTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAParallelBatchTask.m; sourceTree = "<group>"; };
+		E553445C16D17B4A007BF606 /* FASequentialBatchTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FASequentialBatchTask.h; sourceTree = "<group>"; };
+		E553445D16D17B4A007BF606 /* FASequentialBatchTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FASequentialBatchTask.m; sourceTree = "<group>"; };
+		E553445E16D17B4A007BF606 /* FATask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FATask.h; sourceTree = "<group>"; };
+		E553446616D17C1D007BF606 /* FAURLConnectionDataTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLConnectionDataTask.h; sourceTree = "<group>"; };
+		E553446716D17C1D007BF606 /* FAURLConnectionDataTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLConnectionDataTask.m; sourceTree = "<group>"; };
+		E553446816D17C1D007BF606 /* FAURLConnectionDownloadTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLConnectionDownloadTask.h; sourceTree = "<group>"; };
+		E553446916D17C1D007BF606 /* FAURLConnectionDownloadTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLConnectionDownloadTask.m; sourceTree = "<group>"; };
+		E553446A16D17C1D007BF606 /* FAURLConnectionTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLConnectionTask.h; sourceTree = "<group>"; };
+		E553446B16D17C1D007BF606 /* FAURLConnectionTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLConnectionTask.m; sourceTree = "<group>"; };
+		E553446C16D17C1D007BF606 /* FAURLConnectionStreamTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLConnectionStreamTask.h; sourceTree = "<group>"; };
+		E553446D16D17C1D007BF606 /* FAURLConnectionStreamTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLConnectionStreamTask.m; sourceTree = "<group>"; };
+		E553446E16D17C1D007BF606 /* FAURLResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLResult.h; sourceTree = "<group>"; };
+		E553446F16D17C1D007BF606 /* FAURLResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLResult.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E553442316D17ACB007BF606 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E553442A16D17ACB007BF606 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E553443316D17ACB007BF606 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E553443916D17ACB007BF606 /* SenTestingKit.framework in Frameworks */,
+				E553443B16D17ACB007BF606 /* UIKit.framework in Frameworks */,
+				E553443C16D17ACB007BF606 /* Foundation.framework in Frameworks */,
+				E553443F16D17ACB007BF606 /* libFranticApparatus.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E553441D16D17ACB007BF606 = {
+			isa = PBXGroup;
+			children = (
+				E553442B16D17ACB007BF606 /* FranticApparatus */,
+				E553444016D17ACB007BF606 /* FranticApparatusTests */,
+				E553442816D17ACB007BF606 /* Frameworks */,
+				E553442716D17ACB007BF606 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E553442716D17ACB007BF606 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E553442616D17ACB007BF606 /* libFranticApparatus.a */,
+				E553443716D17ACB007BF606 /* FranticApparatusTests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E553442816D17ACB007BF606 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E553442916D17ACB007BF606 /* Foundation.framework */,
+				E553443816D17ACB007BF606 /* SenTestingKit.framework */,
+				E553443A16D17ACB007BF606 /* UIKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E553442B16D17ACB007BF606 /* FranticApparatus */ = {
+			isa = PBXGroup;
+			children = (
+				E553446516D17C08007BF606 /* Network */,
+				E553445116D17B35007BF606 /* Task */,
+				E553442E16D17ACB007BF606 /* FranticApparatus.h */,
+				E553443016D17ACB007BF606 /* FranticApparatus.m */,
+				E553442C16D17ACB007BF606 /* Supporting Files */,
+			);
+			path = FranticApparatus;
+			sourceTree = "<group>";
+		};
+		E553442C16D17ACB007BF606 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				E553442D16D17ACB007BF606 /* FranticApparatus-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E553444016D17ACB007BF606 /* FranticApparatusTests */ = {
+			isa = PBXGroup;
+			children = (
+				E553444616D17ACB007BF606 /* FranticApparatusTests.h */,
+				E553444716D17ACB007BF606 /* FranticApparatusTests.m */,
+				E553444116D17ACB007BF606 /* Supporting Files */,
+			);
+			path = FranticApparatusTests;
+			sourceTree = "<group>";
+		};
+		E553444116D17ACB007BF606 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				E553444216D17ACB007BF606 /* FranticApparatusTests-Info.plist */,
+				E553444316D17ACB007BF606 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E553445116D17B35007BF606 /* Task */ = {
+			isa = PBXGroup;
+			children = (
+				E553445E16D17B4A007BF606 /* FATask.h */,
+				E553445216D17B4A007BF606 /* FAAbstractTask.h */,
+				E553445316D17B4A007BF606 /* FAAbstractTask.m */,
+				E553445816D17B4A007BF606 /* FAGenericTask.h */,
+				E553445916D17B4A007BF606 /* FAGenericTask.m */,
+				E553445416D17B4A007BF606 /* FABatchTask.h */,
+				E553445516D17B4A007BF606 /* FABatchTask.m */,
+				E553445616D17B4A007BF606 /* FAChainedBatchTask.h */,
+				E553445716D17B4A007BF606 /* FAChainedBatchTask.m */,
+				E553445A16D17B4A007BF606 /* FAParallelBatchTask.h */,
+				E553445B16D17B4A007BF606 /* FAParallelBatchTask.m */,
+				E553445C16D17B4A007BF606 /* FASequentialBatchTask.h */,
+				E553445D16D17B4A007BF606 /* FASequentialBatchTask.m */,
+			);
+			path = Task;
+			sourceTree = "<group>";
+		};
+		E553446516D17C08007BF606 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				E553446A16D17C1D007BF606 /* FAURLConnectionTask.h */,
+				E553446B16D17C1D007BF606 /* FAURLConnectionTask.m */,
+				E553446616D17C1D007BF606 /* FAURLConnectionDataTask.h */,
+				E553446716D17C1D007BF606 /* FAURLConnectionDataTask.m */,
+				E553446816D17C1D007BF606 /* FAURLConnectionDownloadTask.h */,
+				E553446916D17C1D007BF606 /* FAURLConnectionDownloadTask.m */,
+				E553446C16D17C1D007BF606 /* FAURLConnectionStreamTask.h */,
+				E553446D16D17C1D007BF606 /* FAURLConnectionStreamTask.m */,
+				E553446E16D17C1D007BF606 /* FAURLResult.h */,
+				E553446F16D17C1D007BF606 /* FAURLResult.m */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E553442516D17ACB007BF606 /* FranticApparatus */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E553444B16D17ACB007BF606 /* Build configuration list for PBXNativeTarget "FranticApparatus" */;
+			buildPhases = (
+				E553442216D17ACB007BF606 /* Sources */,
+				E553442316D17ACB007BF606 /* Frameworks */,
+				E553442416D17ACB007BF606 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FranticApparatus;
+			productName = FranticApparatus;
+			productReference = E553442616D17ACB007BF606 /* libFranticApparatus.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		E553443616D17ACB007BF606 /* FranticApparatusTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E553444E16D17ACB007BF606 /* Build configuration list for PBXNativeTarget "FranticApparatusTests" */;
+			buildPhases = (
+				E553443216D17ACB007BF606 /* Sources */,
+				E553443316D17ACB007BF606 /* Frameworks */,
+				E553443416D17ACB007BF606 /* Resources */,
+				E553443516D17ACB007BF606 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E553443E16D17ACB007BF606 /* PBXTargetDependency */,
+			);
+			name = FranticApparatusTests;
+			productName = FranticApparatusTests;
+			productReference = E553443716D17ACB007BF606 /* FranticApparatusTests.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E553441E16D17ACB007BF606 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+				ORGANIZATIONNAME = "Frantic Apparatus";
+			};
+			buildConfigurationList = E553442116D17ACB007BF606 /* Build configuration list for PBXProject "FranticApparatus" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = E553441D16D17ACB007BF606;
+			productRefGroup = E553442716D17ACB007BF606 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E553442516D17ACB007BF606 /* FranticApparatus */,
+				E553443616D17ACB007BF606 /* FranticApparatusTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E553443416D17ACB007BF606 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E553444516D17ACB007BF606 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		E553443516D17ACB007BF606 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E553442216D17ACB007BF606 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E553443116D17ACB007BF606 /* FranticApparatus.m in Sources */,
+				E553445F16D17B4A007BF606 /* FAAbstractTask.m in Sources */,
+				E553446016D17B4A007BF606 /* FABatchTask.m in Sources */,
+				E553446116D17B4A007BF606 /* FAChainedBatchTask.m in Sources */,
+				E553446216D17B4A007BF606 /* FAGenericTask.m in Sources */,
+				E553446316D17B4A007BF606 /* FAParallelBatchTask.m in Sources */,
+				E553446416D17B4A007BF606 /* FASequentialBatchTask.m in Sources */,
+				E553447016D17C1D007BF606 /* FAURLConnectionDataTask.m in Sources */,
+				E553447116D17C1D007BF606 /* FAURLConnectionDownloadTask.m in Sources */,
+				E553447216D17C1D007BF606 /* FAURLConnectionTask.m in Sources */,
+				E553447316D17C1D007BF606 /* FAURLConnectionStreamTask.m in Sources */,
+				E553447416D17C1D007BF606 /* FAURLResult.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E553443216D17ACB007BF606 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E553444816D17ACB007BF606 /* FranticApparatusTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E553443E16D17ACB007BF606 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E553442516D17ACB007BF606 /* FranticApparatus */;
+			targetProxy = E553443D16D17ACB007BF606 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		E553444316D17ACB007BF606 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E553444416D17ACB007BF606 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		E553444916D17ACB007BF606 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		E553444A16D17ACB007BF606 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E553444C16D17ACB007BF606 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/FranticApparatus.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "FranticApparatus/FranticApparatus-Prefix.pch";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		E553444D16D17ACB007BF606 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/FranticApparatus.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "FranticApparatus/FranticApparatus-Prefix.pch";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		E553444F16D17ACB007BF606 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"\"$(SDKROOT)/Developer/Library/Frameworks\"",
+					"\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "FranticApparatus/FranticApparatus-Prefix.pch";
+				INFOPLIST_FILE = "FranticApparatusTests/FranticApparatusTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		E553445016D17ACB007BF606 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"\"$(SDKROOT)/Developer/Library/Frameworks\"",
+					"\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "FranticApparatus/FranticApparatus-Prefix.pch";
+				INFOPLIST_FILE = "FranticApparatusTests/FranticApparatusTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E553442116D17ACB007BF606 /* Build configuration list for PBXProject "FranticApparatus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E553444916D17ACB007BF606 /* Debug */,
+				E553444A16D17ACB007BF606 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E553444B16D17ACB007BF606 /* Build configuration list for PBXNativeTarget "FranticApparatus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E553444C16D17ACB007BF606 /* Debug */,
+				E553444D16D17ACB007BF606 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		E553444E16D17ACB007BF606 /* Build configuration list for PBXNativeTarget "FranticApparatusTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E553444F16D17ACB007BF606 /* Debug */,
+				E553445016D17ACB007BF606 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E553441E16D17ACB007BF606 /* Project object */;
+}
