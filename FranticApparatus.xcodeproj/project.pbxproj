@@ -27,6 +27,18 @@
 		E553447216D17C1D007BF606 /* FAURLConnectionTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E553446B16D17C1D007BF606 /* FAURLConnectionTask.m */; };
 		E553447316D17C1D007BF606 /* FAURLConnectionStreamTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E553446D16D17C1D007BF606 /* FAURLConnectionStreamTask.m */; };
 		E553447416D17C1D007BF606 /* FAURLResult.m in Sources */ = {isa = PBXBuildFile; fileRef = E553446F16D17C1D007BF606 /* FAURLResult.m */; };
+		E5592C5316D4914600B9C58D /* FAURLConnectionTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553446A16D17C1D007BF606 /* FAURLConnectionTask.h */; };
+		E5592C5416D4914600B9C58D /* FAURLConnectionDataTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553446616D17C1D007BF606 /* FAURLConnectionDataTask.h */; };
+		E5592C5516D4914600B9C58D /* FAURLConnectionDownloadTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553446816D17C1D007BF606 /* FAURLConnectionDownloadTask.h */; };
+		E5592C5616D4914600B9C58D /* FAURLConnectionStreamTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553446C16D17C1D007BF606 /* FAURLConnectionStreamTask.h */; };
+		E5592C5716D4914600B9C58D /* FAURLResult.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553446E16D17C1D007BF606 /* FAURLResult.h */; };
+		E5592C5816D4914600B9C58D /* FATask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445E16D17B4A007BF606 /* FATask.h */; };
+		E5592C5916D4914600B9C58D /* FAAbstractTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445216D17B4A007BF606 /* FAAbstractTask.h */; };
+		E5592C5A16D4914600B9C58D /* FAGenericTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445816D17B4A007BF606 /* FAGenericTask.h */; };
+		E5592C5B16D4914600B9C58D /* FABatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445416D17B4A007BF606 /* FABatchTask.h */; };
+		E5592C5C16D4914600B9C58D /* FAChainedBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445616D17B4A007BF606 /* FAChainedBatchTask.h */; };
+		E5592C5D16D4914600B9C58D /* FAParallelBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445A16D17B4A007BF606 /* FAParallelBatchTask.h */; };
+		E5592C5E16D4914600B9C58D /* FASequentialBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445C16D17B4A007BF606 /* FASequentialBatchTask.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +58,18 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
+				E5592C5316D4914600B9C58D /* FAURLConnectionTask.h in CopyFiles */,
+				E5592C5416D4914600B9C58D /* FAURLConnectionDataTask.h in CopyFiles */,
+				E5592C5516D4914600B9C58D /* FAURLConnectionDownloadTask.h in CopyFiles */,
+				E5592C5616D4914600B9C58D /* FAURLConnectionStreamTask.h in CopyFiles */,
+				E5592C5716D4914600B9C58D /* FAURLResult.h in CopyFiles */,
+				E5592C5816D4914600B9C58D /* FATask.h in CopyFiles */,
+				E5592C5916D4914600B9C58D /* FAAbstractTask.h in CopyFiles */,
+				E5592C5A16D4914600B9C58D /* FAGenericTask.h in CopyFiles */,
+				E5592C5B16D4914600B9C58D /* FABatchTask.h in CopyFiles */,
+				E5592C5C16D4914600B9C58D /* FAChainedBatchTask.h in CopyFiles */,
+				E5592C5D16D4914600B9C58D /* FAParallelBatchTask.h in CopyFiles */,
+				E5592C5E16D4914600B9C58D /* FASequentialBatchTask.h in CopyFiles */,
 				E553442F16D17ACB007BF606 /* FranticApparatus.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -487,6 +511,7 @@
 				E553444D16D17ACB007BF606 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		E553444E16D17ACB007BF606 /* Build configuration list for PBXNativeTarget "FranticApparatusTests" */ = {
 			isa = XCConfigurationList;
@@ -495,6 +520,7 @@
 				E553445016D17ACB007BF606 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
