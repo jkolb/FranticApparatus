@@ -35,6 +35,7 @@
 #import "FAChainedBatchTask.h"
 #import "FAParallelBatchTask.h"
 #import "FASequentialBatchTask.h"
+#import "FAUITask.h"
 
 // Network
 #import "FAURLConnectionTask.h"

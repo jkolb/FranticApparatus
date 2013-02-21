@@ -46,6 +46,7 @@
 		E56BC10D16D5C89A0071E9DE /* FABlockTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E56BC10316D5BEA10071E9DE /* FABlockTask.h */; };
 		E56BC10E16D5C89A0071E9DE /* FAOperationTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E56BC10916D5C64E0071E9DE /* FAOperationTask.h */; };
 		E56BC11316D5D2F40071E9DE /* FAUITask.m in Sources */ = {isa = PBXBuildFile; fileRef = E56BC11216D5D2F40071E9DE /* FAUITask.m */; };
+		E56BC11416D5D7D70071E9DE /* FAUITask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E56BC11116D5D2F40071E9DE /* FAUITask.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +66,7 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
+				E56BC11416D5D7D70071E9DE /* FAUITask.h in CopyFiles */,
 				E56BC10C16D5C89A0071E9DE /* FAGCDTask.h in CopyFiles */,
 				E56BC10D16D5C89A0071E9DE /* FABlockTask.h in CopyFiles */,
 				E56BC10E16D5C89A0071E9DE /* FAOperationTask.h in CopyFiles */,
