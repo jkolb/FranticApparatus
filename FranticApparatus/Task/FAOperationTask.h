@@ -1,5 +1,5 @@
 //
-// FAGenericTask.h
+// FAOperationTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,17 @@
 
 
 
-#import "FAGCDTask.h"
+#import <Foundation/Foundation.h>
+
+#import "FATask.h"
 
 
 
-@interface FAGenericTask : FAGCDTask
+@interface FAOperationTask : NSOperation <FATask>
 
-- (id)generateResultWithError:(NSError **)error;
+@property (nonatomic, weak) NSOperationQueue *queue;
+@property (copy) void (^completionHandler)(id result, NSError *error);
+
+- (void)completeWithResult:(id)result error:(NSError *)error;
 
 @end

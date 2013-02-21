@@ -1,5 +1,5 @@
 //
-// FAGenericTask.h
+// FAOperationTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,24 @@
 
 
 
-#import "FAGCDTask.h"
+#import "FAOperationTask.h"
 
 
 
-@interface FAGenericTask : FAGCDTask
+@implementation FAOperationTask
 
-- (id)generateResultWithError:(NSError **)error;
+- (void)start {
+    if (self.queue == nil) {
+        [self start];
+    } else {
+        [self.queue addOperation:self];
+    }
+}
+
+- (void)completeWithResult:(id)result error:(NSError *)error {
+    if ([self isCancelled]) return;
+    if (self.completionHandler == nil) return;
+    self.completionHandler(result, error);
+}
 
 @end

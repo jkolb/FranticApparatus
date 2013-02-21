@@ -30,23 +30,7 @@
 
 @implementation FAGenericTask
 
-- (void)start {
-    dispatch_queue_t queue = self.queue;
-    
-    if (queue == nil) {
-        queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    }
-    
-    typeof(self) __weak weakSelf = self;
-    dispatch_async(queue, ^{
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil) return;
-        if ([blockSelf isCancelled]) return;
-        [blockSelf run];
-    });
-}
-
-- (void)run {
+- (void)main {
     NSError *error = nil;
     id result = [self generateResultWithError:&error];
     if ([self isCancelled]) return;

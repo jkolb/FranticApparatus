@@ -1,5 +1,5 @@
 //
-// FAGenericTask.h
+// FABlockTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -28,8 +28,13 @@
 
 
 
-@interface FAGenericTask : FAGCDTask
+@interface FABlockTask : FAGCDTask
 
-- (id)generateResultWithError:(NSError **)error;
+- (id)initWithMainQueueBlock:(id (^)(NSError **error))block;
+- (id)initWithHighPriorityQueueBlock:(id (^)(NSError **error))block;
+- (id)initWithDefaultPriorityQueueBlock:(id (^)(NSError **error))block;
+- (id)initWithLowPriorityQueueBlock:(id (^)(NSError **error))block;
+- (id)initWithBackgroundPriorityQueueBlock:(id (^)(NSError **error))block;
+- (id)initWithQueue:(dispatch_queue_t)queue block:(id (^)(NSError **error))block;
 
 @end

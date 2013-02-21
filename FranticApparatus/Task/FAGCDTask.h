@@ -1,5 +1,5 @@
 //
-// FAGenericTask.h
+// FAGrandCentralDispatchTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,25 @@
 
 
 
-#import "FAGCDTask.h"
+#import "FAAbstractTask.h"
 
 
 
-@interface FAGenericTask : FAGCDTask
+@interface FAGCDTask : FAAbstractTask
 
-- (id)generateResultWithError:(NSError **)error;
++ (dispatch_queue_t)mainQueue;
++ (dispatch_queue_t)highPriorityQueue;
++ (dispatch_queue_t)defaultPriorityQueue;
++ (dispatch_queue_t)lowPriorityQueue;
++ (dispatch_queue_t)backgroundPriorityQueue;
+
+- (id)initWithMainQueue;
+- (id)initWithHighPriorityQueue;
+- (id)initWithDefaultPriorityQueue;
+- (id)initWithLowPriorityQueue;
+- (id)initWithBackgroundPriorityQueue;
+- (id)initWithQueue:(dispatch_queue_t)queue;
+
+- (void)main;
 
 @end
