@@ -45,6 +45,7 @@
 		E56BC10C16D5C89A0071E9DE /* FAGCDTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E56BC10616D5C1A50071E9DE /* FAGCDTask.h */; };
 		E56BC10D16D5C89A0071E9DE /* FABlockTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E56BC10316D5BEA10071E9DE /* FABlockTask.h */; };
 		E56BC10E16D5C89A0071E9DE /* FAOperationTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E56BC10916D5C64E0071E9DE /* FAOperationTask.h */; };
+		E56BC11316D5D2F40071E9DE /* FAUITask.m in Sources */ = {isa = PBXBuildFile; fileRef = E56BC11216D5D2F40071E9DE /* FAUITask.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -127,6 +128,8 @@
 		E56BC10716D5C1A50071E9DE /* FAGCDTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAGCDTask.m; sourceTree = "<group>"; };
 		E56BC10916D5C64E0071E9DE /* FAOperationTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAOperationTask.h; sourceTree = "<group>"; };
 		E56BC10A16D5C64E0071E9DE /* FAOperationTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAOperationTask.m; sourceTree = "<group>"; };
+		E56BC11116D5D2F40071E9DE /* FAUITask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAUITask.h; sourceTree = "<group>"; };
+		E56BC11216D5D2F40071E9DE /* FAUITask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAUITask.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -242,6 +245,8 @@
 				E553445B16D17B4A007BF606 /* FAParallelBatchTask.m */,
 				E553445C16D17B4A007BF606 /* FASequentialBatchTask.h */,
 				E553445D16D17B4A007BF606 /* FASequentialBatchTask.m */,
+				E56BC11116D5D2F40071E9DE /* FAUITask.h */,
+				E56BC11216D5D2F40071E9DE /* FAUITask.m */,
 			);
 			path = Task;
 			sourceTree = "<group>";
@@ -376,6 +381,7 @@
 				E56BC10516D5BEA10071E9DE /* FABlockTask.m in Sources */,
 				E56BC10816D5C1A50071E9DE /* FAGCDTask.m in Sources */,
 				E56BC10B16D5C64E0071E9DE /* FAOperationTask.m in Sources */,
+				E56BC11316D5D2F40071E9DE /* FAUITask.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
