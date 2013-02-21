@@ -1,5 +1,5 @@
 //
-// FAGrandCentralDispatchTask.m
+// FAGCDTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
