@@ -76,7 +76,7 @@
 }
 
 - (id <FATask>)taskAtIndex:(NSUInteger)index {
-    NSUInteger nextIndex = ++index;
+    NSUInteger nextIndex = index + 1;
     id <FATask> (^taskFactory)(id lastResult, NSError *lastError) = [self.taskFactories objectAtIndex:index];
     id <FATask> nextTask = taskFactory(self.lastResult, self.lastError);
     typeof(self) __weak weakSelf = self;

@@ -73,7 +73,7 @@
 }
 
 - (id <FATask>)taskAtIndex:(NSUInteger)index {
-    NSUInteger nextIndex = ++index;
+    NSUInteger nextIndex = index + 1;
     id <FATask> nextTask = [self.tasks objectAtIndex:index];
     typeof(self) __weak weakSelf = self;
     [nextTask setCompletionHandler:^(id result, NSError *error) {
