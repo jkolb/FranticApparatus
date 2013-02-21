@@ -30,6 +30,8 @@
 
 @interface FAUITask : FAAbstractTask
 
++ (id <FATask>)taskForController:(id)controller withBackgroundTask:(id <FATask>)backgroundTask completionHandler:(void (^)(id controller, id result, NSError *error))handler;
+
 - (id)initWithBackgroundTask:(id <FATask>)backgroundTask;
 
 @end

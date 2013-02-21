@@ -38,6 +38,18 @@
 
 @implementation FAUITask
 
++ (id <FATask>)taskForController:(id)controller withBackgroundTask:(id <FATask>)backgroundTask completionHandler:(void (^)(id controller, id result, NSError *error))handler {
+    id <FATask> task = [[FAUITask alloc] initWithBackgroundTask:backgroundTask];
+    typeof(controller) __weak weakController = controller;
+    [task setCompletionHandler:^(id result, NSError *error) {
+        typeof(controller) blockController = weakController;
+        if (blockController == nil) return;
+        if (handler == nil) return;
+        handler(blockController, result, error);
+    }];
+    return task;
+}
+
 - (id)init {
     return [self initWithBackgroundTask:nil];
 }
