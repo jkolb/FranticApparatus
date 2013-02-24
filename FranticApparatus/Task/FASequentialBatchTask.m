@@ -58,13 +58,16 @@
 }
 
 - (void)start {
+    [super start];
     [self startTaskAtIndex:0];
 }
 
 - (void)startTaskAtIndex:(NSUInteger)index {
-    if (index >= [self.tasks count]) {
-        if (self.completionHandler == nil) return;
-        self.completionHandler([self.results copy], nil);
+    BOOL allTasksComplete = index >= [self.tasks count];
+    
+    if (allTasksComplete) {
+        if (self.onResult) self.onResult([self.results copy]);
+        if (self.onFinish) self.onFinish();
         return;
     }
     
@@ -76,15 +79,18 @@
     NSUInteger nextIndex = index + 1;
     id <FATask> nextTask = [self.tasks objectAtIndex:index];
     typeof(self) __weak weakSelf = self;
-    [nextTask setCompletionHandler:^(id result, NSError *error) {
+    [nextTask setOnResult:^(id result) {
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if ([blockSelf isCancelled]) return;
-        if (result) {
-            [blockSelf.results addObject:result];
-        } else {
-            [blockSelf.results addObject:error];
-        }
+        [blockSelf.results addObject:result];
+        [blockSelf startTaskAtIndex:nextIndex];
+    }];
+    [nextTask setOnError:^(NSError *error) {
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil) return;
+        if ([blockSelf isCancelled]) return;
+        [blockSelf.results addObject:error];
         [blockSelf startTaskAtIndex:nextIndex];
     }];
     return nextTask;

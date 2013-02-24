@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E53D741116D9D3C9005F209E /* FAURLSendProgress.m in Sources */ = {isa = PBXBuildFile; fileRef = E53D741016D9D3C9005F209E /* FAURLSendProgress.m */; };
+		E53D741416D9D49E005F209E /* FAURLReceiveProgress.m in Sources */ = {isa = PBXBuildFile; fileRef = E53D741316D9D49D005F209E /* FAURLReceiveProgress.m */; };
 		E553442A16D17ACB007BF606 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E553442916D17ACB007BF606 /* Foundation.framework */; };
 		E553442F16D17ACB007BF606 /* FranticApparatus.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553442E16D17ACB007BF606 /* FranticApparatus.h */; };
 		E553443116D17ACB007BF606 /* FranticApparatus.m in Sources */ = {isa = PBXBuildFile; fileRef = E553443016D17ACB007BF606 /* FranticApparatus.m */; };
@@ -89,6 +91,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E53D740F16D9D3C9005F209E /* FAURLSendProgress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLSendProgress.h; sourceTree = "<group>"; };
+		E53D741016D9D3C9005F209E /* FAURLSendProgress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLSendProgress.m; sourceTree = "<group>"; };
+		E53D741216D9D49D005F209E /* FAURLReceiveProgress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLReceiveProgress.h; sourceTree = "<group>"; };
+		E53D741316D9D49D005F209E /* FAURLReceiveProgress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLReceiveProgress.m; sourceTree = "<group>"; };
 		E553442616D17ACB007BF606 /* libFranticApparatus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libFranticApparatus.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E553442916D17ACB007BF606 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E553442D16D17ACB007BF606 /* FranticApparatus-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FranticApparatus-Prefix.pch"; sourceTree = "<group>"; };
@@ -266,6 +272,10 @@
 				E553446D16D17C1D007BF606 /* FAURLConnectionStreamTask.m */,
 				E553446E16D17C1D007BF606 /* FAURLResult.h */,
 				E553446F16D17C1D007BF606 /* FAURLResult.m */,
+				E53D740F16D9D3C9005F209E /* FAURLSendProgress.h */,
+				E53D741016D9D3C9005F209E /* FAURLSendProgress.m */,
+				E53D741216D9D49D005F209E /* FAURLReceiveProgress.h */,
+				E53D741316D9D49D005F209E /* FAURLReceiveProgress.m */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -384,6 +394,8 @@
 				E56BC10816D5C1A50071E9DE /* FAGCDTask.m in Sources */,
 				E56BC10B16D5C64E0071E9DE /* FAOperationTask.m in Sources */,
 				E56BC11316D5D2F40071E9DE /* FAUITask.m in Sources */,
+				E53D741116D9D3C9005F209E /* FAURLSendProgress.m in Sources */,
+				E53D741416D9D49E005F209E /* FAURLReceiveProgress.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

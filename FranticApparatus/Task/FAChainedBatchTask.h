@@ -30,6 +30,6 @@
 
 @interface FAChainedBatchTask : FABatchTask
 
-- (void)addTaskFactory:(id <FATask> (^)(id lastResult, NSError *lastError))taskFactory;
+- (void)addTaskFactory:(id <FATask> (^)(id parameter))taskFactory;
 
 @end

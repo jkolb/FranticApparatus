@@ -31,17 +31,13 @@
 @implementation FAOperationTask
 
 - (void)start {
+    if (self.onStart) self.onStart();
+    
     if (self.queue == nil) {
         [self start];
     } else {
         [self.queue addOperation:self];
     }
-}
-
-- (void)completeWithResult:(id)result error:(NSError *)error {
-    if ([self isCancelled]) return;
-    if (self.completionHandler == nil) return;
-    self.completionHandler(result, error);
 }
 
 @end

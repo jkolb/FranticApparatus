@@ -78,8 +78,9 @@
     NSError *error = nil;
     id result = self.block(&error);
     if ([self isCancelled]) return;
-    if (self.completionHandler == nil) return;
-    self.completionHandler(result, error);
+    if (result && self.onResult) self.onResult(result);
+    if (!result && self.onError) self.onError(error);
+    if (self.onFinish) self.onFinish();
 }
 
 @end

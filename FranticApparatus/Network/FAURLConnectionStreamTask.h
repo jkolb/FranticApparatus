@@ -30,6 +30,4 @@
 
 @interface FAURLConnectionStreamTask : FAURLConnectionTask
 
-@property (copy) void (^progressHandler)(long long bytesWritten, long long totalBytesWritten, long long expectedTotalBytes);
-
 @end

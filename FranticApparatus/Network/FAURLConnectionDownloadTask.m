@@ -25,6 +25,7 @@
 
 
 #import "FAURLConnectionDownloadTask.h"
+#import "FAURLReceiveProgress.h"
 
 
 
@@ -37,16 +38,19 @@
 @implementation FAURLConnectionDownloadTask
 
 - (void)connection:(NSURLConnection *)connection didWriteData:(long long)bytesWritten totalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long) expectedTotalBytes {
-    if (self.progressHandler == nil) return;
-    self.progressHandler(bytesWritten, totalBytesWritten, expectedTotalBytes);
+    if (self.onProgress == nil) return;
+    FAURLReceiveProgress *progress = [[FAURLReceiveProgress alloc] initWithBytesReceived:bytesWritten totalBytesReceived:totalBytesWritten expectedTotalBytes:expectedTotalBytes];
+    self.onProgress(progress);
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    self.completionHandler(nil, error);
+    if (self.onError) self.onError(error);
+    if (self.onFinish) self.onFinish();
 }
 
 - (void)connectionDidFinishDownloading:(NSURLConnection *)connection destinationURL:(NSURL *)destinationURL {
-    self.completionHandler(destinationURL, nil);
+    if (self.onResult) self.onResult(destinationURL);
+    if (self.onFinish) self.onFinish();
 }
 
 @end

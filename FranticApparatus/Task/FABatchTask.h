@@ -30,8 +30,4 @@
 
 @interface FABatchTask : FAAbstractTask
 
-@property (copy) NSError * (^errorHandler)(NSError *subtaskError);
-
-- (NSError *)handleError:(NSError *)subtaskError;
-
 @end

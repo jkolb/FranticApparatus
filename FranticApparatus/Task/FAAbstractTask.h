@@ -32,6 +32,10 @@
 
 @interface FAAbstractTask : NSObject <FATask>
 
-@property (copy) void (^completionHandler)(id result, NSError *error);
+@property (copy) void (^onStart)();
+@property (copy) void (^onProgress)(id progress);
+@property (copy) void (^onResult)(id result);
+@property (copy) void (^onError)(NSError *error);
+@property (copy) void (^onFinish)();
 
 @end

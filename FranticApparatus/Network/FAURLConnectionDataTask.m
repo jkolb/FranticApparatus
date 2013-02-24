@@ -48,11 +48,13 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    self.completionHandler(self.result, nil);
+    if (self.onResult) self.onResult(self.result);
+    if (self.onFinish) self.onFinish();
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    self.completionHandler(nil, error);
+    if (self.onError) self.onError(error);
+    if (self.onFinish) self.onFinish();
 }
 
 @end

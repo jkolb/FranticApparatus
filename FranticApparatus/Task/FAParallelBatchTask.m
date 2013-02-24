@@ -31,6 +31,7 @@
 @interface FAParallelBatchTask ()
 
 @property (nonatomic, strong) NSMutableDictionary *tasks;
+@property (nonatomic, strong) NSMutableDictionary *progress;
 @property (nonatomic, strong) NSMutableDictionary *results;
 
 @end
@@ -46,6 +47,9 @@
     _tasks = [[NSMutableDictionary alloc] initWithCapacity:2];
     if (_tasks == nil) return nil;
     
+    _progress = [[NSMutableDictionary alloc] initWithCapacity:2];
+    if (_progress == nil) return nil;
+    
     _results = [[NSMutableDictionary alloc] initWithCapacity:2];
     if (_results == nil) return nil;
     
@@ -57,6 +61,8 @@
 }
 
 - (void)start {
+    [super start];
+    
     for (id key in self.tasks) {
         id <FATask> task = [self taskForKey:key];
         [task start];
@@ -66,20 +72,26 @@
 - (id <FATask>)taskForKey:(id)key {
     id <FATask> task = [self.tasks objectForKey:key];
     typeof(self) __weak weakSelf = self;
-    [task setCompletionHandler:^(id result, NSError *error) {
+    [task setOnProgress:^(id progress) {
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if ([blockSelf isCancelled]) return;
-        
-        if (result) {
-            [blockSelf.results setObject:result forKey:key];
-        } else {
-            [blockSelf.results setObject:error forKey:key];
-        }
-        
-        if ([blockSelf finished]) {
-            [blockSelf complete];
-        }
+        [blockSelf.progress setObject:progress forKey:key];
+        if (blockSelf.onProgress) blockSelf.onProgress([blockSelf.progress copy]);
+    }];
+    [task setOnResult:^(id result) {
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil) return;
+        if ([blockSelf isCancelled]) return;
+        [blockSelf.results setObject:result forKey:key];
+        if ([blockSelf finished]) [blockSelf finish];
+    }];
+    [task setOnError:^(NSError *error) {
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil) return;
+        if ([blockSelf isCancelled]) return;
+        [blockSelf.results setObject:error forKey:key];
+        if ([blockSelf finished]) [blockSelf finish];
     }];
     return task;
 }
@@ -88,9 +100,9 @@
     return [self.tasks count] == [self.results count];
 }
 
-- (void)complete {
-    if (self.completionHandler == nil) return;
-    self.completionHandler(self.results, nil);
+- (void)finish {
+    if (self.onResult) self.onResult([self.results copy]);
+    if (self.onFinish) self.onFinish();
 }
 
 - (void)cancel {

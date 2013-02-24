@@ -1,5 +1,5 @@
 //
-// FAURLConnectionTask.m
+// FAURLReceiveProgress.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,39 +24,29 @@
 
 
 
-#import "FAURLConnectionTask.h"
+#import "FAURLReceiveProgress.h"
 
 
 
-@interface FAURLConnectionTask ()
+@implementation FAURLReceiveProgress
 
-@property (nonatomic, strong) NSURLConnection *connection;
+- (id)init {
+    return [self initWithBytesReceived:0 totalBytesReceived:0 expectedTotalBytes:0];
+}
 
-@end
-
-
-
-@implementation FAURLConnectionTask
-
-- (id)initWithRequest:(NSURLRequest *)request {
+- (id)initWithBytesReceived:(long long)bytesReceived totalBytesReceived:(long long)totalBytesReceived expectedTotalBytes:(long long)expectedTotalBytes {
     self = [super init];
     if (self == nil) return nil;
-    
-    _connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:NO];
-    if (_connection == nil) return nil;
+
+    _bytesReceived = bytesReceived;
+    _totalBytesReceived = totalBytesReceived;
+    _expectedTotalBytes = expectedTotalBytes;
     
     return self;
 }
 
-- (void)start {
-    [super start];
-    [self.connection setDelegateQueue:self.queue];
-    [self.connection start];
-}
-
-- (void)cancel {
-    [super cancel];
-    [self.connection cancel];
+- (id)copyWithZone:(NSZone *)zone {
+    return self;
 }
 
 @end

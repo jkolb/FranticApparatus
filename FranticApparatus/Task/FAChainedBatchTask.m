@@ -32,8 +32,6 @@
 
 @property (nonatomic, strong) NSMutableArray *taskFactories;
 @property (nonatomic, strong) id <FATask> currentTask;
-@property (nonatomic, strong) id lastResult;
-@property (nonatomic, strong) NSError *lastError;
 
 @end
 
@@ -51,42 +49,47 @@
     return self;
 }
 
-- (void)addTaskFactory:(id <FATask> (^)(id lastResult, NSError *lastError))taskFactory {
+- (void)addTaskFactory:(id <FATask> (^)(id lastResult))taskFactory {
     [self.taskFactories addObject:[taskFactory copy]];
 }
 
 - (void)start {
-    [self startTaskAtIndex:0];
+    [super start];
+    [self startTaskAtIndex:0 withParameter:nil];
 }
 
-- (void)startTaskAtIndex:(NSUInteger)index {
+- (void)startTaskAtIndex:(NSUInteger)index withParameter:(id)parameter {
     BOOL allTasksComplete = index >= [self.taskFactories count];
-    BOOL lastTaskFailed = self.lastResult == nil && self.lastError != nil;
     
-    if (allTasksComplete || lastTaskFailed) {
-        if (self.completionHandler == nil) return;
-        self.completionHandler(self.lastResult, self.lastError);
+    if (allTasksComplete) {
+        if (self.onResult) self.onResult(parameter);
+        if (self.onFinish) self.onFinish();
         return;
     }
     
-    self.currentTask = [self taskAtIndex:index];
+    self.currentTask = [self taskAtIndex:index withParameter:parameter];
     if (self.currentTask == nil) return; // Cancelled
     
     [self.currentTask start];
 }
 
-- (id <FATask>)taskAtIndex:(NSUInteger)index {
+- (id <FATask>)taskAtIndex:(NSUInteger)index withParameter:(id)parameter {
     NSUInteger nextIndex = index + 1;
-    id <FATask> (^taskFactory)(id lastResult, NSError *lastError) = [self.taskFactories objectAtIndex:index];
-    id <FATask> nextTask = taskFactory(self.lastResult, self.lastError);
+    id <FATask> (^taskFactory)(id parameter) = [self.taskFactories objectAtIndex:index];
+    id <FATask> nextTask = taskFactory(parameter);
     typeof(self) __weak weakSelf = self;
-    [nextTask setCompletionHandler:^(id result, NSError *error) {
+    [nextTask setOnResult:^(id result) {
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if ([blockSelf isCancelled]) return;
-        blockSelf.lastResult = result;
-        blockSelf.lastError = [blockSelf handleError:error];
-        [blockSelf startTaskAtIndex:nextIndex];
+        [blockSelf startTaskAtIndex:nextIndex withParameter:result];
+    }];
+    [nextTask setOnError:^(NSError *error) {
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil) return;
+        if ([blockSelf isCancelled]) return;
+        if (blockSelf.onError) blockSelf.onError(error);
+        if (blockSelf.onFinish) blockSelf.onFinish();
     }];
     return nextTask;
 }

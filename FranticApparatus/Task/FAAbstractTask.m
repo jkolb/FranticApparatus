@@ -39,6 +39,7 @@
 @implementation FAAbstractTask
 
 - (void)start {
+    if (self.onStart) self.onStart();
 }
 
 - (BOOL)isCancelled {

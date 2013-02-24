@@ -30,9 +30,4 @@
 
 @implementation FABatchTask
 
-- (NSError *)handleError:(NSError *)subtaskError {
-    if (self.errorHandler == nil || subtaskError == nil) return nil;
-    return self.errorHandler(subtaskError);
-}
-
 @end

@@ -33,8 +33,11 @@
 @interface FAOperationTask : NSOperation <FATask>
 
 @property (nonatomic, weak) NSOperationQueue *queue;
-@property (copy) void (^completionHandler)(id result, NSError *error);
 
-- (void)completeWithResult:(id)result error:(NSError *)error;
+@property (copy) void (^onStart)();
+@property (copy) void (^onProgress)(id progress);
+@property (copy) void (^onResult)(id result);
+@property (copy) void (^onError)(NSError *error);
+@property (copy) void (^onFinish)();
 
 @end

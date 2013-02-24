@@ -38,18 +38,6 @@
 
 @implementation FAUITask
 
-+ (id <FATask>)taskForController:(id)controller withBackgroundTask:(id <FATask>)backgroundTask completionHandler:(void (^)(id controller, id result, NSError *error))handler {
-    id <FATask> task = [[FAUITask alloc] initWithBackgroundTask:backgroundTask];
-    typeof(controller) __weak weakController = controller;
-    [task setCompletionHandler:^(id result, NSError *error) {
-        typeof(controller) blockController = weakController;
-        if (blockController == nil) return;
-        if (handler == nil) return;
-        handler(blockController, result, error);
-    }];
-    return task;
-}
-
 - (id)init {
     return [self initWithBackgroundTask:nil];
 }
@@ -65,14 +53,38 @@
 }
 
 - (void)start {
+    [super start];
     typeof(self) __weak weakSelf = self;
-    [self.backgroundTask setCompletionHandler:^(id result, NSError *error) {
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil) return;
-        if ([blockSelf isCancelled]) return;
-        if (blockSelf.completionHandler == nil) return;
-        [blockSelf completeOnMainThreadWithResult:result error:error];
-    }];
+    self.backgroundTask.onStart = nil;
+    
+    if (self.onProgress) {
+        [self.backgroundTask setOnProgress:^(id progress) {
+            typeof(self) blockSelf = weakSelf;
+            if (blockSelf == nil) return;
+            if ([blockSelf isCancelled]) return;
+            [blockSelf reportProgressOnMainThread:progress];
+        }];
+    }
+    
+    if (self.onResult) {
+        [self.backgroundTask setOnResult:^(id result) {
+            typeof(self) blockSelf = weakSelf;
+            if (blockSelf == nil) return;
+            if ([blockSelf isCancelled]) return;
+            [blockSelf finishOnMainThreadWithResult:result];
+        }];
+    }
+    
+    if (self.onError) {
+        [self.backgroundTask setOnError:^(NSError *error) {
+            typeof(self) blockSelf = weakSelf;
+            if (blockSelf == nil) return;
+            if ([blockSelf isCancelled]) return;
+            [blockSelf finishOnMainThreadWithError:error];
+        }];
+    }
+    
+    self.backgroundTask.onFinish = nil;
     [self.backgroundTask start];
 }
 
@@ -81,14 +93,35 @@
     [self.backgroundTask cancel];
 }
 
-- (void)completeOnMainThreadWithResult:(id)result error:(NSError *)error {
+- (void)reportProgressOnMainThread:(id)progress {
     typeof(self) __weak weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if ([blockSelf isCancelled]) return;
-        if (blockSelf.completionHandler == nil) return;
-        blockSelf.completionHandler(result, error);
+        if (blockSelf.onProgress) blockSelf.onProgress(progress);
+    });
+}
+
+- (void)finishOnMainThreadWithResult:(id)result {
+    typeof(self) __weak weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil) return;
+        if ([blockSelf isCancelled]) return;
+        if (blockSelf.onResult) blockSelf.onResult(result);
+        if (blockSelf.onFinish) blockSelf.onFinish();
+    });
+}
+
+- (void)finishOnMainThreadWithError:(NSError *)error {
+    typeof(self) __weak weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil) return;
+        if ([blockSelf isCancelled]) return;
+        if (blockSelf.onError) blockSelf.onError(error);
+        if (blockSelf.onFinish) blockSelf.onFinish();
     });
 }
 

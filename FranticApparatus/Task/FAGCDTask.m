@@ -93,6 +93,7 @@
 }
 
 - (void)start {
+    [super start];
     typeof(self) __weak weakSelf = self;
     dispatch_async(self.queue, ^{
         typeof(self) blockSelf = weakSelf;

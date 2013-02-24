@@ -1,5 +1,5 @@
 //
-// FAURLConnectionTask.m
+// FAURLSendProgress.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,39 +24,16 @@
 
 
 
-#import "FAURLConnectionTask.h"
+#import <Foundation/Foundation.h>
 
 
 
-@interface FAURLConnectionTask ()
+@interface FAURLSendProgress : NSObject <NSCopying>
 
-@property (nonatomic, strong) NSURLConnection *connection;
+@property (nonatomic, readonly) NSInteger bytesSent;
+@property (nonatomic, readonly) NSInteger totalBytesSent;
+@property (nonatomic, readonly) NSInteger totalBytesExpectedToSend;
 
-@end
-
-
-
-@implementation FAURLConnectionTask
-
-- (id)initWithRequest:(NSURLRequest *)request {
-    self = [super init];
-    if (self == nil) return nil;
-    
-    _connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:NO];
-    if (_connection == nil) return nil;
-    
-    return self;
-}
-
-- (void)start {
-    [super start];
-    [self.connection setDelegateQueue:self.queue];
-    [self.connection start];
-}
-
-- (void)cancel {
-    [super cancel];
-    [self.connection cancel];
-}
+- (id)initWithBytesSent:(NSInteger)bytesSent totalBytesSent:(NSInteger)totalBytesSent totalBytesExpectedToSend:(NSInteger)totalBytesExpectedToSend;
 
 @end
