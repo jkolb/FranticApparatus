@@ -30,4 +30,21 @@
 
 @interface FABatchTask : FAAbstractTask
 
+- (NSSet *)allKeys;
+
+- (void)setSubtaskFactory:(id <FATask> (^)(id parameter))subtaskFactory forKey:(id <NSCopying>)key;
+
+- (id <FATask>)subtaskWithKey:(id)key parameter:(id)parameter;
+
+- (void)configureSubtask:(id <FATask>)subtask withKey:(id)key;
+
+- (id <FATask>)subtaskForKey:(id)key;
+- (void)setSubtask:(id <FATask>)subtask forKey:(id <NSCopying>)key;
+
+- (void)subtaskDidStartWithKey:(id)key;
+- (void)subtaskWithKey:(id)key didReportProgress:(id)progress;
+- (void)subtaskWithKey:(id)key didFinishWithResult:(id)result;
+- (void)subtaskWithKey:(id)key didFinishWithError:(NSError *)error;
+- (void)subtaskDidFinishWithKey:(id)key;
+
 @end

@@ -38,19 +38,18 @@
 @implementation FAURLConnectionDownloadTask
 
 - (void)connection:(NSURLConnection *)connection didWriteData:(long long)bytesWritten totalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long) expectedTotalBytes {
-    if (self.onProgress == nil) return;
     FAURLReceiveProgress *progress = [[FAURLReceiveProgress alloc] initWithBytesReceived:bytesWritten totalBytesReceived:totalBytesWritten expectedTotalBytes:expectedTotalBytes];
-    self.onProgress(progress);
-}
-
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    if (self.onError) self.onError(error);
-    if (self.onFinish) self.onFinish();
+    [self reportProgress:progress];
 }
 
 - (void)connectionDidFinishDownloading:(NSURLConnection *)connection destinationURL:(NSURL *)destinationURL {
-    if (self.onResult) self.onResult(destinationURL);
-    if (self.onFinish) self.onFinish();
+    [self returnResult:destinationURL];
+    [self finish];
+}
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+    [self returnError:error];
+    [self finish];
 }
 
 @end

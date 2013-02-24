@@ -1,5 +1,5 @@
 //
-// FAChainedBatchTask.h
+// FAOrderedBatchTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,18 @@
 
 
 
-#import "FABatchTask.h"
+#import "FAOrderedBatchTask.h"
 
 
 
-@interface FAChainedBatchTask : FABatchTask
+@implementation FAOrderedBatchTask
 
-- (void)addTaskFactory:(id <FATask> (^)(id parameter))taskFactory;
+- (id)startKey {
+    return nil;
+}
+
+- (id)keyAfterKey:(id)key withResult:(id)result {
+    return nil;
+}
 
 @end

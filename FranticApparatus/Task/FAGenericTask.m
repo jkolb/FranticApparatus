@@ -34,9 +34,12 @@
     NSError *error = nil;
     id result = [self generateResultWithError:&error];
     if ([self isCancelled]) return;
-    if (result && self.onResult) self.onResult(result);
-    if (!result && self.onError) self.onError(error);
-    if (self.onFinish) self.onFinish();
+    if (result != nil) {
+        [self returnResult:result];
+    } else {
+        [self returnError:error];
+    }
+    [self finish];
 }
 
 - (id)generateResultWithError:(NSError **)error {

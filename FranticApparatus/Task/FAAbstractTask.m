@@ -50,4 +50,95 @@
     self.cancelled = YES;
 }
 
+- (void)setStartTarget:(id)target action:(SEL)action {
+    id __weak weakTarget = target;
+    typeof(self) __weak weakSelf = self;
+    [self setOnStart:^{
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        id blockTarget = weakTarget;
+        if (blockTarget == nil) return;
+        [blockSelf invokeTarget:blockTarget action:action];
+    }];
+}
+
+- (void)setProgressTarget:(id)target action:(SEL)action {
+    id __weak weakTarget = target;
+    typeof(self) __weak weakSelf = self;
+    [self setOnProgress:^(id progress) {
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        id blockTarget = weakTarget;
+        if (blockTarget == nil) return;
+        [blockSelf invokeTarget:blockTarget action:action withObject:progress];
+    }];
+}
+
+- (void)setResultTarget:(id)target action:(SEL)action {
+    id __weak weakTarget = target;
+    typeof(self) __weak weakSelf = self;
+    [self setOnResult:^(id result) {
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        id blockTarget = weakTarget;
+        if (blockTarget == nil) return;
+        [blockSelf invokeTarget:blockTarget action:action withObject:result];
+    }];
+}
+
+- (void)setErrorTarget:(id)target action:(SEL)action {
+    id __weak weakTarget = target;
+    typeof(self) __weak weakSelf = self;
+    [self setOnError:^(NSError *error) {
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        id blockTarget = weakTarget;
+        if (blockTarget == nil) return;
+        [blockSelf invokeTarget:blockTarget action:action withObject:error];
+    }];
+}
+
+- (void)setFinishTarget:(id)target action:(SEL)action {
+    id __weak weakTarget = target;
+    typeof(self) __weak weakSelf = self;
+    [self setOnFinish:^{
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        id blockTarget = weakTarget;
+        if (blockTarget == nil) return;
+        [blockSelf invokeTarget:blockTarget action:action];
+    }];
+}
+
+- (void)reportProgress:(id)progress {
+    if (self.onProgress) self.onProgress(progress);
+}
+
+- (void)returnResult:(id)result {
+    if (self.onResult) self.onResult(result);
+}
+
+- (void)returnError:(NSError *)error {
+    if (self.onError) self.onError(error);
+}
+
+- (void)finish {
+    if (self.onFinish) self.onFinish();
+}
+
+- (void)invokeTarget:(id)target action:(SEL)action {
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[[target class] instanceMethodSignatureForSelector:action]];
+    invocation.target = target;
+    invocation.selector = action;
+    [invocation invoke];
+}
+
+- (void)invokeTarget:(id)target action:(SEL)action withObject:(id)object {
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[[target class] instanceMethodSignatureForSelector:action]];
+    invocation.target = target;
+    invocation.selector = action;
+    [invocation setArgument:&object atIndex:2];
+    [invocation invoke];
+}
+
 @end

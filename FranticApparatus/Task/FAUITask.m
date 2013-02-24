@@ -55,7 +55,10 @@
 - (void)start {
     [super start];
     typeof(self) __weak weakSelf = self;
-    self.backgroundTask.onStart = nil;
+    
+    if (self.onStart) {
+        self.backgroundTask.onStart = self.onStart;
+    }
     
     if (self.onProgress) {
         [self.backgroundTask setOnProgress:^(id progress) {
@@ -71,7 +74,7 @@
             typeof(self) blockSelf = weakSelf;
             if (blockSelf == nil) return;
             if ([blockSelf isCancelled]) return;
-            [blockSelf finishOnMainThreadWithResult:result];
+            [blockSelf returnResultOnMainThread:result];
         }];
     }
     
@@ -80,11 +83,19 @@
             typeof(self) blockSelf = weakSelf;
             if (blockSelf == nil) return;
             if ([blockSelf isCancelled]) return;
-            [blockSelf finishOnMainThreadWithError:error];
+            [blockSelf returnErrorOnMainThread:error];
         }];
     }
     
-    self.backgroundTask.onFinish = nil;
+    if (self.onFinish) {
+        [self.backgroundTask setOnFinish:^{
+            typeof(self) blockSelf = weakSelf;
+            if (blockSelf == nil) return;
+            if ([blockSelf isCancelled]) return;
+            [blockSelf finishOnMainThread];
+        }];
+    }
+    
     [self.backgroundTask start];
 }
 
@@ -99,29 +110,37 @@
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if ([blockSelf isCancelled]) return;
-        if (blockSelf.onProgress) blockSelf.onProgress(progress);
+        [blockSelf reportProgress:progress];
     });
 }
 
-- (void)finishOnMainThreadWithResult:(id)result {
+- (void)returnResultOnMainThread:(id)result {
     typeof(self) __weak weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if ([blockSelf isCancelled]) return;
-        if (blockSelf.onResult) blockSelf.onResult(result);
-        if (blockSelf.onFinish) blockSelf.onFinish();
+        [blockSelf returnResult:result];
     });
 }
 
-- (void)finishOnMainThreadWithError:(NSError *)error {
+- (void)returnErrorOnMainThread:(NSError *)error {
     typeof(self) __weak weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if ([blockSelf isCancelled]) return;
-        if (blockSelf.onError) blockSelf.onError(error);
-        if (blockSelf.onFinish) blockSelf.onFinish();
+        [blockSelf returnError:error];
+    });
+}
+
+- (void)finishOnMainThread {
+    typeof(self) __weak weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil) return;
+        if ([blockSelf isCancelled]) return;
+        [blockSelf finish];
     });
 }
 

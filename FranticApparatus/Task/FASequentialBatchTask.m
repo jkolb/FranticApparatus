@@ -30,9 +30,7 @@
 
 @interface FASequentialBatchTask ()
 
-@property (nonatomic, strong) NSMutableArray *tasks;
 @property (nonatomic, strong) id <FATask> currentTask;
-@property (nonatomic, strong) NSMutableArray *results;
 
 @end
 
@@ -40,60 +38,56 @@
 
 @implementation FASequentialBatchTask
 
-- (id)init {
-    self = [super init];
-    if (self == nil) return nil;
-    
-    _tasks = [[NSMutableArray alloc] initWithCapacity:2];
-    if (_tasks == nil) return nil;
-    
-    _results = [[NSMutableArray alloc] initWithCapacity:2];
-    if (_results == nil) return nil;
-    
-    return self;
+- (id)addKey {
+    return [NSNumber numberWithUnsignedInteger:[[self allKeys] count]];
 }
 
-- (void)addTask:(id <FATask>)task {
-    [self.tasks addObject:task];
+- (void)addSubtask:(id <FATask>)subtask {
+    [self setSubtask:subtask forKey:[self addKey]];
+}
+
+- (void)addSubtaskFactory:(id <FATask> (^)(id parameter))subtaskFactory {
+    [self setSubtaskFactory:subtaskFactory forKey:[self addKey]];
 }
 
 - (void)start {
     [super start];
-    [self startTaskAtIndex:0];
+    [self startSubtaskForKey:[self startKey] withParameter:nil];
 }
 
-- (void)startTaskAtIndex:(NSUInteger)index {
-    BOOL allTasksComplete = index >= [self.tasks count];
+- (void)startSubtaskForKey:(id)key withParameter:(id)parameter {
+    self.currentTask = [self subtaskWithKey:key parameter:parameter];
     
-    if (allTasksComplete) {
-        if (self.onResult) self.onResult([self.results copy]);
-        if (self.onFinish) self.onFinish();
-        return;
+    if (self.currentTask != nil) {
+        [self.currentTask start];
+    } else {
+        [self returnResult:parameter];
+        [self finish];
     }
-    
-    self.currentTask = [self taskAtIndex:index];
-    [self.currentTask start];
 }
 
-- (id <FATask>)taskAtIndex:(NSUInteger)index {
-    NSUInteger nextIndex = index + 1;
-    id <FATask> nextTask = [self.tasks objectAtIndex:index];
-    typeof(self) __weak weakSelf = self;
-    [nextTask setOnResult:^(id result) {
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil) return;
-        if ([blockSelf isCancelled]) return;
-        [blockSelf.results addObject:result];
-        [blockSelf startTaskAtIndex:nextIndex];
-    }];
-    [nextTask setOnError:^(NSError *error) {
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil) return;
-        if ([blockSelf isCancelled]) return;
-        [blockSelf.results addObject:error];
-        [blockSelf startTaskAtIndex:nextIndex];
-    }];
-    return nextTask;
+- (id)startKey {
+    return [NSNumber numberWithUnsignedInteger:0];
+}
+
+- (id)keyAfterKey:(id)key withResult:(id)result {
+    NSUInteger subtaskIndex = [key unsignedIntegerValue];
+    NSUInteger nextSubtaskIndex = subtaskIndex + 1;
+    return [NSNumber numberWithUnsignedInteger:nextSubtaskIndex];
+}
+
+- (void)subtaskWithKey:(id)key didReportProgress:(id)progress {
+    
+}
+
+- (void)subtaskWithKey:(id)key didFinishWithResult:(id)result {
+    id nextKey = [self keyAfterKey:key withResult:result];
+    [self startSubtaskForKey:nextKey withParameter:result];
+}
+
+- (void)subtaskWithKey:(id)key didFinishWithError:(NSError *)error {
+    [self returnError:error];
+    [self finish];
 }
 
 - (void)cancel {

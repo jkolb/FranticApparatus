@@ -1,5 +1,5 @@
 //
-// FAOperationTask.h
+// FAOrderedBatchTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,20 +24,13 @@
 
 
 
-#import <Foundation/Foundation.h>
-
-#import "FATask.h"
+#import "FABatchTask.h"
 
 
 
-@interface FAOperationTask : NSOperation <FATask>
+@interface FAOrderedBatchTask : FABatchTask
 
-@property (nonatomic, weak) NSOperationQueue *queue;
-
-@property (copy) void (^onStart)();
-@property (copy) void (^onProgress)(id progress);
-@property (copy) void (^onResult)(id result);
-@property (copy) void (^onError)(NSError *error);
-@property (copy) void (^onFinish)();
+- (id)startKey;
+- (id)keyAfterKey:(id)key withResult:(id)result;
 
 @end

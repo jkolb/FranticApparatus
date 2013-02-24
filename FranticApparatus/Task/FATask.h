@@ -36,6 +36,12 @@
 @property (copy) void (^onError)(NSError *error);
 @property (copy) void (^onFinish)();
 
+- (void)setStartTarget:(id)target action:(SEL)action;
+- (void)setProgressTarget:(id)target action:(SEL)action;
+- (void)setResultTarget:(id)target action:(SEL)action;
+- (void)setErrorTarget:(id)target action:(SEL)action;
+- (void)setFinishTarget:(id)target action:(SEL)action;
+
 - (void)start;
 
 - (BOOL)isCancelled;

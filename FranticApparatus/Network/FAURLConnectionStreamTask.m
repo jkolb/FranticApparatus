@@ -42,9 +42,8 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
-    if (self.onProgress == nil) return;
     FAURLSendProgress *progress = [[FAURLSendProgress alloc] initWithBytesSent:bytesWritten totalBytesSent:totalBytesWritten totalBytesExpectedToSend:totalBytesExpectedToWrite];
-    self.onProgress(progress);
+    [self reportProgress:progress];
 }
 
 @end

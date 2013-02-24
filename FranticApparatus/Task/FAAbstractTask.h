@@ -38,4 +38,11 @@
 @property (copy) void (^onError)(NSError *error);
 @property (copy) void (^onFinish)();
 
+- (void)reportProgress:(id)progress;
+
+- (void)returnResult:(id)result;
+- (void)returnError:(NSError *)error;
+
+- (void)finish;
+
 @end

@@ -28,59 +28,18 @@
 
 
 
-@interface FABlockTask ()
-
-@property (nonatomic, copy) id (^block)(NSError **error);
-
-@end
-
-
-
 @implementation FABlockTask
-
-- (id)initWithQueue:(dispatch_queue_t)queue {
-    return [self initWithQueue:queue block:^id(NSError *__autoreleasing *error) {
-        return [NSNull null];
-    }];
-}
-
-- (id)initWithMainQueueBlock:(id (^)(NSError **error))block {
-    return [self initWithQueue:[[self class] mainQueue] block:block];
-}
-
-- (id)initWithHighPriorityQueueBlock:(id (^)(NSError **error))block {
-    return [self initWithQueue:[[self class] highPriorityQueue] block:block];
-}
-
-- (id)initWithDefaultPriorityQueueBlock:(id (^)(NSError **error))block {
-    return [self initWithQueue:[[self class] defaultPriorityQueue] block:block];
-}
-
-- (id)initWithLowPriorityQueueBlock:(id (^)(NSError **error))block {
-    return [self initWithQueue:[[self class] lowPriorityQueue] block:block];
-}
-
-- (id)initWithBackgroundPriorityQueueBlock:(id (^)(NSError **error))block {
-    return [self initWithQueue:[[self class] backgroundPriorityQueue] block:block];
-}
-
-- (id)initWithQueue:(dispatch_queue_t)queue block:(id (^)(NSError **error))block {
-    self = [super initWithQueue:queue];
-    if (self == nil) return nil;
-    
-    _block = block;
-    if (_block == nil) return nil;
-    
-    return self;
-}
 
 - (void)main {
     NSError *error = nil;
-    id result = self.block(&error);
+    id result = self.generateResult(self, &error);
     if ([self isCancelled]) return;
-    if (result && self.onResult) self.onResult(result);
-    if (!result && self.onError) self.onError(error);
-    if (self.onFinish) self.onFinish();
+    if (result != nil) {
+        [self returnResult:result];
+    } else {
+        [self returnError:error];
+    }
+    [self finish];
 }
 
 @end

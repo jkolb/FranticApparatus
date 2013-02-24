@@ -30,6 +30,4 @@
 
 @interface FAParallelBatchTask : FABatchTask
 
-- (void)setTask:(id <FATask>)task forKey:(id <NSCopying>)key;
-
 @end

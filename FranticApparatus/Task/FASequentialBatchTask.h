@@ -24,12 +24,13 @@
 
 
 
-#import "FABatchTask.h"
+#import "FAOrderedBatchTask.h"
 
 
 
-@interface FASequentialBatchTask : FABatchTask
+@interface FASequentialBatchTask : FAOrderedBatchTask
 
-- (void)addTask:(id <FATask>)task;
+- (void)addSubtask:(id <FATask>)subtask;
+- (void)addSubtaskFactory:(id <FATask> (^)(id parameter))subtaskFactory;
 
 @end

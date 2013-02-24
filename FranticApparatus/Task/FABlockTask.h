@@ -30,11 +30,6 @@
 
 @interface FABlockTask : FAGCDTask
 
-- (id)initWithMainQueueBlock:(id (^)(NSError **error))block;
-- (id)initWithHighPriorityQueueBlock:(id (^)(NSError **error))block;
-- (id)initWithDefaultPriorityQueueBlock:(id (^)(NSError **error))block;
-- (id)initWithLowPriorityQueueBlock:(id (^)(NSError **error))block;
-- (id)initWithBackgroundPriorityQueueBlock:(id (^)(NSError **error))block;
-- (id)initWithQueue:(dispatch_queue_t)queue block:(id (^)(NSError **error))block;
+@property (copy) id (^generateResult)(id blockSelf, NSError **error);
 
 @end
