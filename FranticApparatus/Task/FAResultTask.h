@@ -1,5 +1,5 @@
 //
-// FAGenericTask.h
+// FAResultTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,12 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FAGenericTask.h"
 
 
 
-@interface FAGenericTask : FAAbstractTask
+@interface FAResultTask : FAGenericTask
 
-- (void)execute;
+- (id)generateResultWithError:(NSError **)error;
 
 @end

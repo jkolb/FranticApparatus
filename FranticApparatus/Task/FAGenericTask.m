@@ -28,22 +28,82 @@
 
 
 
+@interface FAGenericTask ()
+
+@property (nonatomic, strong) dispatch_queue_t queue;
+
+@end
+
+
+
 @implementation FAGenericTask
 
-- (void)main {
-    NSError *error = nil;
-    id result = [self generateResultWithError:&error];
-    if ([self isCancelled]) return;
-    if (result != nil) {
-        [self returnResult:result];
-    } else {
-        [self returnError:error];
-    }
-    [self finish];
++ (dispatch_queue_t)mainQueue {
+    return dispatch_get_main_queue();
 }
 
-- (id)generateResultWithError:(NSError **)error {
-    return [NSNull null];
++ (dispatch_queue_t)highPriorityQueue {
+    return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+}
+
++ (dispatch_queue_t)defaultPriorityQueue {
+    return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+}
+
++ (dispatch_queue_t)lowPriorityQueue {
+    return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+}
+
++ (dispatch_queue_t)backgroundPriorityQueue {
+    return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+}
+
+- (id)init {
+    return [self initWithDefaultPriorityQueue];
+}
+
+- (id)initWithMainQueue {
+    return [self initWithQueue:[[self class] mainQueue]];
+}
+
+- (id)initWithHighPriorityQueue {
+    return [self initWithQueue:[[self class] highPriorityQueue]];
+}
+
+- (id)initWithDefaultPriorityQueue {
+    return [self initWithQueue:[[self class] defaultPriorityQueue]];
+}
+
+- (id)initWithLowPriorityQueue {
+    return [self initWithQueue:[[self class] lowPriorityQueue]];
+}
+
+- (id)initWithBackgroundPriorityQueue {
+    return [self initWithQueue:[[self class] backgroundPriorityQueue]];
+}
+
+- (id)initWithQueue:(dispatch_queue_t)queue {
+    self = [super init];
+    if (self == nil) return nil;
+    
+    _queue = queue;
+    if (_queue == nil) return nil;
+    
+    return self;
+}
+
+- (void)start {
+    [super start];
+    typeof(self) __weak weakSelf = self;
+    dispatch_async(self.queue, ^{
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil) return;
+        if ([blockSelf isCancelled]) return;
+        [blockSelf execute];
+    });
+}
+
+- (void)execute {
 }
 
 @end
