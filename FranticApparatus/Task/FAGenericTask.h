@@ -30,6 +30,19 @@
 
 @interface FAGenericTask : FAAbstractTask
 
++ (dispatch_queue_t)mainQueue;
++ (dispatch_queue_t)highPriorityQueue;
++ (dispatch_queue_t)defaultPriorityQueue;
++ (dispatch_queue_t)lowPriorityQueue;
++ (dispatch_queue_t)backgroundPriorityQueue;
+
+- (id)initWithMainQueue;
+- (id)initWithHighPriorityQueue;
+- (id)initWithDefaultPriorityQueue;
+- (id)initWithLowPriorityQueue;
+- (id)initWithBackgroundPriorityQueue;
+- (id)initWithQueue:(dispatch_queue_t)queue;
+
 - (void)execute;
 
 @end
