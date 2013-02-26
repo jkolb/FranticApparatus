@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		E504DCE816DAAF0B00DEB30C /* FAOrderedBatchTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E504DCE716DAAF0B00DEB30C /* FAOrderedBatchTask.m */; };
+		E504DCEA16DC5F5700DEB30C /* FAURLSendProgress.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E53D740F16D9D3C9005F209E /* FAURLSendProgress.h */; };
+		E504DCEB16DC5F5700DEB30C /* FAURLReceiveProgress.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E53D741216D9D49D005F209E /* FAURLReceiveProgress.h */; };
+		E504DCEC16DC5F5700DEB30C /* FAOrderedBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E504DCE616DAAF0A00DEB30C /* FAOrderedBatchTask.h */; };
 		E53D741116D9D3C9005F209E /* FAURLSendProgress.m in Sources */ = {isa = PBXBuildFile; fileRef = E53D741016D9D3C9005F209E /* FAURLSendProgress.m */; };
 		E53D741416D9D49E005F209E /* FAURLReceiveProgress.m in Sources */ = {isa = PBXBuildFile; fileRef = E53D741316D9D49D005F209E /* FAURLReceiveProgress.m */; };
 		E553442A16D17ACB007BF606 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E553442916D17ACB007BF606 /* Foundation.framework */; };
@@ -65,6 +68,9 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
+				E504DCEA16DC5F5700DEB30C /* FAURLSendProgress.h in CopyFiles */,
+				E504DCEB16DC5F5700DEB30C /* FAURLReceiveProgress.h in CopyFiles */,
+				E504DCEC16DC5F5700DEB30C /* FAOrderedBatchTask.h in CopyFiles */,
 				E56BC11416D5D7D70071E9DE /* FAUITask.h in CopyFiles */,
 				E56BC10C16D5C89A0071E9DE /* FAGCDTask.h in CopyFiles */,
 				E56BC10D16D5C89A0071E9DE /* FABlockTask.h in CopyFiles */,
