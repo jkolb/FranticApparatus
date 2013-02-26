@@ -1,5 +1,5 @@
 //
-// FAGenericTask.h
+// FAGenericBlockTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,12 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FAGenericTask.h"
 
 
 
-@interface FAGenericTask : FAAbstractTask
+@interface FAGenericBlockTask : FAGenericTask
 
-- (void)execute;
+@property (copy) void (^onExecute)();
 
 @end

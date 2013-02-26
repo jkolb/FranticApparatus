@@ -1,5 +1,5 @@
 //
-// FAGenericTask.h
+// FAResultTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,27 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FAResultTask.h"
 
 
 
-@interface FAGenericTask : FAAbstractTask
+@implementation FAResultTask
 
-- (void)execute;
+- (void)execute {
+    NSError *error = nil;
+    id result = [self generateResultWithError:&error];
+    
+    if (result) {
+        [self returnResult:result];
+    } else {
+        [self returnError:error];
+    }
+    
+    [self finish];
+}
+
+- (id)generateResultWithError:(NSError **)error {
+    return [NSNull null];
+}
 
 @end

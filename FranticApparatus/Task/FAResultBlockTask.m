@@ -1,5 +1,5 @@
 //
-// FABlockTask.m
+// FAResultBlockTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,22 +24,18 @@
 
 
 
-#import "FABlockTask.h"
+#import "FAResultBlockTask.h"
 
 
 
-@implementation FABlockTask
+@implementation FAResultBlockTask
 
-- (void)main {
-    NSError *error = nil;
-    id result = self.generateResult(self, &error);
-    if ([self isCancelled]) return;
-    if (result != nil) {
-        [self returnResult:result];
+- (id)generateResultWithError:(NSError **)error {
+    if (self.generateResult) {
+        return self.generateResult(error);
     } else {
-        [self returnError:error];
+        return [NSNull null];
     }
-    [self finish];
 }
 
 @end

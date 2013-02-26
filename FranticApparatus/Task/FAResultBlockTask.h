@@ -1,5 +1,5 @@
 //
-// FAGCDTask.h
+// FAResultBlockTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,25 +24,12 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FAResultTask.h"
 
 
 
-@interface FAGCDTask : FAAbstractTask
+@interface FAResultBlockTask : FAResultTask
 
-+ (dispatch_queue_t)mainQueue;
-+ (dispatch_queue_t)highPriorityQueue;
-+ (dispatch_queue_t)defaultPriorityQueue;
-+ (dispatch_queue_t)lowPriorityQueue;
-+ (dispatch_queue_t)backgroundPriorityQueue;
-
-- (id)initWithMainQueue;
-- (id)initWithHighPriorityQueue;
-- (id)initWithDefaultPriorityQueue;
-- (id)initWithLowPriorityQueue;
-- (id)initWithBackgroundPriorityQueue;
-- (id)initWithQueue:(dispatch_queue_t)queue;
-
-- (void)main;
+@property (copy) id (^generateResult)(NSError **error);
 
 @end

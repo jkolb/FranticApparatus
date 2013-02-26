@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2C3AD42816DAE73800DE5534 /* FAResultTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C3AD42716DAE73800DE5534 /* FAResultTask.m */; };
+		2C3AD42B16DAEBAC00DE5534 /* FAGenericBlockTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C3AD42A16DAEBAC00DE5534 /* FAGenericBlockTask.m */; };
+		2C3AD42E16DAEC0A00DE5534 /* FAResultBlockTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C3AD42D16DAEC0A00DE5534 /* FAResultBlockTask.m */; };
 		E504DCE816DAAF0B00DEB30C /* FAOrderedBatchTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E504DCE716DAAF0B00DEB30C /* FAOrderedBatchTask.m */; };
 		E504DCEA16DC5F5700DEB30C /* FAURLSendProgress.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E53D740F16D9D3C9005F209E /* FAURLSendProgress.h */; };
 		E504DCEB16DC5F5700DEB30C /* FAURLReceiveProgress.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E53D741216D9D49D005F209E /* FAURLReceiveProgress.h */; };
@@ -43,10 +46,6 @@
 		E5592C5B16D4914600B9C58D /* FABatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445416D17B4A007BF606 /* FABatchTask.h */; };
 		E5592C5D16D4914600B9C58D /* FAParallelBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445A16D17B4A007BF606 /* FAParallelBatchTask.h */; };
 		E5592C5E16D4914600B9C58D /* FASequentialBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445C16D17B4A007BF606 /* FASequentialBatchTask.h */; };
-		E56BC10516D5BEA10071E9DE /* FABlockTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E56BC10416D5BEA10071E9DE /* FABlockTask.m */; };
-		E56BC10816D5C1A50071E9DE /* FAGCDTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E56BC10716D5C1A50071E9DE /* FAGCDTask.m */; };
-		E56BC10C16D5C89A0071E9DE /* FAGCDTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E56BC10616D5C1A50071E9DE /* FAGCDTask.h */; };
-		E56BC10D16D5C89A0071E9DE /* FABlockTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E56BC10316D5BEA10071E9DE /* FABlockTask.h */; };
 		E56BC11316D5D2F40071E9DE /* FAUITask.m in Sources */ = {isa = PBXBuildFile; fileRef = E56BC11216D5D2F40071E9DE /* FAUITask.m */; };
 		E56BC11416D5D7D70071E9DE /* FAUITask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E56BC11116D5D2F40071E9DE /* FAUITask.h */; };
 /* End PBXBuildFile section */
@@ -72,8 +71,6 @@
 				E504DCEB16DC5F5700DEB30C /* FAURLReceiveProgress.h in CopyFiles */,
 				E504DCEC16DC5F5700DEB30C /* FAOrderedBatchTask.h in CopyFiles */,
 				E56BC11416D5D7D70071E9DE /* FAUITask.h in CopyFiles */,
-				E56BC10C16D5C89A0071E9DE /* FAGCDTask.h in CopyFiles */,
-				E56BC10D16D5C89A0071E9DE /* FABlockTask.h in CopyFiles */,
 				E5592C5316D4914600B9C58D /* FAURLConnectionTask.h in CopyFiles */,
 				E5592C5416D4914600B9C58D /* FAURLConnectionDataTask.h in CopyFiles */,
 				E5592C5516D4914600B9C58D /* FAURLConnectionDownloadTask.h in CopyFiles */,
@@ -92,6 +89,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2C3AD42616DAE73800DE5534 /* FAResultTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAResultTask.h; sourceTree = "<group>"; };
+		2C3AD42716DAE73800DE5534 /* FAResultTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAResultTask.m; sourceTree = "<group>"; };
+		2C3AD42916DAEBAC00DE5534 /* FAGenericBlockTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAGenericBlockTask.h; sourceTree = "<group>"; };
+		2C3AD42A16DAEBAC00DE5534 /* FAGenericBlockTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAGenericBlockTask.m; sourceTree = "<group>"; };
+		2C3AD42C16DAEC0A00DE5534 /* FAResultBlockTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAResultBlockTask.h; sourceTree = "<group>"; };
+		2C3AD42D16DAEC0A00DE5534 /* FAResultBlockTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAResultBlockTask.m; sourceTree = "<group>"; };
 		E504DCE616DAAF0A00DEB30C /* FAOrderedBatchTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAOrderedBatchTask.h; sourceTree = "<group>"; };
 		E504DCE716DAAF0B00DEB30C /* FAOrderedBatchTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAOrderedBatchTask.m; sourceTree = "<group>"; };
 		E53D740F16D9D3C9005F209E /* FAURLSendProgress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLSendProgress.h; sourceTree = "<group>"; };
@@ -131,10 +134,6 @@
 		E553446D16D17C1D007BF606 /* FAURLConnectionStreamTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLConnectionStreamTask.m; sourceTree = "<group>"; };
 		E553446E16D17C1D007BF606 /* FAURLResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLResult.h; sourceTree = "<group>"; };
 		E553446F16D17C1D007BF606 /* FAURLResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLResult.m; sourceTree = "<group>"; };
-		E56BC10316D5BEA10071E9DE /* FABlockTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FABlockTask.h; sourceTree = "<group>"; };
-		E56BC10416D5BEA10071E9DE /* FABlockTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FABlockTask.m; sourceTree = "<group>"; };
-		E56BC10616D5C1A50071E9DE /* FAGCDTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAGCDTask.h; sourceTree = "<group>"; };
-		E56BC10716D5C1A50071E9DE /* FAGCDTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAGCDTask.m; sourceTree = "<group>"; };
 		E56BC11116D5D2F40071E9DE /* FAUITask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAUITask.h; sourceTree = "<group>"; };
 		E56BC11216D5D2F40071E9DE /* FAUITask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAUITask.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -236,12 +235,14 @@
 				E553445E16D17B4A007BF606 /* FATask.h */,
 				E553445216D17B4A007BF606 /* FAAbstractTask.h */,
 				E553445316D17B4A007BF606 /* FAAbstractTask.m */,
-				E56BC10616D5C1A50071E9DE /* FAGCDTask.h */,
-				E56BC10716D5C1A50071E9DE /* FAGCDTask.m */,
-				E56BC10316D5BEA10071E9DE /* FABlockTask.h */,
-				E56BC10416D5BEA10071E9DE /* FABlockTask.m */,
 				E553445816D17B4A007BF606 /* FAGenericTask.h */,
 				E553445916D17B4A007BF606 /* FAGenericTask.m */,
+				2C3AD42916DAEBAC00DE5534 /* FAGenericBlockTask.h */,
+				2C3AD42A16DAEBAC00DE5534 /* FAGenericBlockTask.m */,
+				2C3AD42616DAE73800DE5534 /* FAResultTask.h */,
+				2C3AD42716DAE73800DE5534 /* FAResultTask.m */,
+				2C3AD42C16DAEC0A00DE5534 /* FAResultBlockTask.h */,
+				2C3AD42D16DAEC0A00DE5534 /* FAResultBlockTask.m */,
 				E553445416D17B4A007BF606 /* FABatchTask.h */,
 				E553445516D17B4A007BF606 /* FABatchTask.m */,
 				E504DCE616DAAF0A00DEB30C /* FAOrderedBatchTask.h */,
@@ -386,12 +387,13 @@
 				E553447216D17C1D007BF606 /* FAURLConnectionTask.m in Sources */,
 				E553447316D17C1D007BF606 /* FAURLConnectionStreamTask.m in Sources */,
 				E553447416D17C1D007BF606 /* FAURLResult.m in Sources */,
-				E56BC10516D5BEA10071E9DE /* FABlockTask.m in Sources */,
-				E56BC10816D5C1A50071E9DE /* FAGCDTask.m in Sources */,
 				E56BC11316D5D2F40071E9DE /* FAUITask.m in Sources */,
 				E53D741116D9D3C9005F209E /* FAURLSendProgress.m in Sources */,
 				E53D741416D9D49E005F209E /* FAURLReceiveProgress.m in Sources */,
 				E504DCE816DAAF0B00DEB30C /* FAOrderedBatchTask.m in Sources */,
+				2C3AD42816DAE73800DE5534 /* FAResultTask.m in Sources */,
+				2C3AD42B16DAEBAC00DE5534 /* FAGenericBlockTask.m in Sources */,
+				2C3AD42E16DAEC0A00DE5534 /* FAResultBlockTask.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,5 +1,5 @@
 //
-// FABlockTask.h
+// FAGenericBlockTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,14 @@
 
 
 
-#import "FAGCDTask.h"
+#import "FAGenericBlockTask.h"
 
 
 
-@interface FABlockTask : FAGCDTask
+@implementation FAGenericBlockTask
 
-@property (copy) id (^generateResult)(id blockSelf, NSError **error);
+- (void)execute {
+    if (self.onExecute) self.onExecute();
+}
 
 @end
