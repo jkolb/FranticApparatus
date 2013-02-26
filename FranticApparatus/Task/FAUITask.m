@@ -53,7 +53,6 @@
 }
 
 - (void)start {
-    [super start];
     typeof(self) __weak weakSelf = self;
     
     if (self.onStart) {
