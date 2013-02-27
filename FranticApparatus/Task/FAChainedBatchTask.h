@@ -1,5 +1,5 @@
 //
-// FAParallelBatchTask.h
+// FAChainedBatchTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,15 @@
 
 
 
-#import "FABatchTask.h"
+#import "FAOrderedBatchTask.h"
 
 
 
-@interface FAParallelBatchTask : FABatchTask
+@interface FAChainedBatchTask : FAOrderedBatchTask
 
-- (id)initWithParameters:(NSDictionary *)parameters;
+- (id)initWithParameter:(id)parameter;
+
+- (void)addSubtask:(id <FATask>)subtask;
+- (void)addSubtaskFactory:(id <FATask> (^)(id parameter))subtaskFactory;
 
 @end

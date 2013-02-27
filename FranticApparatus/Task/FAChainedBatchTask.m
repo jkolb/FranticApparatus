@@ -1,5 +1,5 @@
 //
-// FAParallelBatchTask.m
+// FAChainedBatchTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,93 +24,93 @@
 
 
 
-#import "FAParallelBatchTask.h"
+#import "FAChainedBatchTask.h"
 
 
 
-@interface FAParallelBatchTask ()
+@interface FAChainedBatchTask ()
 
-@property (nonatomic, copy) NSDictionary *parameters;
-@property (nonatomic, strong) NSMutableDictionary *progress;
-@property (nonatomic, strong) NSMutableDictionary *results;
+@property (nonatomic, strong) id parameter;
+@property (nonatomic, strong) id <FATask> currentTask;
 
 @end
 
 
 
-@implementation FAParallelBatchTask
+@implementation FAChainedBatchTask
 
 - (id)init {
-    return [self initWithParameters:nil];
+    return [self initWithParameter:nil];
 }
 
-- (id)initWithParameters:(NSDictionary *)parameters {
+- (id)initWithParameter:(id)parameter {
     self = [super init];
     if (self == nil) return nil;
     
-    _parameters = parameters;
-    
-    _progress = [[NSMutableDictionary alloc] initWithCapacity:2];
-    if (_progress == nil) return nil;
-    
-    _results = [[NSMutableDictionary alloc] initWithCapacity:2];
-    if (_results == nil) return nil;
+    _parameter = parameter;
     
     return self;
 }
 
-- (id)parameter {
-    return self.parameters;
+- (id)addKey {
+    return [NSNumber numberWithUnsignedInteger:[[self allKeys] count]];
+}
+
+- (void)addSubtask:(id <FATask>)subtask {
+    [self setSubtask:subtask forKey:[self addKey]];
+}
+
+- (void)addSubtaskFactory:(id <FATask> (^)(id parameter))subtaskFactory {
+    [self setSubtaskFactory:subtaskFactory forKey:[self addKey]];
 }
 
 - (void)startWithParameter:(id)parameter {
     [super startWithParameter:parameter];
+    [self startSubtaskForKey:[self startKey] withParameter:parameter];
+}
+
+- (void)startSubtaskForKey:(id)key withParameter:(id)parameter {
+    self.currentTask = [self subtaskWithKey:key parameter:parameter];
     
-    for (id key in [self allKeys]) {
-        id subparameter = [parameter objectForKey:key];
-        id <FATask> subtask = [self subtaskWithKey:key parameter:subparameter];
-        if ([subtask parameter] == nil) {
-            [subtask startWithParameter:subparameter];
+    if (self.currentTask != nil) {
+        if ([self.currentTask parameter] == nil) {
+            [self.currentTask startWithParameter:parameter];
         } else {
-            [subtask start];
+            [self.currentTask start];
         }
+    } else {
+        [self returnResult:parameter];
+        [self finish];
     }
 }
 
-- (BOOL)finished {
-    return [[self allKeys] count] == [self.results count];
+- (id)startKey {
+    return [NSNumber numberWithUnsignedInteger:0];
+}
+
+- (id)keyAfterKey:(id)key withResult:(id)result {
+    NSUInteger subtaskIndex = [key unsignedIntegerValue];
+    NSUInteger nextSubtaskIndex = subtaskIndex + 1;
+    return [NSNumber numberWithUnsignedInteger:nextSubtaskIndex];
 }
 
 - (void)subtaskWithKey:(id)key didReportProgress:(id)progress {
-    [self.progress setObject:progress forKey:key];
-    [self reportProgress:[self.progress copy]];
+    
 }
 
 - (void)subtaskWithKey:(id)key didFinishWithResult:(id)result {
-    [self.results setObject:result forKey:key];
-    
-    if ([self finished]) {
-        [self returnResult:self.results];
-        [self finish];
-    }
+    id nextKey = [self keyAfterKey:key withResult:result];
+    [self startSubtaskForKey:nextKey withParameter:result];
 }
 
 - (void)subtaskWithKey:(id)key didFinishWithError:(NSError *)error {
-    [self.results setObject:error forKey:key];
-    
-    if ([self finished]) {
-        [self returnResult:self.results];
-        [self finish];
-    }
+    [self returnError:error];
+    [self finish];
 }
 
 - (void)cancel {
     [super cancel];
-    
-    for (id key in [self allKeys]) {
-        id <FATask> subtask = [self subtaskForKey:key];
-        [subtask cancel];
-    }
+    [self.currentTask cancel];
 }
 
 @end

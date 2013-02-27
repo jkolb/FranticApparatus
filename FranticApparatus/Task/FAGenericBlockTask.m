@@ -30,8 +30,8 @@
 
 @implementation FAGenericBlockTask
 
-- (void)execute {
-    if (self.onExecute) self.onExecute();
+- (void)executeWithParameter:(id)parameter {
+    if (self.onExecute) self.onExecute(parameter);
 }
 
 @end

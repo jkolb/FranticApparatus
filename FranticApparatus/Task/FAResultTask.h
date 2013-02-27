@@ -30,6 +30,6 @@
 
 @interface FAResultTask : FAGenericTask
 
-- (id)generateResultWithError:(NSError **)error;
+- (id)generateResultWithParameter:(id)parameter error:(NSError **)error;
 
 @end

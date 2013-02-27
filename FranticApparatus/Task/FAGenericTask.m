@@ -30,7 +30,7 @@
 
 @interface FAGenericTask ()
 
-@property (nonatomic, strong) dispatch_queue_t queue;
+@property (nonatomic, strong) id parameter;
 
 @end
 
@@ -59,51 +59,38 @@
 }
 
 - (id)init {
-    return [self initWithDefaultPriorityQueue];
+    return [self initWithParameter:nil];
 }
 
-- (id)initWithMainQueue {
-    return [self initWithQueue:[[self class] mainQueue]];
-}
-
-- (id)initWithHighPriorityQueue {
-    return [self initWithQueue:[[self class] highPriorityQueue]];
-}
-
-- (id)initWithDefaultPriorityQueue {
-    return [self initWithQueue:[[self class] defaultPriorityQueue]];
-}
-
-- (id)initWithLowPriorityQueue {
-    return [self initWithQueue:[[self class] lowPriorityQueue]];
-}
-
-- (id)initWithBackgroundPriorityQueue {
-    return [self initWithQueue:[[self class] backgroundPriorityQueue]];
-}
-
-- (id)initWithQueue:(dispatch_queue_t)queue {
+- (id)initWithParameter:(id)parameter {
     self = [super init];
     if (self == nil) return nil;
     
-    _queue = queue;
-    if (_queue == nil) return nil;
+    _parameter = parameter;
     
     return self;
 }
 
-- (void)start {
-    [super start];
+- (dispatch_queue_t)queue {
+    if (_queue == nil) {
+        return [[self class] defaultPriorityQueue];
+    }
+    
+    return _queue;
+}
+
+- (void)startWithParameter:(id)parameter {
+    [super startWithParameter:parameter];
     typeof(self) __weak weakSelf = self;
     dispatch_async(self.queue, ^{
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if ([blockSelf isCancelled]) return;
-        [blockSelf execute];
+        [blockSelf executeWithParameter:parameter];
     });
 }
 
-- (void)execute {
+- (void)executeWithParameter:(id)parameter {
 }
 
 @end

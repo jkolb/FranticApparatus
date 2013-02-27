@@ -41,7 +41,7 @@
 - (id <FATask>)subtaskForKey:(id)key;
 - (void)setSubtask:(id <FATask>)subtask forKey:(id <NSCopying>)key;
 
-- (void)subtaskDidStartWithKey:(id)key;
+- (void)subtaskWithKey:(id)key didStartWithParameter:(id)parameter;
 - (void)subtaskWithKey:(id)key didReportProgress:(id)progress;
 - (void)subtaskWithKey:(id)key didFinishWithResult:(id)result;
 - (void)subtaskWithKey:(id)key didFinishWithError:(NSError *)error;

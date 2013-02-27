@@ -52,7 +52,7 @@
     return self;
 }
 
-- (void)start {
+- (void)startWithParameter:(id)parameter {
     typeof(self) __weak weakSelf = self;
     
     if (self.onStart) {
@@ -95,7 +95,7 @@
         }];
     }
     
-    [self.backgroundTask start];
+    [self.backgroundTask startWithParameter:parameter];
 }
 
 - (void)cancel {

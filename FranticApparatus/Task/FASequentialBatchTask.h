@@ -30,6 +30,9 @@
 
 @interface FASequentialBatchTask : FAOrderedBatchTask
 
++ (id)sequentialBatchTaskWithParameters:(NSArray *)parameters;
+- (id)initWithParameters:(NSDictionary *)parameters;
+
 - (void)addSubtask:(id <FATask>)subtask;
 - (void)addSubtaskFactory:(id <FATask> (^)(id parameter))subtaskFactory;
 

@@ -30,6 +30,6 @@
 
 @interface FAGenericBlockTask : FAGenericTask
 
-@property (copy) void (^onExecute)();
+@property (copy) void (^onExecute)(id parameter);
 
 @end

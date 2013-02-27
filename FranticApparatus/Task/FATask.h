@@ -30,7 +30,7 @@
 
 @protocol FATask <NSObject>
 
-@property (copy) void (^onStart)();
+@property (copy) void (^onStart)(id parameter);
 @property (copy) void (^onProgress)(id progress);
 @property (copy) void (^onResult)(id result);
 @property (copy) void (^onError)(NSError *error);
@@ -42,7 +42,10 @@
 - (void)setErrorTarget:(id)target action:(SEL)action;
 - (void)setFinishTarget:(id)target action:(SEL)action;
 
+- (id)parameter;
+
 - (void)start;
+- (void)startWithParameter:(id)parameter;
 
 - (BOOL)isCancelled;
 - (void)cancel;

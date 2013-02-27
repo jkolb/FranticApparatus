@@ -30,13 +30,47 @@
 
 @interface FASequentialBatchTask ()
 
+@property (nonatomic, strong) NSMutableDictionary *parameters;
 @property (nonatomic, strong) id <FATask> currentTask;
+@property (nonatomic, strong) NSMutableDictionary *progress;
+@property (nonatomic, strong) NSMutableDictionary *results;
 
 @end
 
 
 
 @implementation FASequentialBatchTask
+
++ (id)sequentialBatchTaskWithParameters:(NSArray *)parameters {
+    NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] initWithCapacity:[parameters count]];
+    NSUInteger index = 0;
+    
+    for (id parameter in parameters) {
+        NSNumber *key = [[NSNumber alloc] initWithUnsignedInteger:index];
+        [dictionary setObject:parameter forKey:key];
+    }
+    
+    return [(FASequentialBatchTask *)[self alloc] initWithParameters:dictionary];
+}
+
+- (id)init {
+    return [self initWithParameters:nil];
+}
+
+- (id)initWithParameters:(NSDictionary *)parameters {
+    self = [super init];
+    if (self == nil) return nil;
+    
+    _parameters = [[NSMutableDictionary alloc] initWithDictionary:parameters];
+    
+    _progress = [[NSMutableDictionary alloc] initWithCapacity:2];
+    if (_progress == nil) return nil;
+    
+    _results = [[NSMutableDictionary alloc] initWithCapacity:2];
+    if (_results == nil) return nil;
+    
+    return self;
+}
 
 - (id)addKey {
     return [NSNumber numberWithUnsignedInteger:[[self allKeys] count]];
@@ -50,16 +84,25 @@
     [self setSubtaskFactory:subtaskFactory forKey:[self addKey]];
 }
 
-- (void)start {
-    [super start];
-    [self startSubtaskForKey:[self startKey] withParameter:nil];
+- (id)parameter {
+    return self.parameters;
+}
+
+- (void)startWithParameter:(id)parameter {
+    [super startWithParameter:parameter];
+    [self startSubtaskForKey:[self startKey] withParameter:parameter];
 }
 
 - (void)startSubtaskForKey:(id)key withParameter:(id)parameter {
-    self.currentTask = [self subtaskWithKey:key parameter:parameter];
+    id subparameter = [parameter objectForKey:key];
+    self.currentTask = [self subtaskWithKey:key parameter:subparameter];
     
     if (self.currentTask != nil) {
-        [self.currentTask start];
+        if ([self.currentTask parameter] == nil) {
+            [self.currentTask startWithParameter:subparameter];
+        } else {
+            [self.currentTask start];
+        }
     } else {
         [self returnResult:parameter];
         [self finish];

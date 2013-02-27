@@ -30,6 +30,6 @@
 
 @interface FAResultBlockTask : FAResultTask
 
-@property (copy) id (^generateResult)(NSError **error);
+@property (copy) id (^generateResult)(id parameter, NSError **error);
 
 @end

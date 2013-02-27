@@ -36,13 +36,10 @@
 + (dispatch_queue_t)lowPriorityQueue;
 + (dispatch_queue_t)backgroundPriorityQueue;
 
-- (id)initWithMainQueue;
-- (id)initWithHighPriorityQueue;
-- (id)initWithDefaultPriorityQueue;
-- (id)initWithLowPriorityQueue;
-- (id)initWithBackgroundPriorityQueue;
-- (id)initWithQueue:(dispatch_queue_t)queue;
+@property (nonatomic, strong) dispatch_queue_t queue;
 
-- (void)execute;
+- (id)initWithParameter:(id)parameter;
+
+- (void)executeWithParameter:(id)parameter;
 
 @end

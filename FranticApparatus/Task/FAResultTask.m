@@ -30,9 +30,9 @@
 
 @implementation FAResultTask
 
-- (void)execute {
+- (void)executeWithParameter:(id)parameter {
     NSError *error = nil;
-    id result = [self generateResultWithError:&error];
+    id result = [self generateResultWithParameter:parameter error:&error];
     
     if (result) {
         [self returnResult:result];
@@ -43,7 +43,7 @@
     [self finish];
 }
 
-- (id)generateResultWithError:(NSError **)error {
+- (id)generateResultWithParameter:(id)parameter error:(NSError **)error {
     return [NSNull null];
 }
 

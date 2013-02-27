@@ -78,11 +78,11 @@
 
 - (void)configureSubtask:(id <FATask>)subtask withKey:(id)key {
     typeof(self) __weak weakSelf = self;
-    [subtask setOnStart:^{
+    [subtask setOnStart:^(id parameter) {
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if ([blockSelf isCancelled]) return;
-        [blockSelf subtaskDidStartWithKey:key];
+        [blockSelf subtaskWithKey:key didStartWithParameter:parameter];
     }];
     [subtask setOnProgress:^(id progress) {
         typeof(self) blockSelf = weakSelf;
@@ -119,7 +119,7 @@
     [self configureSubtask:subtask withKey:key];
 }
 
-- (void)subtaskDidStartWithKey:(id)key {
+- (void)subtaskWithKey:(id)key didStartWithParameter:(id)parameter {
     
 }
 

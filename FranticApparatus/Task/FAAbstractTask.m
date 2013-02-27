@@ -38,8 +38,16 @@
 
 @implementation FAAbstractTask
 
+- (id)parameter {
+    return nil;
+}
+
 - (void)start {
-    if (self.onStart) self.onStart();
+    [self startWithParameter:[self parameter]];
+}
+
+- (void)startWithParameter:(id)parameter {
+    if (self.onStart) self.onStart(parameter);
 }
 
 - (BOOL)isCancelled {
@@ -53,12 +61,12 @@
 - (void)setStartTarget:(id)target action:(SEL)action {
     id __weak weakTarget = target;
     typeof(self) __weak weakSelf = self;
-    [self setOnStart:^{
+    [self setOnStart:^(id parameter) {
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil || [blockSelf isCancelled]) return;
         id blockTarget = weakTarget;
         if (blockTarget == nil) return;
-        [blockSelf invokeTarget:blockTarget action:action];
+        [blockSelf invokeTarget:blockTarget action:action withObject:parameter];
     }];
 }
 

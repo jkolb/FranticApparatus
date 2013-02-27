@@ -30,9 +30,9 @@
 
 @implementation FAResultBlockTask
 
-- (id)generateResultWithError:(NSError **)error {
+- (id)generateResultWithParameter:(id)parameter error:(NSError *__autoreleasing *)error {
     if (self.generateResult) {
-        return self.generateResult(error);
+        return self.generateResult(parameter, error);
     } else {
         return [NSNull null];
     }
