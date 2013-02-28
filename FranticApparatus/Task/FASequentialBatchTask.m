@@ -30,6 +30,8 @@
 
 @interface FASequentialBatchTask ()
 
+@property (nonatomic, strong) NSArray *sortedKeys;
+@property (nonatomic) NSUInteger currentIndex;
 @property (nonatomic, strong) NSMutableDictionary *parameters;
 @property (nonatomic, strong) id <FATask> currentTask;
 @property (nonatomic, strong) NSMutableDictionary *progress;
@@ -88,9 +90,14 @@
     return self.parameters;
 }
 
+- (id)currentKey {
+    return [self.sortedKeys objectAtIndex:self.currentIndex];
+}
+
 - (void)startWithParameter:(id)parameter {
     [super startWithParameter:parameter];
-    [self startSubtaskForKey:[self startKey] withParameter:parameter];
+    self.sortedKeys = [[[self allKeys] allObjects] sortedArrayUsingComparator:self.keyComparator];
+    [self startSubtaskForKey:[self currentKey] withParameter:parameter];
 }
 
 - (void)startSubtaskForKey:(id)key withParameter:(id)parameter {
@@ -109,23 +116,13 @@
     }
 }
 
-- (id)startKey {
-    return [NSNumber numberWithUnsignedInteger:0];
-}
-
-- (id)keyAfterKey:(id)key withResult:(id)result {
-    NSUInteger subtaskIndex = [key unsignedIntegerValue];
-    NSUInteger nextSubtaskIndex = subtaskIndex + 1;
-    return [NSNumber numberWithUnsignedInteger:nextSubtaskIndex];
-}
-
 - (void)subtaskWithKey:(id)key didReportProgress:(id)progress {
     
 }
 
 - (void)subtaskWithKey:(id)key didFinishWithResult:(id)result {
-    id nextKey = [self keyAfterKey:key withResult:result];
-    [self startSubtaskForKey:nextKey withParameter:result];
+    ++self.currentIndex;
+    [self startSubtaskForKey:[self currentKey] withParameter:result];
 }
 
 - (void)subtaskWithKey:(id)key didFinishWithError:(NSError *)error {

@@ -30,12 +30,32 @@
 
 @implementation FAOrderedBatchTask
 
-- (id)startKey {
-    return nil;
-}
-
-- (id)keyAfterKey:(id)key withResult:(id)result {
-    return nil;
+- (NSComparator)keyComparator {
+    if (_keyComparator == nil) {
+        return ^(id key1, id key2) {
+            // number < string < pointer
+            BOOL key1IsNumber = [key1 isKindOfClass:[NSNumber class]];
+            BOOL key2IsNumber = [key2 isKindOfClass:[NSNumber class]];
+            BOOL key1IsString = [key1 isKindOfClass:[NSString class]];
+            BOOL key2IsString = [key2 isKindOfClass:[NSString class]];
+            BOOL key1IsPointer = !key1IsNumber && !key1IsString;
+            BOOL key2IsPointer = !key2IsNumber && !key2IsString;
+            
+            if (key1IsNumber && key2IsNumber) {
+                return [key1 compare:key2];
+            } else if (key1IsString && key2IsString) {
+                return [key1 compare:key2];
+            } else if ((key1IsNumber && (key2IsString || key2IsPointer)) || (key1IsString && key2IsPointer) || (key1 < key2)) {
+                return NSOrderedAscending;
+            } else if ((key2IsNumber && (key1IsString || key1IsPointer)) || (key2IsString && key1IsPointer) || (key2 > key1)) {
+                return NSOrderedDescending;
+            } else {
+                return NSOrderedSame;
+            }
+        };
+    }
+    
+    return _keyComparator;
 }
 
 @end

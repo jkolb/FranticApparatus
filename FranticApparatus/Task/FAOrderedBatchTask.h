@@ -30,7 +30,6 @@
 
 @interface FAOrderedBatchTask : FABatchTask
 
-- (id)startKey;
-- (id)keyAfterKey:(id)key withResult:(id)result;
+@property (nonatomic, copy) NSComparator keyComparator;
 
 @end
