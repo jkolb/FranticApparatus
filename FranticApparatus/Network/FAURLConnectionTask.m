@@ -48,7 +48,6 @@
     if (self == nil) return nil;
     
     _request = request;
-    if (_request == nil) return nil;
     
     return self;
 }
