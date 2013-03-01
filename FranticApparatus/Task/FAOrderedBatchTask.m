@@ -64,13 +64,7 @@
 - (void)startWithParameter:(id)parameter {
     [super startWithParameter:parameter];
     self.sortedKeys = [[self allKeys] sortedArrayUsingComparator:self.keyComparator];
-    [self startCurrentTask];
-}
-
-- (void)startCurrentTask {
-    id key = [self currentKey];
-    id parameter = [self currentParamter];
-    [self startTaskForKey:key withParameter:parameter];
+    [self startTaskForKey:[self currentKey] withParameter:[self parameter]];
 }
 
 - (id)currentKey {

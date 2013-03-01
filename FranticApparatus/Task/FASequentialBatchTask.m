@@ -34,8 +34,8 @@
     return [self initWithParameter:parameters];
 }
 
-- (id)currentParameter {
-    return [[self parameter] objectForKey:[self currentKey]];
+- (id)parameter {
+    return [[super parameter] objectForKey:[self currentKey]];
 }
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {
@@ -53,7 +53,7 @@
     if ([self isFinished]) {
         [self finishWithStatus:FATaskStatusSuccess];
     } else {
-        [self startCurrentTask];
+        [self startTaskForKey:[self currentKey] withParameter:[self parameter]];
     }
 }
 

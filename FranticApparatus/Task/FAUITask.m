@@ -56,7 +56,11 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             typeof(self) blockSelf = weakSelf;
             if (blockSelf == nil || [blockSelf isCancelled]) return;
-            [blockSelf sendActionsWithObject:object forTaskEvent:event];
+            if (object == blockSelf.backgroundTask) {
+                [blockSelf sendActionsWithObject:blockSelf forTaskEvent:event];
+            } else {
+                [blockSelf sendActionsWithObject:object forTaskEvent:event];
+            }
         });
     };
 }

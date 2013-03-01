@@ -28,19 +28,7 @@
 
 
 
-@interface FAChainedBatchTask ()
-
-@property (nonatomic, strong) id lastResult;
-
-@end
-
-
-
 @implementation FAChainedBatchTask
-
-- (id)currentParameter {
-    return [[self parameter] objectForKey:[self currentKey]];
-}
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {
     typeof(self) __weak weakSelf = self;
@@ -62,8 +50,7 @@
     if ([self isFinished]) {
         [self succeedWithResult:result];
     } else {
-        self.lastResult = result;
-        [self startCurrentTask];
+        [self startTaskForKey:[self currentKey] withParameter:result];
     }
 }
 
