@@ -34,8 +34,7 @@
 @property (nonatomic) NSUInteger currentIndex;
 @property (nonatomic, strong) NSMutableDictionary *parameters;
 @property (nonatomic, strong) id <FATask> currentTask;
-@property (nonatomic, strong) NSMutableDictionary *progress;
-@property (nonatomic, strong) NSMutableDictionary *results;
+@property (nonatomic, strong) id lastResult;
 
 @end
 
@@ -65,25 +64,19 @@
     
     _parameters = [[NSMutableDictionary alloc] initWithDictionary:parameters];
     
-    _progress = [[NSMutableDictionary alloc] initWithCapacity:2];
-    if (_progress == nil) return nil;
-    
-    _results = [[NSMutableDictionary alloc] initWithCapacity:2];
-    if (_results == nil) return nil;
-    
     return self;
 }
 
 - (id)addKey {
-    return [NSNumber numberWithUnsignedInteger:[[self allKeys] count]];
+    return [NSNumber numberWithUnsignedInteger:[self count]];
 }
 
-- (void)addSubtask:(id <FATask>)subtask {
-    [self setSubtask:subtask forKey:[self addKey]];
+- (void)addTask:(id <FATask>)task {
+    [self setTask:task forKey:[self addKey]];
 }
 
-- (void)addSubtaskFactory:(id <FATask> (^)(id parameter))subtaskFactory {
-    [self setSubtaskFactory:subtaskFactory forKey:[self addKey]];
+- (void)addFactory:(FATaskFactory)factory {
+    [self setFactory:factory forKey:[self addKey]];
 }
 
 - (id)parameter {
@@ -94,45 +87,43 @@
     return [self.sortedKeys objectAtIndex:self.currentIndex];
 }
 
+- (id)currentParameter {
+    return [self.parameters objectForKey:[self currentKey]];
+}
+
+- (void)startCurrentTask {
+    self.currentTask = [self taskWithKey:[self currentKey] parameter:[self currentParameter]];
+    [self.currentTask start];
+}
+
 - (void)startWithParameter:(id)parameter {
     [super startWithParameter:parameter];
-    self.sortedKeys = [[[self allKeys] allObjects] sortedArrayUsingComparator:self.keyComparator];
-    [self startSubtaskForKey:[self currentKey] withParameter:parameter];
-}
-
-- (void)startSubtaskForKey:(id)key withParameter:(id)parameter {
-    id subparameter = [parameter objectForKey:key];
-    self.currentTask = [self subtaskWithKey:key parameter:subparameter];
     
-    if (self.currentTask != nil) {
-        if ([self.currentTask parameter] == nil) {
-            [self.currentTask startWithParameter:subparameter];
-        } else {
-            [self.currentTask start];
+    if ([self parameter] == nil) {
+        if (parameter != nil && [parameter isKindOfClass:[NSDictionary class]] == NO) {
+            @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"parameter must be an NSDictionary" userInfo:nil];
         }
-    } else {
-        [self returnResult:parameter];
-        [self finish];
+        
+        self.parameters = parameter;
     }
-}
-
-- (void)subtaskWithKey:(id)key didReportProgress:(id)progress {
     
-}
-
-- (void)subtaskWithKey:(id)key didFinishWithResult:(id)result {
-    ++self.currentIndex;
-    [self startSubtaskForKey:[self currentKey] withParameter:result];
-}
-
-- (void)subtaskWithKey:(id)key didFinishWithError:(NSError *)error {
-    [self returnError:error];
-    [self finish];
+    self.sortedKeys = [[[self allKeys] allObjects] sortedArrayUsingComparator:self.keyComparator];
+    [self startCurrentTask];
 }
 
 - (void)cancel {
-    [super cancel];
     [self.currentTask cancel];
+    [super cancel];
+}
+
+- (void)taskWithKeyDidFinish:(id)key {
+    ++self.currentIndex;
+    
+    if (self.currentIndex < [self count]) {
+        [self startCurrentTask];
+    } else {
+        [self finish];
+    }
 }
 
 @end

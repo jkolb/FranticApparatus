@@ -43,12 +43,12 @@
 }
 
 - (void)connectionDidFinishDownloading:(NSURLConnection *)connection destinationURL:(NSURL *)destinationURL {
-    [self returnResult:destinationURL];
+    [self succeedWithResult:destinationURL];
     [self finish];
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    [self returnError:error];
+    [self failWithError:error];
     [self finish];
 }
 

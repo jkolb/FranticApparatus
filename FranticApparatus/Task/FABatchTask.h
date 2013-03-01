@@ -28,23 +28,35 @@
 
 
 
+typedef id <FATask> (^FATaskFactory)(id parameter);
+typedef void (^FAKeyCallback)(id key, id object);
+
+
+
 @interface FABatchTask : FAAbstractTask
 
+- (void)setTask:(id <FATask>)task forKey:(id <NSCopying>)key;
+- (void)setFactory:(FATaskFactory)factory forKey:(id <NSCopying>)key;
+
 - (NSSet *)allKeys;
+- (NSUInteger)count;
 
-- (void)setSubtaskFactory:(id <FATask> (^)(id parameter))subtaskFactory forKey:(id <NSCopying>)key;
+- (id <FATask>)taskForKey:(id)key;
 
-- (id <FATask>)subtaskWithKey:(id)key parameter:(id)parameter;
+- (id <FATask>)taskWithKey:(id)key parameter:(id)parameter;
 
-- (void)configureSubtask:(id <FATask>)subtask withKey:(id)key;
+@property (copy) FAKeyCallback onKeyStart;
+@property (copy) FAKeyCallback onKeyProgress;
+@property (copy) FAKeyCallback onKeyResult;
+@property (copy) FAKeyCallback onKeyError;
+@property (copy) FAKeyCallback onKeyCancel;
+@property (copy) FAKeyCallback onKeyFinish;
 
-- (id <FATask>)subtaskForKey:(id)key;
-- (void)setSubtask:(id <FATask>)subtask forKey:(id <NSCopying>)key;
-
-- (void)subtaskWithKey:(id)key didStartWithParameter:(id)parameter;
-- (void)subtaskWithKey:(id)key didReportProgress:(id)progress;
-- (void)subtaskWithKey:(id)key didFinishWithResult:(id)result;
-- (void)subtaskWithKey:(id)key didFinishWithError:(NSError *)error;
-- (void)subtaskDidFinishWithKey:(id)key;
+- (void)taskWithKeyDidStart:(id)key;
+- (void)taskWithKey:(id)key didReportProgress:(id)progress;
+- (void)taskWithKey:(id)key didSucceedWithResult:(id)result;
+- (void)taskWithKey:(id)key didFailWithError:(id)error;
+- (void)taskWithKeyDidCancel:(id)key;
+- (void)taskWithKeyDidFinish:(id)key;
 
 @end

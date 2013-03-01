@@ -35,9 +35,9 @@
     id result = [self generateResultWithParameter:parameter error:&error];
     
     if (result) {
-        [self returnResult:result];
+        [self succeedWithResult:result];
     } else {
-        [self returnError:error];
+        [self failWithError:error];
     }
     
     [self finish];

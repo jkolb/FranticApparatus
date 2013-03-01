@@ -47,7 +47,7 @@
 }
 
 - (void)startWithParameter:(id)parameter {
-    if (self.onStart) self.onStart(parameter);
+    if (self.onStart) self.onStart(self);
 }
 
 - (BOOL)isCancelled {
@@ -56,93 +56,74 @@
 
 - (void)cancel {
     self.cancelled = YES;
-}
-
-- (void)setStartTarget:(id)target action:(SEL)action {
-    id __weak weakTarget = target;
-    typeof(self) __weak weakSelf = self;
-    [self setOnStart:^(id parameter) {
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
-        id blockTarget = weakTarget;
-        if (blockTarget == nil) return;
-        [blockSelf invokeTarget:blockTarget action:action withObject:parameter];
-    }];
-}
-
-- (void)setProgressTarget:(id)target action:(SEL)action {
-    id __weak weakTarget = target;
-    typeof(self) __weak weakSelf = self;
-    [self setOnProgress:^(id progress) {
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
-        id blockTarget = weakTarget;
-        if (blockTarget == nil) return;
-        [blockSelf invokeTarget:blockTarget action:action withObject:progress];
-    }];
-}
-
-- (void)setResultTarget:(id)target action:(SEL)action {
-    id __weak weakTarget = target;
-    typeof(self) __weak weakSelf = self;
-    [self setOnResult:^(id result) {
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
-        id blockTarget = weakTarget;
-        if (blockTarget == nil) return;
-        [blockSelf invokeTarget:blockTarget action:action withObject:result];
-    }];
-}
-
-- (void)setErrorTarget:(id)target action:(SEL)action {
-    id __weak weakTarget = target;
-    typeof(self) __weak weakSelf = self;
-    [self setOnError:^(NSError *error) {
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
-        id blockTarget = weakTarget;
-        if (blockTarget == nil) return;
-        [blockSelf invokeTarget:blockTarget action:action withObject:error];
-    }];
-}
-
-- (void)setFinishTarget:(id)target action:(SEL)action {
-    id __weak weakTarget = target;
-    typeof(self) __weak weakSelf = self;
-    [self setOnFinish:^{
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
-        id blockTarget = weakTarget;
-        if (blockTarget == nil) return;
-        [blockSelf invokeTarget:blockTarget action:action];
-    }];
+    if (self.onCancel) self.onCancel(self);
+    [self finish];
 }
 
 - (void)reportProgress:(id)progress {
     if (self.onProgress) self.onProgress(progress);
 }
 
-- (void)returnResult:(id)result {
+- (void)succeedWithResult:(id)result {
     if (self.onResult) self.onResult(result);
 }
 
-- (void)returnError:(NSError *)error {
+- (void)failWithError:(id)error {
     if (self.onError) self.onError(error);
 }
 
 - (void)finish {
-    if (self.onFinish) self.onFinish();
+    if (self.onFinish) self.onFinish(self);
 }
 
-- (void)invokeTarget:(id)target action:(SEL)action {
-    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[[target class] instanceMethodSignatureForSelector:action]];
-    invocation.target = target;
-    invocation.selector = action;
-    [invocation invoke];
+- (void)setTarget:(id)target action:(SEL)action forTaskEvent:(FATaskEvent)event {
+    FACallback callback = [self callbackForTarget:target action:action];
+    
+    switch (event) {
+        case FATaskEventStart:
+            [self setOnStart:callback];
+            break;
+            
+        case FATaskEventProgress:
+            [self setOnProgress:callback];
+            break;
+            
+        case FATaskEventResult:
+            [self setOnResult:callback];
+            break;
+            
+        case FATaskEventError:
+            [self setOnError:callback];
+            break;
+            
+        case FATaskEventCancel:
+            [self setOnCancel:callback];
+            break;
+            
+        case FATaskEventFinish:
+            [self setOnFinish:callback];
+            break;
+            
+        default:
+            break;
+    }
+}
+
+- (FACallback)callbackForTarget:(id)target action:(SEL)action {
+    typeof(self) __weak weakSelf = self;
+    id __weak weakTarget = target;
+    return ^(id object) {
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        id blockTarget = weakTarget;
+        if (blockTarget == nil) return;
+        [blockSelf invokeTarget:blockTarget action:action withObject:object];
+    };
 }
 
 - (void)invokeTarget:(id)target action:(SEL)action withObject:(id)object {
-    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[[target class] instanceMethodSignatureForSelector:action]];
+    NSMethodSignature *signature = [[target class] instanceMethodSignatureForSelector:action];
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
     invocation.target = target;
     invocation.selector = action;
     [invocation setArgument:&object atIndex:2];

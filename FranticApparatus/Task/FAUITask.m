@@ -78,7 +78,7 @@
     }
     
     if (self.onError) {
-        [self.backgroundTask setOnError:^(NSError *error) {
+        [self.backgroundTask setOnError:^(id error) {
             typeof(self) blockSelf = weakSelf;
             if (blockSelf == nil) return;
             if ([blockSelf isCancelled]) return;
@@ -87,7 +87,7 @@
     }
     
     if (self.onFinish) {
-        [self.backgroundTask setOnFinish:^{
+        [self.backgroundTask setOnFinish:^(id object){
             typeof(self) blockSelf = weakSelf;
             if (blockSelf == nil) return;
             if ([blockSelf isCancelled]) return;
@@ -119,7 +119,7 @@
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if ([blockSelf isCancelled]) return;
-        [blockSelf returnResult:result];
+        [blockSelf succeedWithResult:result];
     });
 }
 
@@ -129,7 +129,7 @@
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if ([blockSelf isCancelled]) return;
-        [blockSelf returnError:error];
+        [blockSelf failWithError:error];
     });
 }
 

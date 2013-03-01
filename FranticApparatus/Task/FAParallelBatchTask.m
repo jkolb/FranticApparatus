@@ -31,8 +31,7 @@
 @interface FAParallelBatchTask ()
 
 @property (nonatomic, copy) NSDictionary *parameters;
-@property (nonatomic, strong) NSMutableDictionary *progress;
-@property (nonatomic, strong) NSMutableDictionary *results;
+@property (nonatomic) NSUInteger finishedCount;
 
 @end
 
@@ -50,12 +49,6 @@
     
     _parameters = parameters;
     
-    _progress = [[NSMutableDictionary alloc] initWithCapacity:2];
-    if (_progress == nil) return nil;
-    
-    _results = [[NSMutableDictionary alloc] initWithCapacity:2];
-    if (_results == nil) return nil;
-    
     return self;
 }
 
@@ -68,49 +61,47 @@
     
     for (id key in [self allKeys]) {
         id subparameter = [parameter objectForKey:key];
-        id <FATask> subtask = [self subtaskWithKey:key parameter:subparameter];
-        if ([subtask parameter] == nil) {
-            [subtask startWithParameter:subparameter];
+        id <FATask> task = [self taskWithKey:key parameter:subparameter];
+        if ([task parameter] == nil) {
+            [task startWithParameter:subparameter];
         } else {
-            [subtask start];
+            [task start];
         }
     }
 }
 
-- (BOOL)finished {
-    return [[self allKeys] count] == [self.results count];
-}
-
-- (void)subtaskWithKey:(id)key didReportProgress:(id)progress {
-    [self.progress setObject:progress forKey:key];
-    [self reportProgress:[self.progress copy]];
-}
-
-- (void)subtaskWithKey:(id)key didFinishWithResult:(id)result {
-    [self.results setObject:result forKey:key];
-    
-    if ([self finished]) {
-        [self returnResult:self.results];
-        [self finish];
-    }
-}
-
-- (void)subtaskWithKey:(id)key didFinishWithError:(NSError *)error {
-    [self.results setObject:error forKey:key];
-    
-    if ([self finished]) {
-        [self returnResult:self.results];
-        [self finish];
-    }
-}
-
 - (void)cancel {
-    [super cancel];
-    
     for (id key in [self allKeys]) {
-        id <FATask> subtask = [self subtaskForKey:key];
-        [subtask cancel];
+        id <FATask> task = [self taskForKey:key];
+        [task cancel];
     }
+    
+    [super cancel];
+}
+
+- (void)taskWithKeyDidStart:(id)key {
+    
+}
+
+- (void)taskWithKey:(id)key didReportProgress:(id)progress {
+    
+}
+
+- (void)taskWithKey:(id)key didSucceedWithResult:(id)result {
+    
+}
+
+- (void)taskWithKey:(id)key didFailWithError:(id)error {
+    
+}
+
+- (void)taskWithKeyDidCancel:(id)key {
+    
+}
+
+- (void)taskWithKeyDidFinish:(id)key {
+    ++self.finishedCount;
+    if (self.finishedCount >= [self count]) [self finish];
 }
 
 @end

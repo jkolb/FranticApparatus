@@ -48,12 +48,12 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    [self returnResult:self.result];
+    [self succeedWithResult:self.result];
     [self finish];
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    [self returnError:error];
+    [self failWithError:error];
     [self finish];
 }
 

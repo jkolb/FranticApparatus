@@ -28,19 +28,31 @@
 
 
 
+typedef NS_ENUM(NSInteger, FATaskEvent) {
+    FATaskEventStart    = 0,
+    FATaskEventProgress = 1,
+    FATaskEventResult   = 2,
+    FATaskEventError    = 3,
+    FATaskEventCancel   = 4,
+    FATaskEventFinish   = 5,
+};
+
+
+
+typedef void (^FACallback)(id object);
+
+
+
 @protocol FATask <NSObject>
 
-@property (copy) void (^onStart)(id parameter);
-@property (copy) void (^onProgress)(id progress);
-@property (copy) void (^onResult)(id result);
-@property (copy) void (^onError)(NSError *error);
-@property (copy) void (^onFinish)();
+@property (copy) FACallback onStart;
+@property (copy) FACallback onProgress;
+@property (copy) FACallback onResult;
+@property (copy) FACallback onError;
+@property (copy) FACallback onCancel;
+@property (copy) FACallback onFinish;
 
-- (void)setStartTarget:(id)target action:(SEL)action;
-- (void)setProgressTarget:(id)target action:(SEL)action;
-- (void)setResultTarget:(id)target action:(SEL)action;
-- (void)setErrorTarget:(id)target action:(SEL)action;
-- (void)setFinishTarget:(id)target action:(SEL)action;
+- (void)setTarget:(id)target action:(SEL)action forTaskEvent:(FATaskEvent)event;
 
 - (id)parameter;
 

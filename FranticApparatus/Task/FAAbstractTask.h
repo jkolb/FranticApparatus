@@ -32,17 +32,16 @@
 
 @interface FAAbstractTask : NSObject <FATask>
 
-@property (copy) void (^onStart)(id parameter);
-@property (copy) void (^onProgress)(id progress);
-@property (copy) void (^onResult)(id result);
-@property (copy) void (^onError)(NSError *error);
-@property (copy) void (^onFinish)();
+@property (copy) FACallback onStart;
+@property (copy) FACallback onProgress;
+@property (copy) FACallback onResult;
+@property (copy) FACallback onError;
+@property (copy) FACallback onCancel;
+@property (copy) FACallback onFinish;
 
 - (void)reportProgress:(id)progress;
-
-- (void)returnResult:(id)result;
-- (void)returnError:(NSError *)error;
-
+- (void)succeedWithResult:(id)result;
+- (void)failWithError:(id)error;
 - (void)finish;
 
 @end

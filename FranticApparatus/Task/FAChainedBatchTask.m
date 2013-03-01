@@ -58,12 +58,12 @@
     return [NSNumber numberWithUnsignedInteger:[[self allKeys] count]];
 }
 
-- (void)addSubtask:(id <FATask>)subtask {
-    [self setSubtask:subtask forKey:[self addKey]];
+- (void)addTask:(id <FATask>)task {
+    [self setTask:task forKey:[self addKey]];
 }
 
-- (void)addSubtaskFactory:(id <FATask> (^)(id parameter))subtaskFactory {
-    [self setSubtaskFactory:subtaskFactory forKey:[self addKey]];
+- (void)addFactory:(FATaskFactory)factory {
+    [self setFactory:factory forKey:[self addKey]];
 }
 
 - (id)currentKey {
@@ -77,7 +77,7 @@
 }
 
 - (void)startSubtaskForKey:(id)key withParameter:(id)parameter {
-    self.currentTask = [self subtaskWithKey:key parameter:parameter];
+    self.currentTask = [self taskWithKey:key parameter:parameter];
     
     if (self.currentTask != nil) {
         if ([self.currentTask parameter] == nil) {
@@ -86,7 +86,7 @@
             [self.currentTask start];
         }
     } else {
-        [self returnResult:parameter];
+        [self succeedWithResult:parameter];
         [self finish];
     }
 }
@@ -101,7 +101,7 @@
 }
 
 - (void)subtaskWithKey:(id)key didFinishWithError:(NSError *)error {
-    [self returnError:error];
+    [self failWithError:error];
     [self finish];
 }
 
