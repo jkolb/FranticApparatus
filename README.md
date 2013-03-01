@@ -1,8 +1,8 @@
-## [FranticApparatus 0.1](https://github.com/jkolb/FranticApparatus)
+## [FranticApparatus 0.2](https://github.com/jkolb/FranticApparatus)
 
 ## Requirements
 
-FranticApparatus 0.1 and higher requires iOS 6.0 and above.
+FranticApparatus 0.2 and higher requires iOS 6.0 and above.
 
 ## Contact
 
