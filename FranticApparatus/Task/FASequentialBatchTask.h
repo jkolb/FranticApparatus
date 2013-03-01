@@ -30,10 +30,6 @@
 
 @interface FASequentialBatchTask : FAOrderedBatchTask
 
-+ (id)sequentialBatchTaskWithParameters:(NSArray *)parameters;
-- (id)initWithParameters:(NSDictionary *)parameters;
-
-- (void)addTask:(id <FATask>)task;
-- (void)addFactory:(FATaskFactory)factory;
+- (id)initWithParameterDictionary:(NSDictionary *)parameters;
 
 @end

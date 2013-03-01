@@ -38,8 +38,6 @@
 
 @property (nonatomic, strong) dispatch_queue_t queue;
 
-- (id)initWithParameter:(id)parameter;
-
 - (void)executeWithParameter:(id)parameter;
 
 @end

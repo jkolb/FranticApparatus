@@ -44,12 +44,10 @@
 
 - (void)connectionDidFinishDownloading:(NSURLConnection *)connection destinationURL:(NSURL *)destinationURL {
     [self succeedWithResult:destinationURL];
-    [self finish];
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
     [self failWithError:error];
-    [self finish];
 }
 
 @end

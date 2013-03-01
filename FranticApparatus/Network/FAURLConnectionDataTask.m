@@ -49,12 +49,10 @@
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
     [self succeedWithResult:self.result];
-    [self finish];
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
     [self failWithError:error];
-    [self finish];
 }
 
 @end

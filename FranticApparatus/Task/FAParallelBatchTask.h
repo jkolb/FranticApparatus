@@ -30,6 +30,6 @@
 
 @interface FAParallelBatchTask : FABatchTask
 
-- (id)initWithParameters:(NSDictionary *)parameters;
+- (id)initWithParameterDictionary:(NSDictionary *)parameters;
 
 @end

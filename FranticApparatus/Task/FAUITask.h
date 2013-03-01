@@ -30,6 +30,6 @@
 
 @interface FAUITask : FAAbstractTask
 
-- (id)initWithBackgroundTask:(id <FATask>)backgroundTask;
+@property (strong) id <FATask> backgroundTask;
 
 @end

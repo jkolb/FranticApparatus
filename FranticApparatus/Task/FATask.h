@@ -28,13 +28,24 @@
 
 
 
+@protocol FATask;
+
+
+
 typedef NS_ENUM(NSInteger, FATaskEvent) {
     FATaskEventStart    = 0,
     FATaskEventProgress = 1,
-    FATaskEventResult   = 2,
-    FATaskEventError    = 3,
+    FATaskEventSuccess  = 2,
+    FATaskEventFailure  = 3,
     FATaskEventCancel   = 4,
     FATaskEventFinish   = 5,
+};
+
+typedef NS_ENUM(NSInteger, FATaskStatus) {
+    FATaskStatusPending   = 0,
+    FATaskStatusSuccess   = 1,
+    FATaskStatusFailure   = 2,
+    FATaskStatusCancelled = 3,
 };
 
 
@@ -45,19 +56,20 @@ typedef void (^FACallback)(id object);
 
 @protocol FATask <NSObject>
 
-@property (copy) FACallback onStart;
-@property (copy) FACallback onProgress;
-@property (copy) FACallback onResult;
-@property (copy) FACallback onError;
-@property (copy) FACallback onCancel;
-@property (copy) FACallback onFinish;
+- (id)initWithParameter:(id)parameter;
 
-- (void)setTarget:(id)target action:(SEL)action forTaskEvent:(FATaskEvent)event;
+- (void)taskEvent:(FATaskEvent)event addCallback:(FACallback)callback;
+
+- (void)addTarget:(id)target action:(SEL)action forTaskEvent:(FATaskEvent)event;
+
+- (BOOL)hasActionForTaskEvent:(FATaskEvent)event;
 
 - (id)parameter;
 
 - (void)start;
 - (void)startWithParameter:(id)parameter;
+
+- (FATaskStatus)status;
 
 - (BOOL)isCancelled;
 - (void)cancel;

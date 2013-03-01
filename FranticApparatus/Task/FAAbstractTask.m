@@ -30,7 +30,9 @@
 
 @interface FAAbstractTask ()
 
-@property BOOL cancelled;
+@property (nonatomic) FATaskStatus status;
+@property (nonatomic, strong) id parameter;
+@property (nonatomic, strong) NSMutableDictionary *callbacks;
 
 @end
 
@@ -38,75 +40,87 @@
 
 @implementation FAAbstractTask
 
-- (id)parameter {
-    return nil;
+- (id)init {
+    return [self initWithParameter:nil];
+}
+
+- (id)initWithParameter:(id)parameter {
+    self = [super init];
+    if (self == nil) return nil;
+    
+    _callbacks = [[NSMutableDictionary alloc] initWithCapacity:1];
+    if (_callbacks == nil) return nil;
+    
+    _parameter = parameter;
+    
+    return self;
 }
 
 - (void)start {
-    [self startWithParameter:[self parameter]];
+    [self startWithParameter:self.parameter];
 }
 
 - (void)startWithParameter:(id)parameter {
-    if (self.onStart) self.onStart(self);
+    if (self.parameter == nil) self.parameter = parameter;
+    [self sendActionsWithObject:self forTaskEvent:FATaskEventStart];
 }
 
 - (BOOL)isCancelled {
-    return self.cancelled;
+    return self.status == FATaskStatusCancelled;
+}
+
+- (void)taskEvent:(FATaskEvent)event addCallback:(FACallback)callback {
+    NSNumber *eventKey = @(event);
+    NSMutableArray *callbacks = [self.callbacks objectForKey:eventKey];
+    
+    if (callbacks == nil) {
+        callbacks = [[NSMutableArray alloc] initWithCapacity:1];
+        [self.callbacks setObject:callbacks forKey:eventKey];
+    }
+    
+    [callbacks addObject:[callback copy]];
+}
+
+- (void)addTarget:(id)target action:(SEL)action forTaskEvent:(FATaskEvent)event {
+    [self taskEvent:event addCallback:[self callbackForTarget:target action:action]];
+}
+
+- (BOOL)hasActionForTaskEvent:(FATaskEvent)event {
+    return [[self callbacksForTaskEvent:event] count] > 0;
+}
+
+- (void)sendActionsWithObject:(id)object forTaskEvent:(FATaskEvent)event {
+    for (FACallback callback in [self callbacksForTaskEvent:event]) {
+        callback(object);
+    }
+}
+
+- (NSArray *)callbacksForTaskEvent:(FATaskEvent)event {
+    return [self.callbacks objectForKey:@(event)];
 }
 
 - (void)cancel {
-    self.cancelled = YES;
-    if (self.onCancel) self.onCancel(self);
-    [self finish];
+    [self sendActionsWithObject:self forTaskEvent:FATaskEventCancel];
+    [self finishWithStatus:FATaskStatusCancelled];
 }
 
 - (void)reportProgress:(id)progress {
-    if (self.onProgress) self.onProgress(progress);
+    [self sendActionsWithObject:progress forTaskEvent:FATaskEventProgress];
 }
 
 - (void)succeedWithResult:(id)result {
-    if (self.onResult) self.onResult(result);
+    [self sendActionsWithObject:result forTaskEvent:FATaskEventSuccess];
+    [self finishWithStatus:FATaskStatusSuccess];
 }
 
 - (void)failWithError:(id)error {
-    if (self.onError) self.onError(error);
+    [self sendActionsWithObject:error forTaskEvent:FATaskEventFailure];
+    [self finishWithStatus:FATaskStatusFailure];
 }
 
-- (void)finish {
-    if (self.onFinish) self.onFinish(self);
-}
-
-- (void)setTarget:(id)target action:(SEL)action forTaskEvent:(FATaskEvent)event {
-    FACallback callback = [self callbackForTarget:target action:action];
-    
-    switch (event) {
-        case FATaskEventStart:
-            [self setOnStart:callback];
-            break;
-            
-        case FATaskEventProgress:
-            [self setOnProgress:callback];
-            break;
-            
-        case FATaskEventResult:
-            [self setOnResult:callback];
-            break;
-            
-        case FATaskEventError:
-            [self setOnError:callback];
-            break;
-            
-        case FATaskEventCancel:
-            [self setOnCancel:callback];
-            break;
-            
-        case FATaskEventFinish:
-            [self setOnFinish:callback];
-            break;
-            
-        default:
-            break;
-    }
+- (void)finishWithStatus:(FATaskStatus)status {
+    self.status = status;
+    [self sendActionsWithObject:self forTaskEvent:FATaskEventFinish];
 }
 
 - (FACallback)callbackForTarget:(id)target action:(SEL)action {

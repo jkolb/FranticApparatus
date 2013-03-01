@@ -30,9 +30,4 @@
 
 @interface FAChainedBatchTask : FAOrderedBatchTask
 
-- (id)initWithParameter:(id)parameter;
-
-- (void)addTask:(id <FATask>)task;
-- (void)addFactory:(FATaskFactory)factory;
-
 @end

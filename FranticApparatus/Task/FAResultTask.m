@@ -39,8 +39,6 @@
     } else {
         [self failWithError:error];
     }
-    
-    [self finish];
 }
 
 - (id)generateResultWithParameter:(id)parameter error:(NSError **)error {

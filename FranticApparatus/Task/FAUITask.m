@@ -28,119 +28,42 @@
 
 
 
-@interface FAUITask ()
-
-@property (strong) id <FATask> backgroundTask;
-
-@end
-
-
-
 @implementation FAUITask
 
-- (id)init {
-    return [self initWithBackgroundTask:nil];
-}
-
-- (id)initWithBackgroundTask:(id <FATask>)backgroundTask {
-    self = [super init];
-    if (self == nil) return nil;
-    
-    _backgroundTask = backgroundTask;
-    if (_backgroundTask == nil) return nil;
-    
-    return self;
-}
-
 - (void)startWithParameter:(id)parameter {
-    typeof(self) __weak weakSelf = self;
-    
-    if (self.onStart) {
-        self.backgroundTask.onStart = self.onStart;
-    }
-    
-    if (self.onProgress) {
-        [self.backgroundTask setOnProgress:^(id progress) {
-            typeof(self) blockSelf = weakSelf;
-            if (blockSelf == nil) return;
-            if ([blockSelf isCancelled]) return;
-            [blockSelf reportProgressOnMainThread:progress];
-        }];
-    }
-    
-    if (self.onResult) {
-        [self.backgroundTask setOnResult:^(id result) {
-            typeof(self) blockSelf = weakSelf;
-            if (blockSelf == nil) return;
-            if ([blockSelf isCancelled]) return;
-            [blockSelf returnResultOnMainThread:result];
-        }];
-    }
-    
-    if (self.onError) {
-        [self.backgroundTask setOnError:^(id error) {
-            typeof(self) blockSelf = weakSelf;
-            if (blockSelf == nil) return;
-            if ([blockSelf isCancelled]) return;
-            [blockSelf returnErrorOnMainThread:error];
-        }];
-    }
-    
-    if (self.onFinish) {
-        [self.backgroundTask setOnFinish:^(id object){
-            typeof(self) blockSelf = weakSelf;
-            if (blockSelf == nil) return;
-            if ([blockSelf isCancelled]) return;
-            [blockSelf finishOnMainThread];
-        }];
-    }
-    
+    [super startWithParameter:parameter];
+    [self linkEventsWithBackgroundTask];
     [self.backgroundTask startWithParameter:parameter];
 }
 
+- (void)linkEventsWithBackgroundTask {
+    for (FATaskEvent event = FATaskEventStart; event <= FATaskEventFinish; ++event) {
+        [self linkEventWithBackgroundTask:event];
+    }
+}
+
+- (void)linkEventWithBackgroundTask:(FATaskEvent)event {
+    BOOL skipEvent = FATaskEventStart == event || FATaskEventCancel == event;
+    if (skipEvent) return;
+    if ([self hasActionForTaskEvent:event]) {
+        [self.backgroundTask taskEvent:event addCallback:[self callbackOnMainThreadForEvent:event]];
+    }
+}
+
+- (FACallback)callbackOnMainThreadForEvent:(FATaskEvent)event {
+    typeof(self) __weak weakSelf = self;
+    return ^(id object) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            typeof(self) blockSelf = weakSelf;
+            if (blockSelf == nil || [blockSelf isCancelled]) return;
+            [blockSelf sendActionsWithObject:object forTaskEvent:event];
+        });
+    };
+}
+
 - (void)cancel {
-    [super cancel];
     [self.backgroundTask cancel];
-}
-
-- (void)reportProgressOnMainThread:(id)progress {
-    typeof(self) __weak weakSelf = self;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil) return;
-        if ([blockSelf isCancelled]) return;
-        [blockSelf reportProgress:progress];
-    });
-}
-
-- (void)returnResultOnMainThread:(id)result {
-    typeof(self) __weak weakSelf = self;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil) return;
-        if ([blockSelf isCancelled]) return;
-        [blockSelf succeedWithResult:result];
-    });
-}
-
-- (void)returnErrorOnMainThread:(NSError *)error {
-    typeof(self) __weak weakSelf = self;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil) return;
-        if ([blockSelf isCancelled]) return;
-        [blockSelf failWithError:error];
-    });
-}
-
-- (void)finishOnMainThread {
-    typeof(self) __weak weakSelf = self;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil) return;
-        if ([blockSelf isCancelled]) return;
-        [blockSelf finish];
-    });
+    [super cancel];
 }
 
 @end

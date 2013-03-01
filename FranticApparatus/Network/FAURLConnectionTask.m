@@ -30,7 +30,6 @@
 
 @interface FAURLConnectionTask ()
 
-@property (nonatomic, copy) NSURLRequest *request;
 @property (nonatomic, strong) NSURLConnection *connection;
 
 @end
@@ -39,33 +38,23 @@
 
 @implementation FAURLConnectionTask
 
-- (id)init {
-    return [self initWithRequest:nil];
-}
-
 - (id)initWithRequest:(NSURLRequest *)request {
-    self = [super init];
+    self = [super initWithParameter:request];
     if (self == nil) return nil;
-    
-    _request = request;
     
     return self;
 }
 
-- (id)parameter {
-    return self.request;
-}
-
 - (void)startWithParameter:(id)parameter {
     [super startWithParameter:parameter];
-    self.connection = [[NSURLConnection alloc] initWithRequest:parameter delegate:self startImmediately:NO];
+    self.connection = [[NSURLConnection alloc] initWithRequest:[self parameter] delegate:self startImmediately:NO];
     [self.connection setDelegateQueue:self.queue];
     [self.connection start];
 }
 
 - (void)cancel {
-    [super cancel];
     [self.connection cancel];
+    [super cancel];
 }
 
 @end

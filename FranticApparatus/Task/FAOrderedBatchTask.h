@@ -32,4 +32,12 @@
 
 @property (nonatomic, copy) NSComparator keyComparator;
 
+- (void)addTask:(id <FATask>)task;
+- (void)addFactory:(FATaskFactory)factory;
+
+- (void)startCurrentTask;
+- (id)currentKey;
+- (void)advanceToNextKey;
+- (BOOL)isFinished;
+
 @end

@@ -28,101 +28,32 @@
 
 
 
-@interface FASequentialBatchTask ()
-
-@property (nonatomic, strong) NSArray *sortedKeys;
-@property (nonatomic) NSUInteger currentIndex;
-@property (nonatomic, strong) NSMutableDictionary *parameters;
-@property (nonatomic, strong) id <FATask> currentTask;
-@property (nonatomic, strong) id lastResult;
-
-@end
-
-
-
 @implementation FASequentialBatchTask
 
-+ (id)sequentialBatchTaskWithParameters:(NSArray *)parameters {
-    NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] initWithCapacity:[parameters count]];
-    NSUInteger index = 0;
-    
-    for (id parameter in parameters) {
-        NSNumber *key = [[NSNumber alloc] initWithUnsignedInteger:index];
-        [dictionary setObject:parameter forKey:key];
-    }
-    
-    return [(FASequentialBatchTask *)[self alloc] initWithParameters:dictionary];
-}
-
-- (id)init {
-    return [self initWithParameters:nil];
-}
-
-- (id)initWithParameters:(NSDictionary *)parameters {
-    self = [super init];
-    if (self == nil) return nil;
-    
-    _parameters = [[NSMutableDictionary alloc] initWithDictionary:parameters];
-    
-    return self;
-}
-
-- (id)addKey {
-    return [NSNumber numberWithUnsignedInteger:[self count]];
-}
-
-- (void)addTask:(id <FATask>)task {
-    [self setTask:task forKey:[self addKey]];
-}
-
-- (void)addFactory:(FATaskFactory)factory {
-    [self setFactory:factory forKey:[self addKey]];
-}
-
-- (id)parameter {
-    return self.parameters;
-}
-
-- (id)currentKey {
-    return [self.sortedKeys objectAtIndex:self.currentIndex];
+- (id)initWithParameterDictionary:(NSDictionary *)parameters {
+    return [self initWithParameter:parameters];
 }
 
 - (id)currentParameter {
-    return [self.parameters objectForKey:[self currentKey]];
+    return [[self parameter] objectForKey:[self currentKey]];
 }
 
-- (void)startCurrentTask {
-    self.currentTask = [self taskWithKey:[self currentKey] parameter:[self currentParameter]];
-    [self.currentTask start];
-}
-
-- (void)startWithParameter:(id)parameter {
-    [super startWithParameter:parameter];
-    
-    if ([self parameter] == nil) {
-        if (parameter != nil && [parameter isKindOfClass:[NSDictionary class]] == NO) {
-            @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"parameter must be an NSDictionary" userInfo:nil];
-        }
-        
-        self.parameters = parameter;
-    }
-    
-    self.sortedKeys = [[[self allKeys] allObjects] sortedArrayUsingComparator:self.keyComparator];
-    [self startCurrentTask];
-}
-
-- (void)cancel {
-    [self.currentTask cancel];
-    [super cancel];
+- (void)configureTask:(id<FATask>)task withKey:(id)key {
+    typeof(self) __weak weakSelf = self;
+    [task taskEvent:FATaskEventFinish addCallback:^(id object) {
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        [blockSelf taskWithKeyDidFinish:key];
+    }];
 }
 
 - (void)taskWithKeyDidFinish:(id)key {
-    ++self.currentIndex;
+    [self advanceToNextKey];
     
-    if (self.currentIndex < [self count]) {
-        [self startCurrentTask];
+    if ([self isFinished]) {
+        [self finishWithStatus:FATaskStatusSuccess];
     } else {
-        [self finish];
+        [self startCurrentTask];
     }
 }
 

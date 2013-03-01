@@ -30,8 +30,6 @@
 
 @interface FAGenericTask ()
 
-@property (nonatomic, strong) id parameter;
-
 @end
 
 
@@ -58,19 +56,6 @@
     return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
 }
 
-- (id)init {
-    return [self initWithParameter:nil];
-}
-
-- (id)initWithParameter:(id)parameter {
-    self = [super init];
-    if (self == nil) return nil;
-    
-    _parameter = parameter;
-    
-    return self;
-}
-
 - (dispatch_queue_t)queue {
     if (_queue == nil) {
         return [[self class] defaultPriorityQueue];
@@ -84,9 +69,8 @@
     typeof(self) __weak weakSelf = self;
     dispatch_async(self.queue, ^{
         typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil) return;
-        if ([blockSelf isCancelled]) return;
-        [blockSelf executeWithParameter:parameter];
+        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        [blockSelf executeWithParameter:[blockSelf parameter]];
     });
 }
 

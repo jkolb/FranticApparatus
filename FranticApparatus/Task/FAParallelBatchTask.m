@@ -30,7 +30,6 @@
 
 @interface FAParallelBatchTask ()
 
-@property (nonatomic, copy) NSDictionary *parameters;
 @property (nonatomic) NSUInteger finishedCount;
 
 @end
@@ -39,69 +38,37 @@
 
 @implementation FAParallelBatchTask
 
-- (id)init {
-    return [self initWithParameters:nil];
-}
-
-- (id)initWithParameters:(NSDictionary *)parameters {
-    self = [super init];
-    if (self == nil) return nil;
-    
-    _parameters = parameters;
-    
-    return self;
-}
-
-- (id)parameter {
-    return self.parameters;
+- (id)initWithParameterDictionary:(NSDictionary *)parameters {
+    return [self initWithParameter:parameters];
 }
 
 - (void)startWithParameter:(id)parameter {
     [super startWithParameter:parameter];
     
     for (id key in [self allKeys]) {
-        id subparameter = [parameter objectForKey:key];
-        id <FATask> task = [self taskWithKey:key parameter:subparameter];
-        if ([task parameter] == nil) {
-            [task startWithParameter:subparameter];
-        } else {
-            [task start];
-        }
+        [self startTaskForKey:key withParameter:[self parameterForKey:key]];
     }
 }
 
-- (void)cancel {
-    for (id key in [self allKeys]) {
-        id <FATask> task = [self taskForKey:key];
-        [task cancel];
-    }
-    
-    [super cancel];
+- (id)parameterForKey:(id)key {
+    return [[self parameter] objectForKey:key];
 }
 
-- (void)taskWithKeyDidStart:(id)key {
-    
-}
-
-- (void)taskWithKey:(id)key didReportProgress:(id)progress {
-    
-}
-
-- (void)taskWithKey:(id)key didSucceedWithResult:(id)result {
-    
-}
-
-- (void)taskWithKey:(id)key didFailWithError:(id)error {
-    
-}
-
-- (void)taskWithKeyDidCancel:(id)key {
-    
+- (void)configureTask:(id<FATask>)task withKey:(id)key {
+    typeof(self) __weak weakSelf = self;
+    [task taskEvent:FATaskEventFinish addCallback:^(id object) {
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        [blockSelf taskWithKeyDidFinish:key];
+    }];
 }
 
 - (void)taskWithKeyDidFinish:(id)key {
     ++self.finishedCount;
-    if (self.finishedCount >= [self count]) [self finish];
+    
+    if (self.finishedCount >= [self count]) {
+        [self finishWithStatus:FATaskStatusSuccess];
+    }
 }
 
 @end

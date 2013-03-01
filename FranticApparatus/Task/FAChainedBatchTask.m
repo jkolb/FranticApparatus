@@ -30,10 +30,7 @@
 
 @interface FAChainedBatchTask ()
 
-@property (nonatomic, strong) NSArray *sortedKeys;
-@property (nonatomic) NSUInteger currentIndex;
-@property (nonatomic, strong) id parameter;
-@property (nonatomic, strong) id <FATask> currentTask;
+@property (nonatomic, strong) id lastResult;
 
 @end
 
@@ -41,73 +38,33 @@
 
 @implementation FAChainedBatchTask
 
-- (id)init {
-    return [self initWithParameter:nil];
+- (id)currentParameter {
+    return [[self parameter] objectForKey:[self currentKey]];
 }
 
-- (id)initWithParameter:(id)parameter {
-    self = [super init];
-    if (self == nil) return nil;
+- (void)configureTask:(id<FATask>)task withKey:(id)key {
+    typeof(self) __weak weakSelf = self;
+    [task taskEvent:FATaskEventSuccess addCallback:^(id object) {
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        [blockSelf taskWithKey:key didSucceedWithResult:object];
+    }];
+    [task taskEvent:FATaskEventFailure addCallback:^(id object) {
+        typeof(self) blockSelf = weakSelf;
+        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        [blockSelf failWithError:object];
+    }];
+}
+
+- (void)taskWithKey:(id)key didSucceedWithResult:(id)result {
+    [self advanceToNextKey];
     
-    _parameter = parameter;
-    
-    return self;
-}
-
-- (id)addKey {
-    return [NSNumber numberWithUnsignedInteger:[[self allKeys] count]];
-}
-
-- (void)addTask:(id <FATask>)task {
-    [self setTask:task forKey:[self addKey]];
-}
-
-- (void)addFactory:(FATaskFactory)factory {
-    [self setFactory:factory forKey:[self addKey]];
-}
-
-- (id)currentKey {
-    return [self.sortedKeys objectAtIndex:self.currentIndex];
-}
-
-- (void)startWithParameter:(id)parameter {
-    [super startWithParameter:parameter];
-    self.sortedKeys = [[[self allKeys] allObjects] sortedArrayUsingComparator:self.keyComparator];
-    [self startSubtaskForKey:[self currentKey] withParameter:parameter];
-}
-
-- (void)startSubtaskForKey:(id)key withParameter:(id)parameter {
-    self.currentTask = [self taskWithKey:key parameter:parameter];
-    
-    if (self.currentTask != nil) {
-        if ([self.currentTask parameter] == nil) {
-            [self.currentTask startWithParameter:parameter];
-        } else {
-            [self.currentTask start];
-        }
+    if ([self isFinished]) {
+        [self succeedWithResult:result];
     } else {
-        [self succeedWithResult:parameter];
-        [self finish];
+        self.lastResult = result;
+        [self startCurrentTask];
     }
-}
-
-- (void)subtaskWithKey:(id)key didReportProgress:(id)progress {
-    
-}
-
-- (void)subtaskWithKey:(id)key didFinishWithResult:(id)result {
-    ++self.currentIndex;
-    [self startSubtaskForKey:[self currentKey] withParameter:result];
-}
-
-- (void)subtaskWithKey:(id)key didFinishWithError:(NSError *)error {
-    [self failWithError:error];
-    [self finish];
-}
-
-- (void)cancel {
-    [super cancel];
-    [self.currentTask cancel];
 }
 
 @end

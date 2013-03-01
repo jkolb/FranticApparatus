@@ -28,34 +28,65 @@
 
 
 
+@interface FAOrderedBatchTask ()
+
+@property (nonatomic, strong) NSArray *sortedKeys;
+@property (nonatomic) NSUInteger currentIndex;
+
+@end
+
+
+
 @implementation FAOrderedBatchTask
 
 - (NSComparator)keyComparator {
     if (_keyComparator == nil) {
         return ^(id key1, id key2) {
-            // number < string < pointer
-            BOOL key1IsNumber = [key1 isKindOfClass:[NSNumber class]];
-            BOOL key2IsNumber = [key2 isKindOfClass:[NSNumber class]];
-            BOOL key1IsString = [key1 isKindOfClass:[NSString class]];
-            BOOL key2IsString = [key2 isKindOfClass:[NSString class]];
-            BOOL key1IsPointer = !key1IsNumber && !key1IsString;
-            BOOL key2IsPointer = !key2IsNumber && !key2IsString;
-            
-            if (key1IsNumber && key2IsNumber) {
-                return [key1 compare:key2];
-            } else if (key1IsString && key2IsString) {
-                return [key1 compare:key2];
-            } else if ((key1IsNumber && (key2IsString || key2IsPointer)) || (key1IsString && key2IsPointer) || (key1 < key2)) {
-                return NSOrderedAscending;
-            } else if ((key2IsNumber && (key1IsString || key1IsPointer)) || (key2IsString && key1IsPointer) || (key2 > key1)) {
-                return NSOrderedDescending;
-            } else {
-                return NSOrderedSame;
-            }
+            return [key1 compare:key2];
         };
     }
     
     return _keyComparator;
+}
+
+- (void)addTask:(id <FATask>)task {
+    [self setTask:task forKey:[self nextKey]];
+}
+
+- (void)addFactory:(FATaskFactory)factory {
+    [self setFactory:factory forKey:[self nextKey]];
+}
+
+- (id)nextKey {
+    return @([self count]);
+}
+
+- (void)startWithParameter:(id)parameter {
+    [super startWithParameter:parameter];
+    self.sortedKeys = [[self allKeys] sortedArrayUsingComparator:self.keyComparator];
+    [self startCurrentTask];
+}
+
+- (void)startCurrentTask {
+    id key = [self currentKey];
+    id parameter = [self currentParamter];
+    [self startTaskForKey:key withParameter:parameter];
+}
+
+- (id)currentKey {
+    return [self.sortedKeys objectAtIndex:self.currentIndex];
+}
+
+- (id)currentParamter {
+    return nil;
+}
+
+- (void)advanceToNextKey {
+    ++self.currentIndex;
+}
+
+- (BOOL)isFinished {
+    return self.currentIndex >= [self.sortedKeys count];
 }
 
 @end

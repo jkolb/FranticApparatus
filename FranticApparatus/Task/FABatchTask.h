@@ -38,25 +38,13 @@ typedef void (^FAKeyCallback)(id key, id object);
 - (void)setTask:(id <FATask>)task forKey:(id <NSCopying>)key;
 - (void)setFactory:(FATaskFactory)factory forKey:(id <NSCopying>)key;
 
-- (NSSet *)allKeys;
+- (NSArray *)allKeys;
 - (NSUInteger)count;
-
-- (id <FATask>)taskForKey:(id)key;
 
 - (id <FATask>)taskWithKey:(id)key parameter:(id)parameter;
 
-@property (copy) FAKeyCallback onKeyStart;
-@property (copy) FAKeyCallback onKeyProgress;
-@property (copy) FAKeyCallback onKeyResult;
-@property (copy) FAKeyCallback onKeyError;
-@property (copy) FAKeyCallback onKeyCancel;
-@property (copy) FAKeyCallback onKeyFinish;
+- (void)configureTask:(id <FATask>)task withKey:(id)key;
 
-- (void)taskWithKeyDidStart:(id)key;
-- (void)taskWithKey:(id)key didReportProgress:(id)progress;
-- (void)taskWithKey:(id)key didSucceedWithResult:(id)result;
-- (void)taskWithKey:(id)key didFailWithError:(id)error;
-- (void)taskWithKeyDidCancel:(id)key;
-- (void)taskWithKeyDidFinish:(id)key;
+- (void)startTaskForKey:(id)key withParameter:(id)parameter;
 
 @end

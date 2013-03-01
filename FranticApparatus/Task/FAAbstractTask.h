@@ -32,16 +32,11 @@
 
 @interface FAAbstractTask : NSObject <FATask>
 
-@property (copy) FACallback onStart;
-@property (copy) FACallback onProgress;
-@property (copy) FACallback onResult;
-@property (copy) FACallback onError;
-@property (copy) FACallback onCancel;
-@property (copy) FACallback onFinish;
+- (void)sendActionsWithObject:(id)object forTaskEvent:(FATaskEvent)event;
 
 - (void)reportProgress:(id)progress;
 - (void)succeedWithResult:(id)result;
 - (void)failWithError:(id)error;
-- (void)finish;
+- (void)finishWithStatus:(FATaskStatus)status;
 
 @end
