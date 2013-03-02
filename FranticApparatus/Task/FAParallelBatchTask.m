@@ -56,7 +56,7 @@
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {
     typeof(self) __weak weakSelf = self;
-    [task taskEvent:FATaskEventFinish addCallback:^(id object) {
+    [task taskEvent:FATaskEventFinished addCallback:^(id object) {
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil || [blockSelf isCancelled]) return;
         [blockSelf taskWithKeyDidFinish:key];

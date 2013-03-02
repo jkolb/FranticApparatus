@@ -37,20 +37,20 @@
 }
 
 - (void)linkEventsWithBackgroundTask {
-    for (FATaskEvent event = FATaskEventStart; event <= FATaskEventFinish; ++event) {
+    for (FATaskEvent event = FATaskEventStarted; event <= FATaskEventFinished; ++event) {
         [self linkEventWithBackgroundTask:event];
     }
 }
 
 - (void)linkEventWithBackgroundTask:(FATaskEvent)event {
-    BOOL skipEvent = FATaskEventStart == event || FATaskEventCancel == event;
+    BOOL skipEvent = FATaskEventStarted == event || FATaskEventCanceled == event;
     if (skipEvent) return;
-    if ([self hasActionForTaskEvent:event]) {
+    if ([self hasCallbackForTaskEvent:event]) {
         [self.backgroundTask taskEvent:event addCallback:[self callbackOnMainThreadForEvent:event]];
     }
 }
 
-- (FACallback)callbackOnMainThreadForEvent:(FATaskEvent)event {
+- (FATaskCallback)callbackOnMainThreadForEvent:(FATaskEvent)event {
     typeof(self) __weak weakSelf = self;
     return ^(id object) {
         dispatch_async(dispatch_get_main_queue(), ^{

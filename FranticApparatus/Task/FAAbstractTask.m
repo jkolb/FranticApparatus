@@ -62,14 +62,14 @@
 
 - (void)startWithParameter:(id)parameter {
     if (self.parameter == nil) self.parameter = parameter;
-    [self sendActionsWithObject:self forTaskEvent:FATaskEventStart];
+    [self sendActionsWithObject:self forTaskEvent:FATaskEventStarted];
 }
 
 - (BOOL)isCancelled {
-    return self.status == FATaskStatusCancelled;
+    return self.status == FATaskStatusCanceled;
 }
 
-- (void)taskEvent:(FATaskEvent)event addCallback:(FACallback)callback {
+- (void)taskEvent:(FATaskEvent)event addCallback:(FATaskCallback)callback {
     NSNumber *eventKey = @(event);
     NSMutableArray *callbacks = [self.callbacks objectForKey:eventKey];
     
@@ -85,12 +85,12 @@
     [self taskEvent:event addCallback:[self callbackForTarget:target action:action]];
 }
 
-- (BOOL)hasActionForTaskEvent:(FATaskEvent)event {
+- (BOOL)hasCallbackForTaskEvent:(FATaskEvent)event {
     return [[self callbacksForTaskEvent:event] count] > 0;
 }
 
 - (void)sendActionsWithObject:(id)object forTaskEvent:(FATaskEvent)event {
-    for (FACallback callback in [self callbacksForTaskEvent:event]) {
+    for (FATaskCallback callback in [self callbacksForTaskEvent:event]) {
         callback(object);
     }
 }
@@ -100,30 +100,30 @@
 }
 
 - (void)cancel {
-    [self sendActionsWithObject:self forTaskEvent:FATaskEventCancel];
-    [self finishWithStatus:FATaskStatusCancelled];
+    [self sendActionsWithObject:self forTaskEvent:FATaskEventCanceled];
+    [self finishWithStatus:FATaskStatusCanceled];
 }
 
 - (void)reportProgress:(id)progress {
-    [self sendActionsWithObject:progress forTaskEvent:FATaskEventProgress];
+    [self sendActionsWithObject:progress forTaskEvent:FATaskEventProgressed];
 }
 
 - (void)succeedWithResult:(id)result {
-    [self sendActionsWithObject:result forTaskEvent:FATaskEventSuccess];
+    [self sendActionsWithObject:result forTaskEvent:FATaskEventSucceeded];
     [self finishWithStatus:FATaskStatusSuccess];
 }
 
 - (void)failWithError:(id)error {
-    [self sendActionsWithObject:error forTaskEvent:FATaskEventFailure];
+    [self sendActionsWithObject:error forTaskEvent:FATaskEventFailed];
     [self finishWithStatus:FATaskStatusFailure];
 }
 
 - (void)finishWithStatus:(FATaskStatus)status {
     self.status = status;
-    [self sendActionsWithObject:self forTaskEvent:FATaskEventFinish];
+    [self sendActionsWithObject:self forTaskEvent:FATaskEventFinished];
 }
 
-- (FACallback)callbackForTarget:(id)target action:(SEL)action {
+- (FATaskCallback)callbackForTarget:(id)target action:(SEL)action {
     typeof(self) __weak weakSelf = self;
     id __weak weakTarget = target;
     return ^(id object) {

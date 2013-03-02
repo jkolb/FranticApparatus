@@ -32,12 +32,12 @@
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {
     typeof(self) __weak weakSelf = self;
-    [task taskEvent:FATaskEventSuccess addCallback:^(id object) {
+    [task taskEvent:FATaskEventSucceeded addCallback:^(id object) {
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil || [blockSelf isCancelled]) return;
         [blockSelf taskWithKey:key didSucceedWithResult:object];
     }];
-    [task taskEvent:FATaskEventFailure addCallback:^(id object) {
+    [task taskEvent:FATaskEventFailed addCallback:^(id object) {
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil || [blockSelf isCancelled]) return;
         [blockSelf failWithError:object];

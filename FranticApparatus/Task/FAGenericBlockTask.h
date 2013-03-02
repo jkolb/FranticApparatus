@@ -30,6 +30,6 @@
 
 @interface FAGenericBlockTask : FAGenericTask
 
-@property (copy) FACallback onExecute;
+@property (copy) FATaskCallback onExecute;
 
 @end
