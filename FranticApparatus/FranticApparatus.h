@@ -44,3 +44,5 @@
 #import "FAURLConnectionDownloadTask.h"
 #import "FAURLConnectionStreamTask.h"
 #import "FAURLResult.h"
+#import "FAURLSendProgress.h"
+#import "FAURLReceiveProgress.h"
