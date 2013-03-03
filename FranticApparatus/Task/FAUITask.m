@@ -30,6 +30,10 @@
 
 @implementation FAUITask
 
+- (void)dealloc {
+    [_backgroundTask cancel];
+}
+
 - (void)startWithParameter:(id)parameter {
     [super startWithParameter:parameter];
     [self linkEventsWithBackgroundTask];
@@ -57,9 +61,9 @@
             typeof(self) blockSelf = weakSelf;
             if (blockSelf == nil || [blockSelf isCancelled]) return;
             if (object == blockSelf.backgroundTask) {
-                [blockSelf sendActionsWithObject:blockSelf forTaskEvent:event];
+                [blockSelf callbackWithObject:blockSelf forTaskEvent:event];
             } else {
-                [blockSelf sendActionsWithObject:object forTaskEvent:event];
+                [blockSelf callbackWithObject:object forTaskEvent:event];
             }
         });
     };

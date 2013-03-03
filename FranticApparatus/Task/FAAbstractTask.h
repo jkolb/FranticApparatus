@@ -32,7 +32,7 @@
 
 @interface FAAbstractTask : NSObject <FATask>
 
-- (void)sendActionsWithObject:(id)object forTaskEvent:(FATaskEvent)event;
+- (void)callbackWithObject:(id)object forTaskEvent:(FATaskEvent)event;
 
 - (void)reportProgress:(id)progress;
 - (void)succeedWithResult:(id)result;

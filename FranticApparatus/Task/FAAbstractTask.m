@@ -62,7 +62,7 @@
 
 - (void)startWithParameter:(id)parameter {
     if (self.parameter == nil) self.parameter = parameter;
-    [self sendActionsWithObject:self forTaskEvent:FATaskEventStarted];
+    [self callbackWithObject:self forTaskEvent:FATaskEventStarted];
 }
 
 - (BOOL)isCancelled {
@@ -89,8 +89,9 @@
     return [[self callbacksForTaskEvent:event] count] > 0;
 }
 
-- (void)sendActionsWithObject:(id)object forTaskEvent:(FATaskEvent)event {
+- (void)callbackWithObject:(id)object forTaskEvent:(FATaskEvent)event {
     for (FATaskCallback callback in [self callbacksForTaskEvent:event]) {
+        if ([self isCancelled]) break;
         callback(object);
     }
 }
@@ -100,27 +101,27 @@
 }
 
 - (void)cancel {
-    [self sendActionsWithObject:self forTaskEvent:FATaskEventCanceled];
+    [self callbackWithObject:self forTaskEvent:FATaskEventCanceled];
     [self finishWithStatus:FATaskStatusCanceled];
 }
 
 - (void)reportProgress:(id)progress {
-    [self sendActionsWithObject:progress forTaskEvent:FATaskEventProgressed];
+    [self callbackWithObject:progress forTaskEvent:FATaskEventProgressed];
 }
 
 - (void)succeedWithResult:(id)result {
-    [self sendActionsWithObject:result forTaskEvent:FATaskEventSucceeded];
+    [self callbackWithObject:result forTaskEvent:FATaskEventSucceeded];
     [self finishWithStatus:FATaskStatusSuccess];
 }
 
 - (void)failWithError:(id)error {
-    [self sendActionsWithObject:error forTaskEvent:FATaskEventFailed];
+    [self callbackWithObject:error forTaskEvent:FATaskEventFailed];
     [self finishWithStatus:FATaskStatusFailure];
 }
 
 - (void)finishWithStatus:(FATaskStatus)status {
     self.status = status;
-    [self sendActionsWithObject:self forTaskEvent:FATaskEventFinished];
+    [self callbackWithObject:self forTaskEvent:FATaskEventFinished];
 }
 
 - (FATaskCallback)callbackForTarget:(id)target action:(SEL)action {
