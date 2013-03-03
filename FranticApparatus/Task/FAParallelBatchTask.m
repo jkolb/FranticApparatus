@@ -58,7 +58,7 @@
     typeof(self) __weak weakSelf = self;
     [task taskEvent:FATaskEventFinished addCallback:^(id object) {
         typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        if (blockSelf == nil || [blockSelf isCanceled]) return;
         [blockSelf taskWithKeyDidFinish:key];
     }];
 }

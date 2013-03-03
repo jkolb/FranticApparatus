@@ -34,12 +34,12 @@
     typeof(self) __weak weakSelf = self;
     [task taskEvent:FATaskEventSucceeded addCallback:^(id object) {
         typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        if (blockSelf == nil || [blockSelf isCanceled]) return;
         [blockSelf taskWithKey:key didSucceedWithResult:object];
     }];
     [task taskEvent:FATaskEventFailed addCallback:^(id object) {
         typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        if (blockSelf == nil || [blockSelf isCanceled]) return;
         [blockSelf failWithError:object];
     }];
 }

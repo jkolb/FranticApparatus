@@ -69,7 +69,7 @@
     typeof(self) __weak weakSelf = self;
     dispatch_async(self.queue, ^{
         typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        if (blockSelf == nil || [blockSelf isCanceled]) return;
         [blockSelf executeWithParameter:[blockSelf parameter]];
     });
 }

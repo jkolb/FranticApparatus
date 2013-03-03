@@ -59,7 +59,7 @@
     return ^(id object) {
         dispatch_async(dispatch_get_main_queue(), ^{
             typeof(self) blockSelf = weakSelf;
-            if (blockSelf == nil || [blockSelf isCancelled]) return;
+            if (blockSelf == nil || [blockSelf isCanceled]) return;
             if (object == blockSelf.backgroundTask) {
                 [blockSelf callbackWithObject:blockSelf forTaskEvent:event];
             } else {

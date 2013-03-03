@@ -65,7 +65,7 @@
     [self callbackWithObject:self forTaskEvent:FATaskEventStarted];
 }
 
-- (BOOL)isCancelled {
+- (BOOL)isCanceled {
     return self.status == FATaskStatusCanceled;
 }
 
@@ -91,7 +91,7 @@
 
 - (void)callbackWithObject:(id)object forTaskEvent:(FATaskEvent)event {
     for (FATaskCallback callback in [self callbacksForTaskEvent:event]) {
-        if ([self isCancelled]) break;
+        if ([self isCanceled]) break;
         callback(object);
     }
 }
@@ -129,7 +129,7 @@
     id __weak weakTarget = target;
     return ^(id object) {
         typeof(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        if (blockSelf == nil || [blockSelf isCanceled]) return;
         id blockTarget = weakTarget;
         if (blockTarget == nil) return;
         [blockSelf invokeTarget:blockTarget action:action withObject:object];

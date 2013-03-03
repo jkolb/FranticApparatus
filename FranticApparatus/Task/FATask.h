@@ -68,11 +68,16 @@ typedef NS_ENUM(NSInteger, FATaskStatus) {
     FATaskStatusCanceled = 3,
 };
 
-
-
 /*!
  @typedef FATaskCallback
  @abstract A block used to perform an action when an important event in a task's lifecyle is triggered.
+ @discussion Each event will be called with a different type of object that depends on the event the callback is associated with.
+    FATaskEventStarted is passed the task object.
+    FATaskEventProgressed is passed an object representing the current progress made during the tasks execution.
+    FATaskEventSucceeded is passed an object representing the final result of the tasks computation, this can be nil.
+    FATaskEventFailed is passed an object representing any error that occurred during the tasks computation, this can be nil.
+    FATaskEventCanceled is passed the task object.
+    FATaskEventFinished is passed the task object.
  */
 typedef void (^FATaskCallback)(id object);
 
@@ -102,7 +107,7 @@ typedef void (^FATaskCallback)(id object);
     The event that will trigger the callback.
  @param callback
     The block to execute.
- @discussion A way to execute a block when a lifecycle event occurs. Multiple callbacks can be associated with a single event. A callback will not be executed if the task no longer exists in memory or if the task has been canceled.
+ @discussion A way to execute a block when a lifecycle event occurs. Multiple callbacks and actions can be associated with a single event.
  */
 - (void)taskEvent:(FATaskEvent)event addCallback:(FATaskCallback)callback;
 
@@ -115,7 +120,7 @@ typedef void (^FATaskCallback)(id object);
     The selector to execute.
  @param event
     The event that will trigger the action.
- @discussion A way to execute a specific method when a lifecycle event occurs. Multiple actions can be associated with a single event. An action will not be executed if the task no longer exists in memory or if the task has been canceled.
+ @discussion A way to execute a specific method when a lifecycle event occurs. Multiple actions and callbacks can be associated with a single event.
  */
 - (void)addTarget:(id)target action:(SEL)action forTaskEvent:(FATaskEvent)event;
 
@@ -147,13 +152,28 @@ typedef void (^FATaskCallback)(id object);
  @abstract Starts the task with a specific parameter.
  @param parameter
     The parameter to use during the tasks computations, or nil.
- @discussion If the task was initialized with a parameter this parameter will be ignored. Pass in nil or just call start to execute the task without a parameter.
+ @discussion If the task was initialized with a parameter this parameter will be ignored. Pass in nil to execute the task without a parameter (as long as one hasn't been set during initialization).
  */
 - (void)startWithParameter:(id)parameter;
 
+/*!
+ @method status
+ @return Returns the status after the task has finished (FATaskStatusSuccess, FATaskStatusFailure, or FATaskStatusCanceled) otherwise returns FATaskStatusPending.
+ */
 - (FATaskStatus)status;
 
-- (BOOL)isCancelled;
+/*!
+ @method isCanceled
+ @return Returns YES if the tasks has finished due to early cancellation, otherwise returns NO.
+ @discussion This method can be periodically checked during execution of a task to exit long running computations when the task has been cancelled early.
+ */
+- (BOOL)isCanceled;
+
+/*!
+ @method cancel
+ @abstract Cancel execution of the task.
+ @discussion This method triggers events FATaskEventCanceled and then FATaskEventFinished. Execution of the task will still proceed until detection of the cancellation occurs which should eliminate any extra work from being done. Long running tasks should periodically check the value from isCanceled and stop processing when it returns YES.
+ */
 - (void)cancel;
 
 @end
