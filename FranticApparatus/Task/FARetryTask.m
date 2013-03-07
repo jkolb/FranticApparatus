@@ -36,7 +36,7 @@ NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
 @interface FARetryTask ()
 
 @property (nonatomic, strong) id <FATask> task;
-@property (readwrite) NSUInteger tryCount;
+@property (readwrite) NSUInteger retryCount;
 @property (strong) dispatch_source_t delayTimer;
 
 @end
@@ -55,10 +55,6 @@ NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
 }
 
 - (void)try {
-    ++self.tryCount;
-    
-    if (self.tryCount > 1) [self triggerEvent:FARetryTaskEventRestarted withObject:self];
-    
     id parameter = [self parameter];
     self.task = self.factory(parameter);
     [self.task addTarget:self action:@selector(tryFailedWithError:) forTaskEvent:FATaskEventFailed];
@@ -68,21 +64,27 @@ NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
 }
 
 - (void)tryFailedWithError:(id)error {
-    BOOL exceededMaximumAttempts = self.tryCount == NSUIntegerMax || (self.tryCount == self.maximumAttempts && self.maximumAttempts > 0);
+    BOOL exceededMaximumRetryCount = self.retryCount == NSUIntegerMax || (self.retryCount == self.maximumRetryCount && self.maximumRetryCount > 0);
     BOOL shouldNotRetry = [self shouldRetryAfterError:error] == NO;
     
-    if (exceededMaximumAttempts || shouldNotRetry) {
+    if (exceededMaximumRetryCount || shouldNotRetry) {
         [self failWithError:error];
     } else {
         [self delayBeforeRetry];
     }
 }
 
+- (void)retry {
+    ++self.retryCount;
+    [self triggerEvent:FARetryTaskEventRestarted withObject:self];
+    [self try];
+}
+
 - (void)delayBeforeRetry {
     NSTimeInterval delayInterval = [self nextDelayInterval];
     
     if (delayInterval == 0) {
-        [self try];
+        [self retry];
     } else {
         [self triggerEvent:FARetryTaskEventDelayed withObject:self];
         [self retryAfterDelayInterval:delayInterval];
@@ -94,12 +96,13 @@ NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
     
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     self.delayTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
+    dispatch_source_set_timer(self.delayTimer, dispatch_time(DISPATCH_TIME_NOW, delayInterval * NSEC_PER_SEC), DISPATCH_TIME_FOREVER, 0);
     __typeof__(self) __weak weakSelf = self;
     dispatch_source_set_event_handler(self.delayTimer, ^{
         __typeof__(self) blockSelf = weakSelf;
         if (blockSelf == nil || [blockSelf isCancelled]) return;
         [blockSelf cancelTimer];
-        [blockSelf try];
+        [blockSelf retry];
     });
     dispatch_resume(self.delayTimer);
 }
@@ -112,7 +115,7 @@ NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
 - (NSTimeInterval)nextDelayInterval {
     if (self.delayInterval > 0) return self.delayInterval;
     if (self.calculateDelayInterval == nil) return 5.0;
-    return self.calculateDelayInterval();
+    return self.calculateDelayInterval(self.retryCount);
 }
 
 - (void)cancelTimer {
