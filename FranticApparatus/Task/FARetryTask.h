@@ -1,5 +1,5 @@
 //
-// FAURLConnectionTask.m
+// FARetryTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,41 +24,21 @@
 
 
 
-#import "FAURLConnectionTask.h"
+#import "FAAbstractTask.h"
 
 
 
-@interface FAURLConnectionTask ()
-
-@property (nonatomic, strong) NSURLConnection *connection;
-
-@end
+extern NSString * const FARetryTaskEventRestarted;
+extern NSString * const FARetryTaskEventDelayed;
 
 
 
-@implementation FAURLConnectionTask
+@interface FARetryTask : FAAbstractTask
 
-- (id)initWithRequest:(NSURLRequest *)request {
-    self = [super initWithParameter:request];
-    if (self == nil) return nil;
-    
-    return self;
-}
-
-- (void)startWithParameter:(id)parameter {
-    [super startWithParameter:parameter];
-    self.connection = [[NSURLConnection alloc] initWithRequest:[self parameter] delegate:self startImmediately:NO];
-    
-    if (self.queue != nil) {
-        [self.connection setDelegateQueue:self.queue];
-    }
-    
-    [self.connection start];
-}
-
-- (void)cancel {
-    [self.connection cancel];
-    [super cancel];
-}
+@property (copy) FATaskFactory factory;
+@property NSUInteger maximumAttempts;
+@property (copy) BOOL (^shouldRetry)(id error);
+@property (copy) NSTimeInterval (^calculateDelayInterval)();
+@property NSTimeInterval delayInterval;
 
 @end

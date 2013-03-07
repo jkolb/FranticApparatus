@@ -28,7 +28,6 @@
 
 
 
-typedef id <FATask> (^FATaskFactory)(id parameter);
 typedef void (^FAKeyCallback)(id key, id object);
 
 

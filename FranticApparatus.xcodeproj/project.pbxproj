@@ -48,6 +48,7 @@
 		E56BC11316D5D2F40071E9DE /* FAUITask.m in Sources */ = {isa = PBXBuildFile; fileRef = E56BC11216D5D2F40071E9DE /* FAUITask.m */; };
 		E56BC11416D5D7D70071E9DE /* FAUITask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E56BC11116D5D2F40071E9DE /* FAUITask.h */; };
 		E5B4799D16E8440200480D10 /* FATask.m in Sources */ = {isa = PBXBuildFile; fileRef = E5B4799C16E8440200480D10 /* FATask.m */; };
+		E5B479A016E8525E00480D10 /* FARetryTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E5B4799F16E8525E00480D10 /* FARetryTask.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -134,6 +135,8 @@
 		E56BC11116D5D2F40071E9DE /* FAUITask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAUITask.h; sourceTree = "<group>"; };
 		E56BC11216D5D2F40071E9DE /* FAUITask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAUITask.m; sourceTree = "<group>"; };
 		E5B4799C16E8440200480D10 /* FATask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FATask.m; sourceTree = "<group>"; };
+		E5B4799E16E8525D00480D10 /* FARetryTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FARetryTask.h; sourceTree = "<group>"; };
+		E5B4799F16E8525E00480D10 /* FARetryTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FARetryTask.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -248,6 +251,8 @@
 				2C439C1416DDBCAC002381F0 /* FAChainedBatchTask.m */,
 				E56BC11116D5D2F40071E9DE /* FAUITask.h */,
 				E56BC11216D5D2F40071E9DE /* FAUITask.m */,
+				E5B4799E16E8525D00480D10 /* FARetryTask.h */,
+				E5B4799F16E8525E00480D10 /* FARetryTask.m */,
 			);
 			path = Task;
 			sourceTree = "<group>";
@@ -388,6 +393,7 @@
 				E504DCE816DAAF0B00DEB30C /* FAOrderedBatchTask.m in Sources */,
 				2C439C1516DDBCAC002381F0 /* FAChainedBatchTask.m in Sources */,
 				E5B4799D16E8440200480D10 /* FATask.m in Sources */,
+				E5B479A016E8525E00480D10 /* FARetryTask.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

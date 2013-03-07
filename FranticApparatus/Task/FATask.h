@@ -32,6 +32,10 @@
 
 
 
+typedef id <FATask> (^FATaskFactory)(id parameter);
+
+
+
 /*!
  @enum FATaskEvent
  @abstract Constants used to indicate specific events in the lifecycle of a task.
