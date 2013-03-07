@@ -10,6 +10,8 @@
 		2C0A3D3E16E8EF5300988BB6 /* FARetryTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E5B4799E16E8525D00480D10 /* FARetryTask.h */; };
 		2C0A3D4416E9016F00988BB6 /* FAConditionalBatchTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C0A3D4316E9016F00988BB6 /* FAConditionalBatchTask.m */; };
 		2C0A3D4516E9104700988BB6 /* FAConditionalBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2C0A3D4216E9016F00988BB6 /* FAConditionalBatchTask.h */; };
+		2C0A3D4E16E9171000988BB6 /* NSURLResponse+StringEncoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C0A3D4D16E9171000988BB6 /* NSURLResponse+StringEncoding.m */; };
+		2C0A3D4F16E917A200988BB6 /* NSURLResponse+StringEncoding.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2C0A3D4C16E9171000988BB6 /* NSURLResponse+StringEncoding.h */; };
 		2C439C1516DDBCAC002381F0 /* FAChainedBatchTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C439C1416DDBCAC002381F0 /* FAChainedBatchTask.m */; };
 		2C439C1616DDC55F002381F0 /* FAChainedBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2C439C1316DDBCAB002381F0 /* FAChainedBatchTask.h */; };
 		E504DCE816DAAF0B00DEB30C /* FAOrderedBatchTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E504DCE716DAAF0B00DEB30C /* FAOrderedBatchTask.m */; };
@@ -71,6 +73,7 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
+				2C0A3D4F16E917A200988BB6 /* NSURLResponse+StringEncoding.h in CopyFiles */,
 				2C0A3D4516E9104700988BB6 /* FAConditionalBatchTask.h in CopyFiles */,
 				2C0A3D3E16E8EF5300988BB6 /* FARetryTask.h in CopyFiles */,
 				2C439C1616DDC55F002381F0 /* FAChainedBatchTask.h in CopyFiles */,
@@ -98,6 +101,8 @@
 /* Begin PBXFileReference section */
 		2C0A3D4216E9016F00988BB6 /* FAConditionalBatchTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAConditionalBatchTask.h; sourceTree = "<group>"; };
 		2C0A3D4316E9016F00988BB6 /* FAConditionalBatchTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAConditionalBatchTask.m; sourceTree = "<group>"; };
+		2C0A3D4C16E9171000988BB6 /* NSURLResponse+StringEncoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLResponse+StringEncoding.h"; sourceTree = "<group>"; };
+		2C0A3D4D16E9171000988BB6 /* NSURLResponse+StringEncoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLResponse+StringEncoding.m"; sourceTree = "<group>"; };
 		2C439C1316DDBCAB002381F0 /* FAChainedBatchTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAChainedBatchTask.h; sourceTree = "<group>"; };
 		2C439C1416DDBCAC002381F0 /* FAChainedBatchTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAChainedBatchTask.m; sourceTree = "<group>"; };
 		E504DCE616DAAF0A00DEB30C /* FAOrderedBatchTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAOrderedBatchTask.h; sourceTree = "<group>"; };
@@ -283,6 +288,8 @@
 				E53D741016D9D3C9005F209E /* FAURLSendProgress.m */,
 				E53D741216D9D49D005F209E /* FAURLReceiveProgress.h */,
 				E53D741316D9D49D005F209E /* FAURLReceiveProgress.m */,
+				2C0A3D4C16E9171000988BB6 /* NSURLResponse+StringEncoding.h */,
+				2C0A3D4D16E9171000988BB6 /* NSURLResponse+StringEncoding.m */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -404,6 +411,7 @@
 				E5B4799D16E8440200480D10 /* FATask.m in Sources */,
 				E5B479A016E8525E00480D10 /* FARetryTask.m in Sources */,
 				2C0A3D4416E9016F00988BB6 /* FAConditionalBatchTask.m in Sources */,
+				2C0A3D4E16E9171000988BB6 /* NSURLResponse+StringEncoding.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

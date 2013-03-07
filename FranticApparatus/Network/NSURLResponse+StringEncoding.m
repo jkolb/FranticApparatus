@@ -1,5 +1,5 @@
 //
-// FranticApparatus.h
+// NSURLResponse+StringEncoding.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,25 +24,16 @@
 
 
 
-// Task
-#import "FATask.h"
-#import "FAAbstractTask.h"
-#import "FABackgroundTask.h"
-#import "FABatchTask.h"
-#import "FAOrderedBatchTask.h"
-#import "FAParallelBatchTask.h"
-#import "FASequentialBatchTask.h"
-#import "FAChainedBatchTask.h"
-#import "FAConditionalBatchTask.h"
-#import "FARetryTask.h"
-#import "FAUITask.h"
-
-// Network
-#import "FAURLConnectionTask.h"
-#import "FAURLConnectionDataTask.h"
-#import "FAURLConnectionDownloadTask.h"
-#import "FAURLConnectionStreamTask.h"
-#import "FAURLResult.h"
-#import "FAURLSendProgress.h"
-#import "FAURLReceiveProgress.h"
 #import "NSURLResponse+StringEncoding.h"
+
+
+
+@implementation NSURLResponse (StringEncoding)
+
+- (NSStringEncoding)stringEncoding {
+    NSString *textEncodingName = [self textEncodingName];
+    if (textEncodingName == nil) return NSUTF8StringEncoding;
+    return CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding((__bridge CFStringRef)(textEncodingName)));
+}
+
+@end
