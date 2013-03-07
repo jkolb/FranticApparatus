@@ -1,5 +1,5 @@
 //
-// FAGenericBlockTask.h
+// FATask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,13 @@
 
 
 
-#import "FAGenericTask.h"
+#import "FATask.h"
 
 
 
-@interface FAGenericBlockTask : FAGenericTask
-
-@property (copy) FATaskCallback onExecute;
-
-@end
+NSString *const FATaskEventStarted    = @"FATaskEventStarted";
+NSString *const FATaskEventProgressed = @"FATaskEventProgressed";
+NSString *const FATaskEventSucceeded  = @"FATaskEventSucceeded";
+NSString *const FATaskEventFailed     = @"FATaskEventFailed";
+NSString *const FATaskEventCancelled  = @"FATaskEventCancelled";
+NSString *const FATaskEventFinished   = @"FATaskEventFinished";

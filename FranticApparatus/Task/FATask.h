@@ -39,18 +39,18 @@
  @constant FATaskEventProgressed An event that indicates the task is reporting some partial result during execution. This event may occur more than once.
  @constant FATaskEventSucceeded An event that indicates that a task has successfully executed and has optionally generated a result.
  @constant FATaskEventFailed An event that indicates that a task has failed to execute and has optionally generated an error.
- @constant FATaskEventCanceled An event that indicates that a task was canceled before fully executing.
+ @constant FATaskEventCancelled An event that indicates that a task was cancelled before fully executing.
  @constant FATaskEventFinished An event that indicates that the task has finished executing, no matter if due to success, failure, or cancellation.
  @discussion Events occur during the lifecycle of a task. An event will only occur at most once for a task unless it is FATaskEventProgressed. Callbacks can be associated with events so that the effects of a task's execution can affect the flow of an application.
  */
-typedef NS_ENUM(NSInteger, FATaskEvent) {
-    FATaskEventStarted    = 0,
-    FATaskEventProgressed = 1,
-    FATaskEventSucceeded  = 2,
-    FATaskEventFailed     = 3,
-    FATaskEventCanceled   = 4,
-    FATaskEventFinished   = 5,
-};
+extern NSString * const FATaskEventStarted;
+extern NSString * const FATaskEventProgressed;
+extern NSString * const FATaskEventSucceeded;
+extern NSString * const FATaskEventFailed;
+extern NSString * const FATaskEventCancelled;
+extern NSString * const FATaskEventFinished;
+
+
 
 /*!
  @enum FATaskStatus
@@ -58,14 +58,14 @@ typedef NS_ENUM(NSInteger, FATaskEvent) {
  @constant FATaskStatusPending Status used to indicate a task has not finished yet.
  @constant FATaskStatusSuccess Status when a task succeeds and optionally generates a result.
  @constant FATaskStatusFailure Status when a task fails and optionally generates an error.
- @constant FATaskStatusCanceled Status when a task is canceled before it completes execution.
- @description Before a task finishes its status will be FATaskStatusPending. Once a task is finished its status will be one of the following: FATaskStatusSuccess, FATaskStatusFailure, or FATaskStatusCanceled depending on the results of the task's execution.
+ @constant FATaskStatusCancelled Status when a task is cancelled before it completes execution.
+ @description Before a task finishes its status will be FATaskStatusPending. Once a task is finished its status will be one of the following: FATaskStatusSuccess, FATaskStatusFailure, or FATaskStatusCancelled depending on the results of the task's execution.
  */
 typedef NS_ENUM(NSInteger, FATaskStatus) {
-    FATaskStatusPending  = 0,
-    FATaskStatusSuccess  = 1,
-    FATaskStatusFailure  = 2,
-    FATaskStatusCanceled = 3,
+    FATaskStatusPending   = 0,
+    FATaskStatusSuccess   = 1,
+    FATaskStatusFailure   = 2,
+    FATaskStatusCancelled = 3,
 };
 
 /*!
@@ -76,7 +76,7 @@ typedef NS_ENUM(NSInteger, FATaskStatus) {
     FATaskEventProgressed is passed an object representing the current progress made during the tasks execution.
     FATaskEventSucceeded is passed an object representing the final result of the tasks computation, this can be nil.
     FATaskEventFailed is passed an object representing any error that occurred during the tasks computation, this can be nil.
-    FATaskEventCanceled is passed the task object.
+    FATaskEventCancelled is passed the task object.
     FATaskEventFinished is passed the task object.
  */
 typedef void (^FATaskCallback)(id object);
@@ -86,7 +86,7 @@ typedef void (^FATaskCallback)(id object);
 /*!
  @protocol FATask
  @abstract A protocol that provides a common interface for dealing with synchronous or asynchronous tasks.
- @discussion A task is a unit of work that optionally returns a result. Generally tasks have the following lifecycle: start, execute, finish. FATask provides a common interface for describing a task and being notified when important events in its lifecycle occur. You can register an event handler for when a task starts, progresses, succeeds, fails, is canceled, and when it finishes. Multiple callbacks can be triggered for each event in a task's lifecycle. Tasks can be parameterized, either during initialization or when being started. Any parameter provided during intialization overrides any parameter provided when starting. Tasks can be canceled at any time during their execution and you can check for early cancellation during your task's computations. Most importantly tasks are designed to be composable, this allows them to be wrapped to extend their functionality or executed in batches while still appearing as a single unit of work.
+ @discussion A task is a unit of work that optionally returns a result. Generally tasks have the following lifecycle: start, execute, finish. FATask provides a common interface for describing a task and being notified when important events in its lifecycle occur. You can register an event handler for when a task starts, progresses, succeeds, fails, is cancelled, and when it finishes. Multiple callbacks can be triggered for each event in a task's lifecycle. Tasks can be parameterized, either during initialization or when being started. Any parameter provided during intialization overrides any parameter provided when starting. Tasks can be cancelled at any time during their execution and you can check for early cancellation during your task's computations. Most importantly tasks are designed to be composable, this allows them to be wrapped to extend their functionality or executed in batches while still appearing as a single unit of work.
  */
 @protocol FATask <NSObject>
 
@@ -109,7 +109,7 @@ typedef void (^FATaskCallback)(id object);
     The block to execute.
  @discussion A way to execute a block when a lifecycle event occurs. Multiple callbacks and actions can be associated with a single event.
  */
-- (void)taskEvent:(FATaskEvent)event addCallback:(FATaskCallback)callback;
+- (void)taskEvent:(NSString *)event addCallback:(FATaskCallback)callback;
 
 /*!
  @method addTarget:action:forTaskEvent:
@@ -122,16 +122,11 @@ typedef void (^FATaskCallback)(id object);
     The event that will trigger the action.
  @discussion A way to execute a specific method when a lifecycle event occurs. Multiple actions and callbacks can be associated with a single event.
  */
-- (void)addTarget:(id)target action:(SEL)action forTaskEvent:(FATaskEvent)event;
+- (void)addTarget:(id)target action:(SEL)action forTaskEvent:(NSString *)event;
 
-/*!
- @method hasCallbackForTaskEvent:
- @abstract Determine if any callback or action has been registered for an event.
- @param event
-    The event to check.
- @return YES if an action or callback has been registered, NO if not.
- */
-- (BOOL)hasCallbackForTaskEvent:(FATaskEvent)event;
+- (NSSet *)registeredEvents;
+
+- (void)triggerEvent:(NSString *)event withObject:(id)object;
 
 /*!
  @method parameter
@@ -158,21 +153,21 @@ typedef void (^FATaskCallback)(id object);
 
 /*!
  @method status
- @return Returns the status after the task has finished (FATaskStatusSuccess, FATaskStatusFailure, or FATaskStatusCanceled) otherwise returns FATaskStatusPending.
+ @return Returns the status after the task has finished (FATaskStatusSuccess, FATaskStatusFailure, or FATaskStatusCancelled) otherwise returns FATaskStatusPending.
  */
 - (FATaskStatus)status;
 
 /*!
- @method isCanceled
+ @method isCancelled
  @return Returns YES if the tasks has finished due to early cancellation, otherwise returns NO.
  @discussion This method can be periodically checked during execution of a task to exit long running computations when the task has been cancelled early.
  */
-- (BOOL)isCanceled;
+- (BOOL)isCancelled;
 
 /*!
  @method cancel
  @abstract Cancel execution of the task.
- @discussion This method triggers events FATaskEventCanceled and then FATaskEventFinished. Execution of the task will still proceed until detection of the cancellation occurs which should eliminate any extra work from being done. Long running tasks should periodically check the value from isCanceled and stop processing when it returns YES.
+ @discussion This method triggers events FATaskEventCancelled and then FATaskEventFinished. Execution of the task will still proceed until detection of the cancellation occurs which should eliminate any extra work from being done. Long running tasks should periodically check the value from isCancelled and stop processing when it returns YES.
  */
 - (void)cancel;
 

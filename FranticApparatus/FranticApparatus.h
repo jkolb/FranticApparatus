@@ -27,10 +27,7 @@
 // Task
 #import "FATask.h"
 #import "FAAbstractTask.h"
-#import "FAGenericTask.h"
-#import "FAGenericBlockTask.h"
-#import "FAResultTask.h"
-#import "FAResultBlockTask.h"
+#import "FABackgroundTask.h"
 #import "FABatchTask.h"
 #import "FAOrderedBatchTask.h"
 #import "FAParallelBatchTask.h"

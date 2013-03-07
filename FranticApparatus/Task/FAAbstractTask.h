@@ -32,8 +32,6 @@
 
 @interface FAAbstractTask : NSObject <FATask>
 
-- (void)callbackWithObject:(id)object forTaskEvent:(FATaskEvent)event;
-
 - (void)reportProgress:(id)progress;
 - (void)succeedWithResult:(id)result;
 - (void)failWithError:(id)error;

@@ -30,10 +30,6 @@
 
 @implementation FAUITask
 
-- (void)dealloc {
-    [_backgroundTask cancel];
-}
-
 - (void)startWithParameter:(id)parameter {
     [super startWithParameter:parameter];
     [self linkEventsWithBackgroundTask];
@@ -41,29 +37,26 @@
 }
 
 - (void)linkEventsWithBackgroundTask {
-    for (FATaskEvent event = FATaskEventStarted; event <= FATaskEventFinished; ++event) {
-        [self linkEventWithBackgroundTask:event];
-    }
-}
-
-- (void)linkEventWithBackgroundTask:(FATaskEvent)event {
-    BOOL skipEvent = FATaskEventStarted == event || FATaskEventCanceled == event;
-    if (skipEvent) return;
-    if ([self hasCallbackForTaskEvent:event]) {
+    NSSet *registeredEvents = [self registeredEvents];
+    NSMutableSet *linkEvents = [NSMutableSet setWithSet:registeredEvents];
+    [linkEvents removeObject:FATaskEventStarted];
+    [linkEvents removeObject:FATaskEventCancelled];
+    
+    for (NSString *event in linkEvents) {
         [self.backgroundTask taskEvent:event addCallback:[self callbackOnMainThreadForEvent:event]];
     }
 }
 
-- (FATaskCallback)callbackOnMainThreadForEvent:(FATaskEvent)event {
+- (FATaskCallback)callbackOnMainThreadForEvent:(NSString *)event {
     typeof(self) __weak weakSelf = self;
     return ^(id object) {
         dispatch_async(dispatch_get_main_queue(), ^{
             typeof(self) blockSelf = weakSelf;
-            if (blockSelf == nil || [blockSelf isCanceled]) return;
+            if (blockSelf == nil || [blockSelf isCancelled]) return;
             if (object == blockSelf.backgroundTask) {
-                [blockSelf callbackWithObject:blockSelf forTaskEvent:event];
+                [blockSelf triggerEvent:event withObject:blockSelf];
             } else {
-                [blockSelf callbackWithObject:object forTaskEvent:event];
+                [blockSelf triggerEvent:event withObject:object];
             }
         });
     };

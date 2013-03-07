@@ -1,5 +1,5 @@
 //
-// FAParallelBatchTask.m
+// FABackgroundTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,51 +24,60 @@
 
 
 
-#import "FAParallelBatchTask.h"
+#import "FABackgroundTask.h"
 
 
 
-@interface FAParallelBatchTask ()
+@implementation FABackgroundTask
 
-@property (nonatomic) NSUInteger finishedCount;
-
-@end
-
-
-
-@implementation FAParallelBatchTask
-
-- (id)initWithParameterDictionary:(NSDictionary *)parameters {
-    return [self initWithParameter:parameters];
+- (dispatch_queue_t)backgroundQueue {
+    switch (self.priority) {
+        case FABackgroundTaskPriorityHigh:
+            return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+            
+        case FABackgroundTaskPriorityLow:
+            return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+            
+        case FABackgroundTaskPriorityLowest:
+            return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+            
+        case FABackgroundTaskPriorityDefault:
+        case FABackgroundTaskPriorityMedium:
+        default:
+            return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    }
 }
 
 - (void)startWithParameter:(id)parameter {
     [super startWithParameter:parameter];
-    
-    for (id key in [self allKeys]) {
-        [self startTaskForKey:key withParameter:[self parameterForKey:key]];
-    }
-}
-
-- (id)parameterForKey:(id)key {
-    return [[self parameter] objectForKey:key];
-}
-
-- (void)configureTask:(id<FATask>)task withKey:(id)key {
     typeof(self) __weak weakSelf = self;
-    [task taskEvent:FATaskEventFinished addCallback:^(id object) {
+    dispatch_async([self backgroundQueue], ^{
         typeof(self) blockSelf = weakSelf;
         if (blockSelf == nil || [blockSelf isCancelled]) return;
-        [blockSelf taskWithKeyDidFinish:key];
-    }];
+        [blockSelf executeInBackground];
+    });
 }
 
-- (void)taskWithKeyDidFinish:(id)key {
-    ++self.finishedCount;
+- (void)executeInBackground {
+    id parameter = [self parameter];
+    NSError *error = nil;
+    id result = nil;
     
-    if (self.finishedCount >= [self count]) {
-        [self finishWithStatus:FATaskStatusSuccess];
+    if (self.generateResult == nil) {
+        result = [self generateResultWithParameter:parameter error:&error];
+    } else {
+        result = self.generateResult(parameter, &error);
     }
+    
+    if (result == nil) {
+        [self failWithError:error];
+    } else {
+        [self succeedWithResult:result];
+    }
+}
+
+- (id)generateResultWithParameter:(id)parameter error:(NSError **)error {
+    return [NSNull null];
 }
 
 @end

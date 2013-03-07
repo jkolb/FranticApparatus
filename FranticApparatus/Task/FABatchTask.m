@@ -48,13 +48,6 @@
     return self;
 }
 
-- (void)dealloc {
-    for (id key in _tasks) {
-        id <FATask> task = [_tasks objectForKey:key];
-        [task cancel];
-    }
-}
-
 - (void)setTask:(id <FATask>)task forKey:(id <NSCopying>)key {
     [self.tasks setObject:task forKey:key];
 }

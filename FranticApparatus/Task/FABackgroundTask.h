@@ -1,5 +1,5 @@
 //
-// FAResultTask.h
+// FABackgroundTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,11 +24,25 @@
 
 
 
-#import "FAGenericTask.h"
+#import "FAAbstractTask.h"
 
 
 
-@interface FAResultTask : FAGenericTask
+typedef NS_ENUM(NSInteger, FABackgroundTaskPriority) {
+    FABackgroundTaskPriorityDefault = 0,
+    FABackgroundTaskPriorityHigh    = 1,
+    FABackgroundTaskPriorityMedium  = 2,
+    FABackgroundTaskPriorityLow     = 3,
+    FABackgroundTaskPriorityLowest  = 4,
+};
+
+
+
+@interface FABackgroundTask : FAAbstractTask
+
+@property (nonatomic) FABackgroundTaskPriority priority;
+
+@property (copy) id (^generateResult)(id parameter, NSError **error);
 
 - (id)generateResultWithParameter:(id)parameter error:(NSError **)error;
 
