@@ -1,5 +1,5 @@
 //
-// FranticApparatus.h
+// FAConditionalBatchTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,24 +24,13 @@
 
 
 
-// Task
-#import "FATask.h"
-#import "FAAbstractTask.h"
-#import "FABackgroundTask.h"
 #import "FABatchTask.h"
-#import "FAOrderedBatchTask.h"
-#import "FAParallelBatchTask.h"
-#import "FASequentialBatchTask.h"
-#import "FAChainedBatchTask.h"
-#import "FAConditionalBatchTask.h"
-#import "FARetryTask.h"
-#import "FAUITask.h"
 
-// Network
-#import "FAURLConnectionTask.h"
-#import "FAURLConnectionDataTask.h"
-#import "FAURLConnectionDownloadTask.h"
-#import "FAURLConnectionStreamTask.h"
-#import "FAURLResult.h"
-#import "FAURLSendProgress.h"
-#import "FAURLReceiveProgress.h"
+
+
+@interface FAConditionalBatchTask : FABatchTask
+
+@property (copy) id (^determineTaskKey)(id parameter, NSError **error);
+@property (copy) id (^determineTaskParameter)(id parameter, NSError **error);
+
+@end

@@ -52,7 +52,7 @@
     [self.tasks setObject:task forKey:key];
 }
 
-- (void)setFactory:(FATaskFactory)factory forKey:(id <NSCopying>)key {
+- (void)setFactory:(id <FATask> (^)(id parameter))factory forKey:(id <NSCopying>)key {
     [self.tasks setObject:factory forKey:key];
 }
 
@@ -72,7 +72,7 @@
     if ([object conformsToProtocol:@protocol(FATask)]) {
         task = object;
     } else {
-        FATaskFactory factory = object;
+        id <FATask> (^factory)(id parameter) = object;
         task = factory(parameter);
         [self.tasks setObject:task forKey:key];
     }

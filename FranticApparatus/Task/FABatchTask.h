@@ -35,7 +35,7 @@ typedef void (^FAKeyCallback)(id key, id object);
 @interface FABatchTask : FAAbstractTask
 
 - (void)setTask:(id <FATask>)task forKey:(id <NSCopying>)key;
-- (void)setFactory:(FATaskFactory)factory forKey:(id <NSCopying>)key;
+- (void)setFactory:(id <FATask> (^)(id parameter))factory forKey:(id <NSCopying>)key;
 
 - (NSArray *)allKeys;
 - (NSUInteger)count;

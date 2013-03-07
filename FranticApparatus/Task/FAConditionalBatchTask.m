@@ -1,5 +1,5 @@
 //
-// FAOrderedBatchTask.m
+// FAConditionalBatchTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,63 +24,46 @@
 
 
 
-#import "FAOrderedBatchTask.h"
+#import "FAConditionalBatchTask.h"
 
 
 
-@interface FAOrderedBatchTask ()
-
-@property (nonatomic, strong) NSArray *sortedKeys;
-@property (nonatomic) NSUInteger currentIndex;
-
-@end
-
-
-
-@implementation FAOrderedBatchTask
-
-- (NSComparator)keyComparator {
-    if (_keyComparator == nil) {
-        return ^(id key1, id key2) {
-            return [key1 compare:key2];
-        };
-    }
-    
-    return _keyComparator;
-}
-
-- (void)addTask:(id <FATask>)task {
-    [self setTask:task forKey:[self nextKey]];
-}
-
-- (void)addFactory:(id <FATask> (^)(id parameter))factory {
-    [self setFactory:factory forKey:[self nextKey]];
-}
-
-- (id)nextKey {
-    return @([self count]);
-}
+@implementation FAConditionalBatchTask
 
 - (void)startWithParameter:(id)parameter {
     [super startWithParameter:parameter];
-    self.sortedKeys = [[self allKeys] sortedArrayUsingComparator:self.keyComparator];
-    [self startTaskForKey:[self currentKey] withParameter:[self parameter]];
+    NSError *error = nil;
+    id taskKey = [self determineTaskKeyWithError:&error];
+    
+    if (taskKey == nil) {
+        [self failWithError:error];
+        return;
+    }
+    
+    id taskParameter = [self determineTaskParameterWithError:&error];
+    
+    if (taskParameter == nil) {
+        [self failWithError:error];
+        return;
+    }
+    
+    [self startTaskForKey:taskKey withParameter:taskParameter];
 }
 
-- (id)currentKey {
-    return [self.sortedKeys objectAtIndex:self.currentIndex];
+- (id)determineTaskKeyWithError:(NSError **)error {
+    if (self.determineTaskKey == nil) return [[self allKeys] lastObject];
+    return self.determineTaskKey([self parameter], error);
 }
 
-- (id)currentParamter {
-    return nil;
+- (id)determineTaskParameterWithError:(NSError **)error {
+    id parameter = [self parameter];
+    if (self.determineTaskParameter == nil) return parameter;
+    return self.determineTaskParameter(parameter, error);
 }
 
-- (void)advanceToNextKey {
-    ++self.currentIndex;
-}
-
-- (BOOL)isFinished {
-    return self.currentIndex >= [self.sortedKeys count];
+- (void)configureTask:(id<FATask>)task withKey:(id)key {
+    [task setParentTask:self];
+    [task setExcludeParentEvents:[NSSet setWithObjects:FATaskEventStarted, FATaskEventCancelled, nil]];
 }
 
 @end

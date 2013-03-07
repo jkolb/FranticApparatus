@@ -33,7 +33,7 @@
 @property (nonatomic, copy) NSComparator keyComparator;
 
 - (void)addTask:(id <FATask>)task;
-- (void)addFactory:(FATaskFactory)factory;
+- (void)addFactory:(id <FATask> (^)(id parameter))factory;
 
 - (id)currentKey;
 - (void)advanceToNextKey;
