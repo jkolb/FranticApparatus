@@ -62,29 +62,9 @@ NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
     id parameter = [self parameter];
     self.task = self.factory(parameter);
     [self.task addTarget:self action:@selector(tryFailedWithError:) forTaskEvent:FATaskEventFailed];
-    [self linkEventsWithTask:self.task];
+    [self.task setParentTask:self];
+    [self.task setExcludeParentEvents:[NSSet setWithObjects:FATaskEventStarted, FATaskEventCancelled, FATaskEventFailed, nil]];
     [self.task startWithParameter:parameter];
-}
-
-- (void)linkEventsWithTask:(id <FATask>)task {
-    NSSet *registeredEvents = [self registeredEvents];
-    NSMutableSet *linkEvents = [NSMutableSet setWithSet:registeredEvents];
-    [linkEvents removeObject:FATaskEventStarted];
-    [linkEvents removeObject:FATaskEventCancelled];
-    [linkEvents removeObject:FATaskEventFailed];
-    
-    for (NSString *event in linkEvents) {
-        __typeof__(self) weakSelf = self;
-        [task taskEvent:event addCallback:^(id object) {
-            __typeof__(self) blockSelf = weakSelf;
-            if (blockSelf == nil || [blockSelf isCancelled]) return;
-            if (object == task) {
-                [blockSelf triggerEvent:event withObject:blockSelf];
-            } else {
-                [blockSelf triggerEvent:event withObject:object];
-            }
-        }];
-    }
 }
 
 - (void)tryFailedWithError:(id)error {

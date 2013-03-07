@@ -132,6 +132,12 @@ typedef void (^FATaskCallback)(id object);
 
 - (void)triggerEvent:(NSString *)event withObject:(id)object;
 
+- (id <FATask>)parentTask;
+- (void)setParentTask:(id <FATask>)parentTask;
+- (void)triggerEventOnParentTask:(NSString *)event withObject:(id)object;
+- (NSSet *)excludeParentEvents;
+- (void)setExcludeParentEvents:(NSSet *)excludeParentEvents;
+
 /*!
  @method parameter
  @return The parameter used during the execution of the task.

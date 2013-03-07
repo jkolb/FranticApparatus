@@ -93,6 +93,24 @@
         if ([self isCancelled]) break;
         callback(object);
     }
+    
+    if (self.parentTask != nil) {
+        [self triggerEventOnParentTask:event withObject:object];
+    }
+}
+
+- (void)triggerEventOnParentTask:(NSString *)event withObject:(id)object {
+    if ([[self excludeParentEvents] containsObject:event]) return;
+    
+    if (self == object) {
+        [self.parentTask triggerEvent:event withObject:self.parentTask];
+    } else {
+        [self.parentTask triggerEvent:event withObject:object];
+    }
+}
+
+- (NSSet *)excludeParentEvents {
+    return [NSSet set];
 }
 
 - (NSArray *)callbacksForTaskEvent:(NSString *)event {

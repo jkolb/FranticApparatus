@@ -32,32 +32,19 @@
 
 - (void)startWithParameter:(id)parameter {
     [super startWithParameter:parameter];
-    [self linkEventsWithBackgroundTask];
+    [self.backgroundTask setParentTask:self];
+    [self.backgroundTask setExcludeParentEvents:[NSSet setWithObjects:FATaskEventStarted, FATaskEventCancelled, nil]];
     [self.backgroundTask startWithParameter:parameter];
 }
 
-- (void)linkEventsWithBackgroundTask {
-    NSSet *registeredEvents = [self registeredEvents];
-    NSMutableSet *linkEvents = [NSMutableSet setWithSet:registeredEvents];
-    [linkEvents removeObject:FATaskEventStarted];
-    [linkEvents removeObject:FATaskEventCancelled];
-    
-    for (NSString *event in linkEvents) {
-        [self.backgroundTask taskEvent:event addCallback:[self callbackOnMainThreadForEvent:event]];
-    }
+- (void)taskEvent:(NSString *)event addCallback:(FATaskCallback)callback {
+    [super taskEvent:event addCallback:[self callbackOnMainThread:callback]];
 }
 
-- (FATaskCallback)callbackOnMainThreadForEvent:(NSString *)event {
-    __typeof__(self) __weak weakSelf = self;
+- (FATaskCallback)callbackOnMainThread:(FATaskCallback)callback {
     return ^(id object) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            __typeof__(self) blockSelf = weakSelf;
-            if (blockSelf == nil || [blockSelf isCancelled]) return;
-            if (object == blockSelf.backgroundTask) {
-                [blockSelf triggerEvent:event withObject:blockSelf];
-            } else {
-                [blockSelf triggerEvent:event withObject:object];
-            }
+            callback(object);
         });
     };
 }
