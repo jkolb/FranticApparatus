@@ -48,10 +48,10 @@
 }
 
 - (FATaskCallback)callbackOnMainThreadForEvent:(NSString *)event {
-    typeof(self) __weak weakSelf = self;
+    __typeof__(self) __weak weakSelf = self;
     return ^(id object) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            typeof(self) blockSelf = weakSelf;
+            __typeof__(self) blockSelf = weakSelf;
             if (blockSelf == nil || [blockSelf isCancelled]) return;
             if (object == blockSelf.backgroundTask) {
                 [blockSelf triggerEvent:event withObject:blockSelf];

@@ -31,14 +31,14 @@
 @implementation FAChainedBatchTask
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {
-    typeof(self) __weak weakSelf = self;
+    __typeof__(self) __weak weakSelf = self;
     [task taskEvent:FATaskEventSucceeded addCallback:^(id object) {
-        typeof(self) blockSelf = weakSelf;
+        __typeof__(self) blockSelf = weakSelf;
         if (blockSelf == nil || [blockSelf isCancelled]) return;
         [blockSelf taskWithKey:key didSucceedWithResult:object];
     }];
     [task taskEvent:FATaskEventFailed addCallback:^(id object) {
-        typeof(self) blockSelf = weakSelf;
+        __typeof__(self) blockSelf = weakSelf;
         if (blockSelf == nil || [blockSelf isCancelled]) return;
         [blockSelf failWithError:object];
     }];

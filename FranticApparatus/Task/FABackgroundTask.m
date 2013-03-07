@@ -50,9 +50,9 @@
 
 - (void)startWithParameter:(id)parameter {
     [super startWithParameter:parameter];
-    typeof(self) __weak weakSelf = self;
+    __typeof__(self) __weak weakSelf = self;
     dispatch_async([self backgroundQueue], ^{
-        typeof(self) blockSelf = weakSelf;
+        __typeof__(self) blockSelf = weakSelf;
         if (blockSelf == nil || [blockSelf isCancelled]) return;
         [blockSelf executeInBackground];
     });

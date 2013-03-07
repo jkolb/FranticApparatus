@@ -124,10 +124,10 @@
 }
 
 - (FATaskCallback)callbackForTarget:(id)target action:(SEL)action {
-    typeof(self) __weak weakSelf = self;
+    __typeof__(self) __weak weakSelf = self;
     id __weak weakTarget = target;
     return ^(id object) {
-        typeof(self) blockSelf = weakSelf;
+        __typeof__(self) blockSelf = weakSelf;
         if (blockSelf == nil || [blockSelf isCancelled]) return;
         id blockTarget = weakTarget;
         if (blockTarget == nil) return;
