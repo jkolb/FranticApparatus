@@ -37,6 +37,7 @@ extern NSString * const FARetryTaskEventDelayed;
 
 @property (copy) FATaskFactory factory;
 @property NSUInteger maximumAttempts;
+@property (readonly) NSUInteger tryCount;
 @property (copy) BOOL (^shouldRetry)(id error);
 @property (copy) NSTimeInterval (^calculateDelayInterval)();
 @property NSTimeInterval delayInterval;

@@ -36,7 +36,7 @@ NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
 @interface FARetryTask ()
 
 @property (nonatomic, strong) id <FATask> task;
-@property (nonatomic) NSUInteger tryCount;
+@property (readwrite) NSUInteger tryCount;
 @property (strong) dispatch_source_t delayTimer;
 
 @end
