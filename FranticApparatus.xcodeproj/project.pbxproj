@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2C0A3D3E16E8EF5300988BB6 /* FARetryTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E5B4799E16E8525D00480D10 /* FARetryTask.h */; };
 		2C439C1516DDBCAC002381F0 /* FAChainedBatchTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C439C1416DDBCAC002381F0 /* FAChainedBatchTask.m */; };
 		2C439C1616DDC55F002381F0 /* FAChainedBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2C439C1316DDBCAB002381F0 /* FAChainedBatchTask.h */; };
 		E504DCE816DAAF0B00DEB30C /* FAOrderedBatchTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E504DCE716DAAF0B00DEB30C /* FAOrderedBatchTask.m */; };
@@ -68,6 +69,7 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
+				2C0A3D3E16E8EF5300988BB6 /* FARetryTask.h in CopyFiles */,
 				2C439C1616DDC55F002381F0 /* FAChainedBatchTask.h in CopyFiles */,
 				E504DCEA16DC5F5700DEB30C /* FAURLSendProgress.h in CopyFiles */,
 				E504DCEB16DC5F5700DEB30C /* FAURLReceiveProgress.h in CopyFiles */,
