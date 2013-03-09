@@ -119,10 +119,9 @@ NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
 }
 
 - (void)cancelTimer {
-    if (self.delayTimer != nil) {
-        dispatch_source_cancel(self.delayTimer);
-        self.delayTimer = nil;
-    }
+    if (self.delayTimer == nil) return;
+    dispatch_source_cancel(self.delayTimer);
+    self.delayTimer = nil;
 }
 
 - (void)cancel {
