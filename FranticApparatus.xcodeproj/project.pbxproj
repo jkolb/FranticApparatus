@@ -55,6 +55,7 @@
 		E5C0C2B816ECE8BB005DEDFF /* FATaskEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E5C0C2B716ECE8BA005DEDFF /* FATaskEvent.m */; };
 		E5C0C2B916ECEEE8005DEDFF /* FATaskEvent.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E5C0C2B616ECE8BA005DEDFF /* FATaskEvent.h */; };
 		E5C0C2BC16ED2277005DEDFF /* FABatchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = E5C0C2BB16ED2276005DEDFF /* FABatchResult.m */; };
+		E5C0C2BD16ED32B6005DEDFF /* FABatchResult.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E5C0C2BA16ED2276005DEDFF /* FABatchResult.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +75,7 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
+				E5C0C2BD16ED32B6005DEDFF /* FABatchResult.h in CopyFiles */,
 				E5C0C2B916ECEEE8005DEDFF /* FATaskEvent.h in CopyFiles */,
 				2C0A3D4F16E917A200988BB6 /* NSURLResponse+StringEncoding.h in CopyFiles */,
 				2C0A3D4516E9104700988BB6 /* FAConditionalBatchTask.h in CopyFiles */,

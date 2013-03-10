@@ -30,6 +30,7 @@
 #import "FAAbstractTask.h"
 #import "FABackgroundTask.h"
 #import "FABatchTask.h"
+#import "FABatchResult.h"
 #import "FAOrderedBatchTask.h"
 #import "FAParallelBatchTask.h"
 #import "FASequentialBatchTask.h"
