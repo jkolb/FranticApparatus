@@ -48,11 +48,13 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    [self succeedWithResult:self.result];
+    [self triggerEventWithType:FATaskEventTypeResult payload:self.result];
+    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    [self failWithError:error];
+    [self triggerEventWithType:FATaskEventTypeError payload:error];
+    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
 }
 
 @end

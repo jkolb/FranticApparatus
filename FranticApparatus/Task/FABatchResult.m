@@ -1,5 +1,5 @@
 //
-// FATask.m
+// FABatchResult.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,13 +24,24 @@
 
 
 
-#import "FATask.h"
+#import "FABatchResult.h"
 
 
 
-NSString *const FATaskEventTypeStart    = @"FATaskEventTypeStart";
-NSString *const FATaskEventTypeProgress = @"FATaskEventTypeProgress";
-NSString *const FATaskEventTypeResult   = @"FATaskEventTypeResult";
-NSString *const FATaskEventTypeError    = @"FATaskEventTypeError";
-NSString *const FATaskEventTypeCancel   = @"FATaskEventTypeCancel";
-NSString *const FATaskEventTypeFinish   = @"FATaskEventTypeFinish";
+@implementation FABatchResult
+
+- (id)init {
+    return [self initWithKey:[NSNull null] value:[NSNull null]];
+}
+
+- (id)initWithKey:(id)key value:(id)value {
+    self = [super init];
+    if (self == nil) return nil;
+    
+    _key = key;
+    _value = value;
+    
+    return self;
+}
+
+@end

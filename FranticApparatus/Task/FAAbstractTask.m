@@ -25,12 +25,13 @@
 
 
 #import "FAAbstractTask.h"
+#import "FATaskEvent.h"
 
 
 
 @interface FAAbstractTask ()
 
-@property (nonatomic) FATaskStatus status;
+@property BOOL cancelled;
 @property (nonatomic, strong) id parameter;
 @property (nonatomic, strong) NSMutableDictionary *callbacks;
 
@@ -62,94 +63,70 @@
 
 - (void)startWithParameter:(id)parameter {
     if (self.parameter == nil) self.parameter = parameter;
-    [self triggerEvent:FATaskEventStarted withObject:self];
+    [self triggerEventWithType:FATaskEventTypeStart payload:nil];
 }
 
 - (BOOL)isCancelled {
-    return self.status == FATaskStatusCancelled;
+    return self.cancelled;
 }
 
-- (void)taskEvent:(NSString *)event addCallback:(FATaskCallback)callback {
-    NSMutableArray *callbacks = [self.callbacks objectForKey:event];
+- (void)eventType:(NSString *)type addHandler:(void (^)(FATaskEvent *event))callback {
+    NSMutableArray *callbacks = [self.callbacks objectForKey:type];
     
     if (callbacks == nil) {
         callbacks = [[NSMutableArray alloc] initWithCapacity:1];
-        [self.callbacks setObject:callbacks forKey:event];
+        [self.callbacks setObject:callbacks forKey:type];
     }
     
-    [callbacks addObject:[callback copy]];
+    [callbacks addObject:[self callbackOnMainThread:callback]];
 }
 
-- (void)addTarget:(id)target action:(SEL)action forTaskEvent:(NSString *)event {
-    [self taskEvent:event addCallback:[self callbackForTarget:target action:action]];
+- (void)eventType:(NSString *)type addSafeHandler:(void (^)(id blockSelf, FATaskEvent *event))handler {
+    __typeof__(self) __weak weakSelf = self;
+    [self eventType:type addHandler:^(FATaskEvent *event) {
+        __typeof__(self) blockSelf = weakSelf;
+        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        handler(blockSelf, event);
+    }];
+}
+
+- (void)addTarget:(id)target action:(SEL)action forEventType:(NSString *)type {
+    __typeof__(target) weakTarget = target;
+    [self eventType:type addSafeHandler:^(id blockSelf, FATaskEvent *event) {
+        __typeof__(target) blockTarget = weakTarget;
+        if (blockTarget == nil) return;
+        [blockSelf invokeTarget:blockTarget action:action withObject:event];
+    }];
 }
 
 - (NSSet *)registeredEvents {
     return [NSSet setWithArray:[self.callbacks allKeys]];
 }
 
-- (void)triggerEvent:(NSString *)event withObject:(id)object {
-    for (FATaskCallback callback in [self callbacksForTaskEvent:event]) {
+- (void)triggerEventWithType:(NSString *)type payload:(id)payload {
+    FATaskEvent *event = [[FATaskEvent alloc] initWithType:type source:self payload:payload];
+    
+    for (void (^callback)(FATaskEvent *) in [self callbacksForEventType:type]) {
         if ([self isCancelled]) break;
-        callback(object);
-    }
-    
-    if (self.parentTask != nil) {
-        [self triggerEventOnParentTask:event withObject:object];
+        callback(event);
     }
 }
 
-- (void)triggerEventOnParentTask:(NSString *)event withObject:(id)object {
-    if ([[self excludeParentEvents] containsObject:event]) return;
-    
-    if (self == object) {
-        [self.parentTask triggerEvent:event withObject:self.parentTask];
-    } else {
-        [self.parentTask triggerEvent:event withObject:object];
-    }
-}
-
-- (NSSet *)excludeParentEvents {
-    return [NSSet set];
-}
-
-- (NSArray *)callbacksForTaskEvent:(NSString *)event {
-    return [self.callbacks objectForKey:event];
+- (NSArray *)callbacksForEventType:(NSString *)type {
+    return [self.callbacks objectForKey:type];
 }
 
 - (void)cancel {
-    [self triggerEvent:FATaskEventCancelled withObject:self];
-    [self finishWithStatus:FATaskStatusCancelled];
+    self.cancelled = YES;
+    [self triggerEventWithType:FATaskEventTypeCancel payload:nil];
+    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
 }
 
-- (void)reportProgress:(id)progress {
-    [self triggerEvent:FATaskEventProgressed withObject:progress];
-}
-
-- (void)succeedWithResult:(id)result {
-    [self triggerEvent:FATaskEventSucceeded withObject:result];
-    [self finishWithStatus:FATaskStatusSuccess];
-}
-
-- (void)failWithError:(id)error {
-    [self triggerEvent:FATaskEventFailed withObject:error];
-    [self finishWithStatus:FATaskStatusFailure];
-}
-
-- (void)finishWithStatus:(FATaskStatus)status {
-    self.status = status;
-    [self triggerEvent:FATaskEventFinished withObject:self];
-}
-
-- (FATaskCallback)callbackForTarget:(id)target action:(SEL)action {
-    __typeof__(self) __weak weakSelf = self;
-    id __weak weakTarget = target;
-    return ^(id object) {
-        __typeof__(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
-        id blockTarget = weakTarget;
-        if (blockTarget == nil) return;
-        [blockSelf invokeTarget:blockTarget action:action withObject:object];
+- (void (^)(FATaskEvent *))callbackOnMainThread:(void (^)(FATaskEvent *))callback {
+    return ^(FATaskEvent *event) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            callback(event);
+        });
     };
 }
 

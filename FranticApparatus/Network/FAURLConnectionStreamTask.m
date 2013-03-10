@@ -43,7 +43,7 @@
 
 - (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
     FAURLSendProgress *progress = [[FAURLSendProgress alloc] initWithBytesSent:bytesWritten totalBytesSent:totalBytesWritten totalBytesExpectedToSend:totalBytesExpectedToWrite];
-    [self reportProgress:progress];
+    [self triggerEventWithType:FATaskEventTypeProgress payload:progress];
 }
 
 @end

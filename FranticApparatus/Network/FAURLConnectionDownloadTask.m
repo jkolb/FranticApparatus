@@ -39,15 +39,17 @@
 
 - (void)connection:(NSURLConnection *)connection didWriteData:(long long)bytesWritten totalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long) expectedTotalBytes {
     FAURLReceiveProgress *progress = [[FAURLReceiveProgress alloc] initWithBytesReceived:bytesWritten totalBytesReceived:totalBytesWritten expectedTotalBytes:expectedTotalBytes];
-    [self reportProgress:progress];
+    [self triggerEventWithType:FATaskEventTypeProgress payload:progress];
 }
 
 - (void)connectionDidFinishDownloading:(NSURLConnection *)connection destinationURL:(NSURL *)destinationURL {
-    [self succeedWithResult:destinationURL];
+    [self triggerEventWithType:FATaskEventTypeResult payload:destinationURL];
+    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    [self failWithError:error];
+    [self triggerEventWithType:FATaskEventTypeError payload:error];
+    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
 }
 
 @end

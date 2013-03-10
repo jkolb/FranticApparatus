@@ -26,6 +26,7 @@
 
 // Task
 #import "FATask.h"
+#import "FATaskEvent.h"
 #import "FAAbstractTask.h"
 #import "FABackgroundTask.h"
 #import "FABatchTask.h"
@@ -35,7 +36,6 @@
 #import "FAChainedBatchTask.h"
 #import "FAConditionalBatchTask.h"
 #import "FARetryTask.h"
-#import "FAUITask.h"
 
 // Network
 #import "FAURLConnectionTask.h"

@@ -1,5 +1,5 @@
 //
-// FAUITask.h
+// FABatchResult.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,15 @@
 
 
 
-#import "FAAbstractTask.h"
+#import <Foundation/Foundation.h>
 
 
 
-@interface FAUITask : FAAbstractTask
+@interface FABatchResult : NSObject
 
-@property (strong) id <FATask> backgroundTask;
+@property (nonatomic, strong, readonly) id key;
+@property (nonatomic, strong, readonly) id value;
+
+- (id)initWithKey:(id)key value:(id)value;
 
 @end

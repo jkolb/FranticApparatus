@@ -28,8 +28,8 @@
 
 
 
-NSString * const FARetryTaskEventRestarted = @"FARetryTaskEventRestarted";
-NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
+NSString * const FARetryTaskEventTypeRestart = @"FARetryTaskEventTypeRestart";
+NSString * const FARetryTaskEventTypeDelay   = @"FARetryTaskEventTypeDelay";
 
 
 
@@ -57,9 +57,7 @@ NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
 - (void)try {
     id parameter = [self parameter];
     self.task = self.factory(parameter);
-    [self.task addTarget:self action:@selector(tryFailedWithError:) forTaskEvent:FATaskEventFailed];
-    [self.task setParentTask:self];
-    [self.task setExcludeParentEvents:[NSSet setWithObjects:FATaskEventStarted, FATaskEventCancelled, FATaskEventFailed, nil]];
+    [self.task addTarget:self action:@selector(tryFailedWithError:) forEventType:FATaskEventTypeError];
     [self.task startWithParameter:parameter];
 }
 
@@ -68,7 +66,8 @@ NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
     BOOL shouldNotRetry = [self shouldRetryAfterError:error] == NO;
     
     if (exceededMaximumRetryCount || shouldNotRetry) {
-        [self failWithError:error];
+        [self triggerEventWithType:FATaskEventTypeError payload:error];
+        [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
     } else {
         [self delayBeforeRetry];
     }
@@ -76,7 +75,7 @@ NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
 
 - (void)retry {
     ++self.retryCount;
-    [self triggerEvent:FARetryTaskEventRestarted withObject:self];
+    [self triggerEventWithType:FARetryTaskEventTypeRestart payload:nil];
     [self try];
 }
 
@@ -86,7 +85,7 @@ NSString * const FARetryTaskEventDelayed = @"FARetryTaskEventDelayed";
     if (delayInterval == 0) {
         [self retry];
     } else {
-        [self triggerEvent:FARetryTaskEventDelayed withObject:self];
+        [self triggerEventWithType:FARetryTaskEventTypeDelay payload:nil];
         [self retryAfterDelayInterval:delayInterval];
     }
 }

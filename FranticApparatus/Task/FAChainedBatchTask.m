@@ -31,27 +31,21 @@
 @implementation FAChainedBatchTask
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {
-    __typeof__(self) __weak weakSelf = self;
-    [task taskEvent:FATaskEventSucceeded addCallback:^(id object) {
-        __typeof__(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
-        [blockSelf taskWithKey:key didSucceedWithResult:object];
+    [task eventType:FATaskEventTypeResult addSafeHandler:^(__typeof__(self) blockSelf, FATaskEvent *event) {
+        [blockSelf advanceToNextKey];
+        
+        if ([blockSelf isFinished]) {
+            [blockSelf triggerEventWithType:FATaskEventTypeResult payload:event.payload];
+            [blockSelf triggerEventWithType:FATaskEventTypeFinish payload:nil];
+        } else {
+            [blockSelf startTaskForKey:[blockSelf currentKey] withParameter:event.payload];
+        }
     }];
-    [task taskEvent:FATaskEventFailed addCallback:^(id object) {
-        __typeof__(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
-        [blockSelf failWithError:object];
-    }];
-}
-
-- (void)taskWithKey:(id)key didSucceedWithResult:(id)result {
-    [self advanceToNextKey];
     
-    if ([self isFinished]) {
-        [self succeedWithResult:result];
-    } else {
-        [self startTaskForKey:[self currentKey] withParameter:result];
-    }
+    [task eventType:FATaskEventTypeError addSafeHandler:^(__typeof__(self) blockSelf, FATaskEvent *event) {
+        [blockSelf triggerEventWithType:FATaskEventTypeError payload:event.payload];
+        [blockSelf triggerEventWithType:FATaskEventTypeFinish payload:nil];
+    }];
 }
 
 @end

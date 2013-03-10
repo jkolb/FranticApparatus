@@ -1,5 +1,5 @@
 //
-// FAUITask.m
+// FATaskEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,34 +24,20 @@
 
 
 
-#import "FAUITask.h"
+#import <Foundation/Foundation.h>
 
 
 
-@implementation FAUITask
+@protocol FATask;
 
-- (void)startWithParameter:(id)parameter {
-    [super startWithParameter:parameter];
-    [self.backgroundTask setParentTask:self];
-    [self.backgroundTask setExcludeParentEvents:[NSSet setWithObjects:FATaskEventStarted, FATaskEventCancelled, nil]];
-    [self.backgroundTask startWithParameter:parameter];
-}
 
-- (void)taskEvent:(NSString *)event addCallback:(FATaskCallback)callback {
-    [super taskEvent:event addCallback:[self callbackOnMainThread:callback]];
-}
 
-- (FATaskCallback)callbackOnMainThread:(FATaskCallback)callback {
-    return ^(id object) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            callback(object);
-        });
-    };
-}
+@interface FATaskEvent : NSObject
 
-- (void)cancel {
-    [self.backgroundTask cancel];
-    [super cancel];
-}
+@property (nonatomic, copy, readonly) NSString *type;
+@property (nonatomic, weak, readonly) id <FATask> source;
+@property (nonatomic, strong, readonly) id payload;
+
+- (id)initWithType:(NSString *)type source:(id <FATask>)source payload:(id)payload;
 
 @end

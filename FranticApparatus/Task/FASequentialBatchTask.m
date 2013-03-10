@@ -25,6 +25,7 @@
 
 
 #import "FASequentialBatchTask.h"
+#import "FABatchResult.h"
 
 
 
@@ -39,22 +40,27 @@
 }
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {
-    __typeof__(self) __weak weakSelf = self;
-    [task taskEvent:FATaskEventFinished addCallback:^(id object) {
-        __typeof__(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
-        [blockSelf taskWithKeyDidFinish:key];
+    [task eventType:FATaskEventTypeResult addSafeHandler:^(__typeof__(self) blockSelf, FATaskEvent *event) {
+        FABatchResult *result = [[FABatchResult alloc] initWithKey:key value:event.payload];
+        
+        [blockSelf triggerEventWithType:FATaskEventTypeResult payload:result];
     }];
-}
-
-- (void)taskWithKeyDidFinish:(id)key {
-    [self advanceToNextKey];
     
-    if ([self isFinished]) {
-        [self finishWithStatus:FATaskStatusSuccess];
-    } else {
-        [self startTaskForKey:[self currentKey] withParameter:[self parameter]];
-    }
+    [task eventType:FATaskEventTypeError addSafeHandler:^(__typeof__(self) blockSelf, FATaskEvent *event) {
+        FABatchResult *error = [[FABatchResult alloc] initWithKey:key value:event.payload];
+        
+        [blockSelf triggerEventWithType:FATaskEventTypeError payload:error];
+    }];
+    
+    [task eventType:FATaskEventTypeFinish addSafeHandler:^(__typeof__(self) blockSelf, FATaskEvent *event) {
+        [blockSelf advanceToNextKey];
+        
+        if ([blockSelf isFinished]) {
+            [blockSelf triggerEventWithType:FATaskEventTypeFinish payload:nil];
+        } else {
+            [blockSelf startTaskForKey:[blockSelf currentKey] withParameter:[blockSelf parameter]];
+        }
+    }];
 }
 
 @end

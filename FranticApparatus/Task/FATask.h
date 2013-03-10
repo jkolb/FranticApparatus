@@ -26,6 +26,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import "FATaskEvent.h"
+
 
 
 @protocol FATask;
@@ -43,43 +45,12 @@
  @constant FATaskEventFinished An event that indicates that the task has finished executing, no matter if due to success, failure, or cancellation.
  @discussion Events occur during the lifecycle of a task. An event will only occur at most once for a task unless it is FATaskEventProgressed. Callbacks can be associated with events so that the effects of a task's execution can affect the flow of an application.
  */
-extern NSString * const FATaskEventStarted;
-extern NSString * const FATaskEventProgressed;
-extern NSString * const FATaskEventSucceeded;
-extern NSString * const FATaskEventFailed;
-extern NSString * const FATaskEventCancelled;
-extern NSString * const FATaskEventFinished;
-
-
-
-/*!
- @enum FATaskStatus
- @abstract Constants used to report the final status of a task.
- @constant FATaskStatusPending Status used to indicate a task has not finished yet.
- @constant FATaskStatusSuccess Status when a task succeeds and optionally generates a result.
- @constant FATaskStatusFailure Status when a task fails and optionally generates an error.
- @constant FATaskStatusCancelled Status when a task is cancelled before it completes execution.
- @description Before a task finishes its status will be FATaskStatusPending. Once a task is finished its status will be one of the following: FATaskStatusSuccess, FATaskStatusFailure, or FATaskStatusCancelled depending on the results of the task's execution.
- */
-typedef NS_ENUM(NSInteger, FATaskStatus) {
-    FATaskStatusPending   = 0,
-    FATaskStatusSuccess   = 1,
-    FATaskStatusFailure   = 2,
-    FATaskStatusCancelled = 3,
-};
-
-/*!
- @typedef FATaskCallback
- @abstract A block used to perform an action when an important event in a task's lifecyle is triggered.
- @discussion Each event will be called with a different type of object that depends on the event the callback is associated with.
-    FATaskEventStarted is passed the task object.
-    FATaskEventProgressed is passed an object representing the current progress made during the tasks execution.
-    FATaskEventSucceeded is passed an object representing the final result of the tasks computation, this can be nil.
-    FATaskEventFailed is passed an object representing any error that occurred during the tasks computation, this can be nil.
-    FATaskEventCancelled is passed the task object.
-    FATaskEventFinished is passed the task object.
- */
-typedef void (^FATaskCallback)(id object);
+extern NSString * const FATaskEventTypeStart;
+extern NSString * const FATaskEventTypeProgress;
+extern NSString * const FATaskEventTypeResult;
+extern NSString * const FATaskEventTypeError;
+extern NSString * const FATaskEventTypeCancel;
+extern NSString * const FATaskEventTypeFinish;
 
 
 
@@ -109,7 +80,8 @@ typedef void (^FATaskCallback)(id object);
     The block to execute.
  @discussion A way to execute a block when a lifecycle event occurs. Multiple callbacks and actions can be associated with a single event.
  */
-- (void)taskEvent:(NSString *)event addCallback:(FATaskCallback)callback;
+- (void)eventType:(NSString *)type addHandler:(void (^)(FATaskEvent *event))callback;
+- (void)eventType:(NSString *)type addSafeHandler:(void (^)(id blockSelf, FATaskEvent *event))handler;
 
 /*!
  @method addTarget:action:forTaskEvent:
@@ -122,17 +94,11 @@ typedef void (^FATaskCallback)(id object);
     The event that will trigger the action.
  @discussion A way to execute a specific method when a lifecycle event occurs. Multiple actions and callbacks can be associated with a single event.
  */
-- (void)addTarget:(id)target action:(SEL)action forTaskEvent:(NSString *)event;
+- (void)addTarget:(id)target action:(SEL)action forEventType:(NSString *)type;
 
 - (NSSet *)registeredEvents;
 
-- (void)triggerEvent:(NSString *)event withObject:(id)object;
-
-- (id <FATask>)parentTask;
-- (void)setParentTask:(id <FATask>)parentTask;
-- (void)triggerEventOnParentTask:(NSString *)event withObject:(id)object;
-- (NSSet *)excludeParentEvents;
-- (void)setExcludeParentEvents:(NSSet *)excludeParentEvents;
+- (void)triggerEventWithType:(NSString *)type payload:(id)payload;
 
 /*!
  @method parameter
@@ -156,12 +122,6 @@ typedef void (^FATaskCallback)(id object);
  @discussion If the task was initialized with a parameter this parameter will be ignored. Pass in nil to execute the task without a parameter (as long as one hasn't been set during initialization).
  */
 - (void)startWithParameter:(id)parameter;
-
-/*!
- @method status
- @return Returns the status after the task has finished (FATaskStatusSuccess, FATaskStatusFailure, or FATaskStatusCancelled) otherwise returns FATaskStatusPending.
- */
-- (FATaskStatus)status;
 
 /*!
  @method isCancelled

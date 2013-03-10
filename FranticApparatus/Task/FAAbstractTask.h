@@ -32,12 +32,4 @@
 
 @interface FAAbstractTask : NSObject <FATask>
 
-@property (nonatomic, weak) id <FATask> parentTask;
-@property (nonatomic, copy) NSSet *excludeParentEvents;
-
-- (void)reportProgress:(id)progress;
-- (void)succeedWithResult:(id)result;
-- (void)failWithError:(id)error;
-- (void)finishWithStatus:(FATaskStatus)status;
-
 @end

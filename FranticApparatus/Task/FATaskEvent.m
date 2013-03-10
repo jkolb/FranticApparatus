@@ -1,5 +1,5 @@
 //
-// FATask.m
+// FATaskEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,13 +24,37 @@
 
 
 
-#import "FATask.h"
+#import "FATaskEvent.h"
 
 
 
-NSString *const FATaskEventTypeStart    = @"FATaskEventTypeStart";
-NSString *const FATaskEventTypeProgress = @"FATaskEventTypeProgress";
-NSString *const FATaskEventTypeResult   = @"FATaskEventTypeResult";
-NSString *const FATaskEventTypeError    = @"FATaskEventTypeError";
-NSString *const FATaskEventTypeCancel   = @"FATaskEventTypeCancel";
-NSString *const FATaskEventTypeFinish   = @"FATaskEventTypeFinish";
+@interface FATaskEvent ()
+
+@property (nonatomic) BOOL consumed;
+
+@end
+
+
+
+@implementation FATaskEvent
+
+- (id)init {
+    return [self initWithType:@"" source:nil payload:nil];
+}
+
+- (id)initWithType:(NSString *)type source:(id <FATask>)source payload:(id)payload {
+    self = [super init];
+    if (self == nil) return nil;
+    
+    _type = type;
+    if ([_type length] == 0) return nil;
+    
+    _source = source;
+    if (_source == nil) return nil;
+    
+    _payload = payload;
+    
+    return self;
+}
+
+@end

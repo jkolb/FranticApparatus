@@ -36,14 +36,16 @@
     id taskKey = [self determineTaskKeyWithError:&error];
     
     if (taskKey == nil) {
-        [self failWithError:error];
+        [self triggerEventWithType:FATaskEventTypeError payload:error];
+        [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
         return;
     }
     
     id taskParameter = [self determineTaskParameterWithError:&error];
     
     if (taskParameter == nil) {
-        [self failWithError:error];
+        [self triggerEventWithType:FATaskEventTypeError payload:error];
+        [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
         return;
     }
     
@@ -62,8 +64,6 @@
 }
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {
-    [task setParentTask:self];
-    [task setExcludeParentEvents:[NSSet setWithObjects:FATaskEventStarted, FATaskEventCancelled, nil]];
 }
 
 @end

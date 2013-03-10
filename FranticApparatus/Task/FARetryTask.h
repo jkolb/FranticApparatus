@@ -28,8 +28,8 @@
 
 
 
-extern NSString * const FARetryTaskEventRestarted;
-extern NSString * const FARetryTaskEventDelayed;
+extern NSString * const FARetryTaskEventTypeRestart;
+extern NSString * const FARetryTaskEventTypeDelay;
 
 
 

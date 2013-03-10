@@ -66,13 +66,15 @@
     if (self.generateResult == nil) {
         result = [self generateResultWithParameter:parameter error:&error];
     } else {
-        result = self.generateResult(parameter, &error);
+        result = self.generateResult(self, parameter, &error);
     }
     
     if (result == nil) {
-        [self failWithError:error];
+        [self triggerEventWithType:FATaskEventTypeError payload:error];
+        [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
     } else {
-        [self succeedWithResult:result];
+        [self triggerEventWithType:FATaskEventTypeResult payload:result];
+        [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
     }
 }
 
