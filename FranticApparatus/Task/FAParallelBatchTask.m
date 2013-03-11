@@ -56,23 +56,21 @@
 }
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {
-    [task eventType:FATaskEventTypeResult addSafeHandler:^(__typeof__(self) blockSelf, FATaskEvent *event) {
+    [task eventType:FATaskEventTypeResult task:self addTaskHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
         FABatchResult *result = [[FABatchResult alloc] initWithKey:key value:event.payload];
-        
-        [blockSelf triggerEventWithType:FATaskEventTypeResult payload:result];
+        [blockTask triggerEventWithType:FATaskEventTypeResult payload:result];
     }];
     
-    [task eventType:FATaskEventTypeError addSafeHandler:^(__typeof__(self) blockSelf, FATaskEvent *event) {
+    [task eventType:FATaskEventTypeError task:self addTaskHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
         FABatchResult *error = [[FABatchResult alloc] initWithKey:key value:event.payload];
-        
-        [blockSelf triggerEventWithType:FATaskEventTypeError payload:error];
+        [blockTask triggerEventWithType:FATaskEventTypeError payload:error];
     }];
 
-    [task eventType:FATaskEventTypeFinish addSafeHandler:^(__typeof__(self) blockSelf, FATaskEvent *event) {
-        ++blockSelf.finishedCount;
+    [task eventType:FATaskEventTypeFinish task:self addTaskHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
+        ++blockTask.finishedCount;
         
-        if (blockSelf.finishedCount >= [blockSelf count]) {
-            [blockSelf triggerEventWithType:FATaskEventTypeFinish payload:nil];
+        if (blockTask.finishedCount >= [blockTask count]) {
+            [blockTask triggerEventWithType:FATaskEventTypeFinish payload:nil];
         }
     }];
 }

@@ -32,4 +32,6 @@
 
 @interface FAAbstractTask : NSObject <FATask>
 
++ (void (^)(FATaskEvent *))handlerWithTask:(id <FATask>)task taskHandler:(void (^)(id blockTask, FATaskEvent *event))taskHandler;
+
 @end

@@ -50,6 +50,7 @@
 		E5592C5B16D4914600B9C58D /* FABatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445416D17B4A007BF606 /* FABatchTask.h */; };
 		E5592C5D16D4914600B9C58D /* FAParallelBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445A16D17B4A007BF606 /* FAParallelBatchTask.h */; };
 		E5592C5E16D4914600B9C58D /* FASequentialBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445C16D17B4A007BF606 /* FASequentialBatchTask.h */; };
+		E57E005E16EE44810066D124 /* FAUITask.m in Sources */ = {isa = PBXBuildFile; fileRef = E57E005D16EE44810066D124 /* FAUITask.m */; };
 		E5B4799D16E8440200480D10 /* FATask.m in Sources */ = {isa = PBXBuildFile; fileRef = E5B4799C16E8440200480D10 /* FATask.m */; };
 		E5B479A016E8525E00480D10 /* FARetryTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E5B4799F16E8525E00480D10 /* FARetryTask.m */; };
 		E5C0C2B816ECE8BB005DEDFF /* FATaskEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E5C0C2B716ECE8BA005DEDFF /* FATaskEvent.m */; };
@@ -147,6 +148,8 @@
 		E553446D16D17C1D007BF606 /* FAURLConnectionStreamTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLConnectionStreamTask.m; sourceTree = "<group>"; };
 		E553446E16D17C1D007BF606 /* FAURLResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLResult.h; sourceTree = "<group>"; };
 		E553446F16D17C1D007BF606 /* FAURLResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLResult.m; sourceTree = "<group>"; };
+		E57E005C16EE44810066D124 /* FAUITask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAUITask.h; sourceTree = "<group>"; };
+		E57E005D16EE44810066D124 /* FAUITask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAUITask.m; sourceTree = "<group>"; };
 		E5B4799C16E8440200480D10 /* FATask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FATask.m; sourceTree = "<group>"; };
 		E5B4799E16E8525D00480D10 /* FARetryTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FARetryTask.h; sourceTree = "<group>"; };
 		E5B4799F16E8525E00480D10 /* FARetryTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FARetryTask.m; sourceTree = "<group>"; };
@@ -274,6 +277,8 @@
 				2C0A3D4316E9016F00988BB6 /* FAConditionalBatchTask.m */,
 				E5B4799E16E8525D00480D10 /* FARetryTask.h */,
 				E5B4799F16E8525E00480D10 /* FARetryTask.m */,
+				E57E005C16EE44810066D124 /* FAUITask.h */,
+				E57E005D16EE44810066D124 /* FAUITask.m */,
 			);
 			path = Task;
 			sourceTree = "<group>";
@@ -420,6 +425,7 @@
 				2C0A3D4E16E9171000988BB6 /* NSURLResponse+StringEncoding.m in Sources */,
 				E5C0C2B816ECE8BB005DEDFF /* FATaskEvent.m in Sources */,
 				E5C0C2BC16ED2277005DEDFF /* FABatchResult.m in Sources */,
+				E57E005E16EE44810066D124 /* FAUITask.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

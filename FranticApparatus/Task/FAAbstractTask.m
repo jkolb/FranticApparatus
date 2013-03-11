@@ -33,7 +33,7 @@
 
 @property BOOL cancelled;
 @property (nonatomic, strong) id parameter;
-@property (nonatomic, strong) NSMutableDictionary *callbacks;
+@property (nonatomic, strong) NSMutableDictionary *handlersByEventType;
 
 @end
 
@@ -49,8 +49,8 @@
     self = [super init];
     if (self == nil) return nil;
     
-    _callbacks = [[NSMutableDictionary alloc] initWithCapacity:1];
-    if (_callbacks == nil) return nil;
+    _handlersByEventType = [[NSMutableDictionary alloc] initWithCapacity:1];
+    if (_handlersByEventType == nil) return nil;
     
     _parameter = parameter;
     
@@ -70,37 +70,45 @@
     return self.cancelled;
 }
 
-- (void)eventType:(NSString *)type addHandler:(void (^)(FATaskEvent *event))callback {
-    NSMutableArray *callbacks = [self.callbacks objectForKey:type];
+- (void)eventType:(NSString *)type addHandler:(void (^)(FATaskEvent *event))handler {
+    NSMutableArray *handlers = [self.handlersByEventType objectForKey:type];
     
-    if (callbacks == nil) {
-        callbacks = [[NSMutableArray alloc] initWithCapacity:1];
-        [self.callbacks setObject:callbacks forKey:type];
+    if (handlers == nil) {
+        handlers = [[NSMutableArray alloc] initWithCapacity:1];
+        [self.handlersByEventType setObject:handlers forKey:type];
     }
     
-    [callbacks addObject:[self callbackOnMainThread:callback]];
+    [handlers addObject:handler];
 }
 
-- (void)eventType:(NSString *)type addSafeHandler:(void (^)(id blockSelf, FATaskEvent *event))handler {
-    __typeof__(self) __weak weakSelf = self;
-    [self eventType:type addHandler:^(FATaskEvent *event) {
-        __typeof__(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
-        handler(blockSelf, event);
-    }];
+- (void)eventType:(NSString *)type addTaskHandler:(void (^)(id blockTask, FATaskEvent *event))taskHandler {
+    [self eventType:type addHandler:[[self class] handlerWithTask:self taskHandler:taskHandler]];
+}
+
+- (void)eventType:(NSString *)type task:(id <FATask>)task addTaskHandler:(void (^)(id blockTask, FATaskEvent *event))taskHandler {
+    [self eventType:type addHandler:[[self class] handlerWithTask:task taskHandler:taskHandler]];
 }
 
 - (void)addTarget:(id)target action:(SEL)action forEventType:(NSString *)type {
     __typeof__(target) weakTarget = target;
-    [self eventType:type addSafeHandler:^(id blockSelf, FATaskEvent *event) {
+    [self eventType:type addTaskHandler:^(id blockTask, FATaskEvent *event) {
         __typeof__(target) blockTarget = weakTarget;
         if (blockTarget == nil) return;
-        [blockSelf invokeTarget:blockTarget action:action withObject:event];
+        [blockTask invokeTarget:blockTarget action:action withObject:event];
     }];
 }
 
++ (void (^)(FATaskEvent *))handlerWithTask:(id <FATask>)task taskHandler:(void (^)(id blockTask, FATaskEvent *event))taskHandler {
+    __typeof__(task) __weak weakTask = task;
+    return ^(FATaskEvent *event) {
+        __typeof__(task) blockTask = weakTask;
+        if (blockTask == nil || [blockTask isCancelled]) return;
+        taskHandler(blockTask, event);
+    };
+}
+
 - (NSSet *)registeredEvents {
-    return [NSSet setWithArray:[self.callbacks allKeys]];
+    return [NSSet setWithArray:[self.handlersByEventType allKeys]];
 }
 
 - (void)triggerEventWithType:(NSString *)type payload:(id)payload {
@@ -113,21 +121,13 @@
 }
 
 - (NSArray *)callbacksForEventType:(NSString *)type {
-    return [self.callbacks objectForKey:type];
+    return [self.handlersByEventType objectForKey:type];
 }
 
 - (void)cancel {
     self.cancelled = YES;
     [self triggerEventWithType:FATaskEventTypeCancel payload:nil];
     [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
-}
-
-- (void (^)(FATaskEvent *))callbackOnMainThread:(void (^)(FATaskEvent *))callback {
-    return ^(FATaskEvent *event) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            callback(event);
-        });
-    };
 }
 
 - (void)invokeTarget:(id)target action:(SEL)action withObject:(id)object {

@@ -1,5 +1,5 @@
 //
-// FAChainedBatchTask.m
+// FAUITask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,28 +24,14 @@
 
 
 
-#import "FAChainedBatchTask.h"
+#import <Foundation/Foundation.h>
+
+#import "FATask.h"
 
 
 
-@implementation FAChainedBatchTask
+@interface FAUITask : NSObject <FATask>
 
-- (void)configureTask:(id<FATask>)task withKey:(id)key {
-    [task eventType:FATaskEventTypeResult task:self addTaskHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
-        [blockTask advanceToNextKey];
-        
-        if ([blockTask isFinished]) {
-            [blockTask triggerEventWithType:FATaskEventTypeResult payload:event.payload];
-            [blockTask triggerEventWithType:FATaskEventTypeFinish payload:nil];
-        } else {
-            [blockTask startTaskForKey:[blockTask currentKey] withParameter:event.payload];
-        }
-    }];
-    
-    [task eventType:FATaskEventTypeError task:self addTaskHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
-        [blockTask triggerEventWithType:FATaskEventTypeError payload:event.payload];
-        [blockTask triggerEventWithType:FATaskEventTypeFinish payload:nil];
-    }];
-}
+@property (nonatomic, strong) id <FATask> backgroundTask;
 
 @end

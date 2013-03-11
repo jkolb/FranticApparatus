@@ -80,8 +80,9 @@ extern NSString * const FATaskEventTypeFinish;
     The block to execute.
  @discussion A way to execute a block when a lifecycle event occurs. Multiple callbacks and actions can be associated with a single event.
  */
-- (void)eventType:(NSString *)type addHandler:(void (^)(FATaskEvent *event))callback;
-- (void)eventType:(NSString *)type addSafeHandler:(void (^)(id blockSelf, FATaskEvent *event))handler;
+- (void)eventType:(NSString *)type addHandler:(void (^)(FATaskEvent *event))handler;
+- (void)eventType:(NSString *)type addTaskHandler:(void (^)(id blockTask, FATaskEvent *event))taskHandler;
+- (void)eventType:(NSString *)type task:(id <FATask>)task addTaskHandler:(void (^)(id blockTask, FATaskEvent *event))taskHandler;
 
 /*!
  @method addTarget:action:forTaskEvent:

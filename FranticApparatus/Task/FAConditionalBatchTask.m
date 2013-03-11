@@ -64,6 +64,17 @@
 }
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {
+    [task eventType:FATaskEventTypeResult task:self addTaskHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
+        [blockTask triggerEventWithType:FATaskEventTypeResult payload:event.payload];
+    }];
+    
+    [task eventType:FATaskEventTypeError task:self addTaskHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
+        [blockTask triggerEventWithType:FATaskEventTypeError payload:event.payload];
+    }];
+    
+    [task eventType:FATaskEventTypeFinish task:self addTaskHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
+        [blockTask triggerEventWithType:FATaskEventTypeFinish payload:nil];
+    }];
 }
 
 @end
