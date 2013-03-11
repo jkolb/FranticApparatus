@@ -25,13 +25,13 @@
 
 
 #import "FAURLConnectionDataTask.h"
-#import "FAURLResult.h"
+#import "FAURLDataResult.h"
 
 
 
-@interface FAURLConnectionDataTask () <NSURLConnectionDataDelegate>
+@interface FAURLConnectionDataTask ()
 
-@property (nonatomic, strong) FAURLResult *result;
+@property (nonatomic, strong) FAURLDataResult *result;
 
 @end
 
@@ -39,8 +39,8 @@
 
 @implementation FAURLConnectionDataTask
 
-- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
-    self.result = [[FAURLResult alloc] initWithResponse:response];
+- (void)handleValidResponse:(NSURLResponse *)response {
+    self.result = [[FAURLDataResult alloc] initWithResponse:response];
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
@@ -48,13 +48,7 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    [self triggerEventWithType:FATaskEventTypeResult payload:self.result];
-    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
-}
-
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    [self triggerEventWithType:FATaskEventTypeError payload:error];
-    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
+    [self succeedWithResult:self.result];
 }
 
 @end

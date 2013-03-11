@@ -31,12 +31,8 @@
 @interface FAURLResult : NSObject
 
 @property (nonatomic, strong) NSURLResponse *response;
-@property (nonatomic, copy, readonly) NSData *data;
-@property (nonatomic, copy, readonly) NSString *text;
 
 - (id)initWithResponse:(NSURLResponse *)response;
-
-- (void)appendData:(NSData *)data;
 
 - (NSHTTPURLResponse *)HTTPResponse;
 

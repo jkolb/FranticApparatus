@@ -28,10 +28,22 @@
 
 
 
+@protocol FAURLResponseValidator;
+
+
+
 @interface FAURLConnectionTask : FAAbstractTask
 
 @property (nonatomic, weak) NSOperationQueue *queue;
+@property (nonatomic, weak) id <FAURLResponseValidator> responseValidator;
 
 - (id)initWithRequest:(NSURLRequest *)request;
+
+- (void)handleValidResponse:(NSURLResponse *)response;
+
+- (void)failWithError:(NSError *)error;
+- (void)succeedWithResult:(id)result;
+
+- (void)cleanup;
 
 @end

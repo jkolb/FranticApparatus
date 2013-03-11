@@ -25,10 +25,11 @@
 
 
 #import "FAURLConnectionTask.h"
+#import "FAURLResponseValidator.h"
 
 
 
-@interface FAURLConnectionTask ()
+@interface FAURLConnectionTask () <NSURLConnectionDataDelegate>
 
 @property (nonatomic, strong) NSURLConnection *connection;
 
@@ -59,6 +60,46 @@
 - (void)cancel {
     [self.connection cancel];
     [super cancel];
+    self.responseValidator = nil;
+}
+
+- (void)handleValidResponse:(NSURLResponse *)response {
+}
+
+- (void)failWithError:(NSError *)error {
+    [self cleanup];
+    [self triggerEventWithType:FATaskEventTypeError payload:error];
+    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
+}
+
+- (void)succeedWithResult:(id)result {
+    [self cleanup];
+    [self triggerEventWithType:FATaskEventTypeResult payload:result];
+    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
+}
+
+- (void)cleanup {
+    [self.connection cancel];
+    self.connection = nil;
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+    NSError *error = nil;
+    BOOL isValidResponse = YES;
+    
+    if (self.responseValidator != nil) {
+        isValidResponse = [self.responseValidator isValidResponse:response withError:&error];
+    }
+    
+    if (isValidResponse) {
+        [self handleValidResponse:response];
+    } else {
+        [self failWithError:error];
+    }
+}
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+    [self failWithError:error];
 }
 
 @end

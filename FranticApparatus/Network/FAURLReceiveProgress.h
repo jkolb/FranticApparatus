@@ -28,12 +28,25 @@
 
 
 
-@interface FAURLReceiveProgress : NSObject <NSCopying>
+@interface FAURLReceiveProgress : NSObject <NSCopying, NSMutableCopying>
 
 @property (nonatomic, readonly) long long bytesReceived;
 @property (nonatomic, readonly) long long totalBytesReceived;
 @property (nonatomic, readonly) long long expectedTotalBytes;
 
 - (id)initWithBytesReceived:(long long)bytesReceived totalBytesReceived:(long long)totalBytesReceived expectedTotalBytes:(long long)expectedTotalBytes;
+
+@end
+
+
+
+@interface FAMutableURLReceiveProgress : FAURLReceiveProgress
+
+@property (nonatomic, readwrite) long long bytesReceived;
+@property (nonatomic, readwrite) long long totalBytesReceived;
+
+- (id)initWithExpectedTotalBytes:(long long)expectedTotalBytes;
+
+- (void)addBytes:(NSUInteger)count;
 
 @end

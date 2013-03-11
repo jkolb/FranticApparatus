@@ -25,11 +25,21 @@
 
 
 #import "FAURLConnectionDownloadTask.h"
+#import "FAURLDownloadResult.h"
 #import "FAURLReceiveProgress.h"
 
 
 
-@interface FAURLConnectionDownloadTask () <NSURLConnectionDownloadDelegate>
+static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
+
+
+
+@interface FAURLConnectionDownloadTask () <NSURLConnectionDataDelegate>
+
+@property (nonatomic, strong) NSMutableData *buffer;
+@property (nonatomic, strong) NSOutputStream *outputStream;
+@property (nonatomic, strong) FAMutableURLReceiveProgress *progress;
+@property (nonatomic, strong) FAURLDownloadResult *result;
 
 @end
 
@@ -37,19 +47,62 @@
 
 @implementation FAURLConnectionDownloadTask
 
-- (void)connection:(NSURLConnection *)connection didWriteData:(long long)bytesWritten totalBytesWritten:(long long)totalBytesWritten expectedTotalBytes:(long long) expectedTotalBytes {
-    FAURLReceiveProgress *progress = [[FAURLReceiveProgress alloc] initWithBytesReceived:bytesWritten totalBytesReceived:totalBytesWritten expectedTotalBytes:expectedTotalBytes];
-    [self triggerEventWithType:FATaskEventTypeProgress payload:progress];
+- (void)handleValidResponse:(NSURLResponse *)response {
+    self.result = [[FAURLDownloadResult alloc] initWithResponse:response];
+    self.result.downloadPath = self.downloadPath;
+    self.progress = [[FAMutableURLReceiveProgress alloc] initWithExpectedTotalBytes:[response expectedContentLength]];
+    
+    [self.outputStream close];
+    self.outputStream = [NSOutputStream outputStreamToFileAtPath:self.result.downloadPath append:NO];
+    [self.outputStream open];
+
+    if (self.buffer == nil) {
+        self.buffer = [[NSMutableData alloc] initWithCapacity:kFAURLConnectionDownloadTaskDefaultBufferSize];
+    } else {
+        [self.buffer setLength:0];
+    }
 }
 
-- (void)connectionDidFinishDownloading:(NSURLConnection *)connection destinationURL:(NSURL *)destinationURL {
-    [self triggerEventWithType:FATaskEventTypeResult payload:destinationURL];
-    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+    NSError *error = nil;
+    NSUInteger dataOffset = 0;
+    NSUInteger dataLength = [data length];
+    const uint8_t *dataBytes = [data bytes];
+    
+    while (dataOffset < dataLength) {
+        NSInteger bytesWritten = [self.outputStream write:&dataBytes[dataOffset] maxLength:dataLength - dataOffset];
+        
+        if (bytesWritten < 0) {
+            error = [self.outputStream streamError];
+            break;
+        } else if (bytesWritten == 0) {
+            // Stream has reached its capacity
+            break;            
+        } else {
+            dataOffset += bytesWritten;
+            [self.progress addBytes:bytesWritten];
+        }
+        
+        assert(dataOffset <= dataLength);
+    }
+    
+    if (error != nil) {
+        [self failWithError:error];
+    } else if (dataOffset > 0) {
+        [self triggerEventWithType:FATaskEventTypeProgress payload:[self.progress copy]];
+    }
 }
 
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    [self triggerEventWithType:FATaskEventTypeError payload:error];
-    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
+- (void)cleanup {
+    [super cleanup];
+    [self.outputStream close];
+    self.outputStream = nil;
+    self.progress = nil;
+    self.buffer = nil;
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    [self succeedWithResult:self.result];
 }
 
 @end

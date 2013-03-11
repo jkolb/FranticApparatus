@@ -49,4 +49,27 @@
     return self;
 }
 
+- (id)mutableCopyWithZone:(NSZone *)zone {
+    return [[FAMutableURLReceiveProgress alloc] initWithBytesReceived:self.bytesReceived totalBytesReceived:self.totalBytesReceived expectedTotalBytes:self.expectedTotalBytes];
+}
+
+@end
+
+
+
+@implementation FAMutableURLReceiveProgress
+
+- (id)initWithExpectedTotalBytes:(long long)expectedTotalBytes {
+    return [self initWithBytesReceived:0 totalBytesReceived:0 expectedTotalBytes:expectedTotalBytes];
+}
+
+- (id)copyWithZone:(NSZone *)zone {
+    return [[FAURLReceiveProgress alloc] initWithBytesReceived:self.bytesReceived totalBytesReceived:self.totalBytesReceived expectedTotalBytes:self.expectedTotalBytes];
+}
+
+- (void)addBytes:(NSUInteger)count {
+    self.bytesReceived = count;
+    self.totalBytesReceived += count;
+}
+
 @end

@@ -40,11 +40,17 @@
 #import "FAUITask.h"
 
 // Network
+#import "FAHTTPError.h"
+#import "FAURLResponseValidator.h"
+#import "FACustomURLResponseValidator.h"
+#import "FAHTTPURLResponseValidator.h"
 #import "FAURLConnectionTask.h"
 #import "FAURLConnectionDataTask.h"
 #import "FAURLConnectionDownloadTask.h"
 #import "FAURLConnectionStreamTask.h"
 #import "FAURLResult.h"
+#import "FAURLDataResult.h"
+#import "FAURLDownloadResult.h"
 #import "FAURLSendProgress.h"
 #import "FAURLReceiveProgress.h"
 #import "NSURLResponse+StringEncoding.h"

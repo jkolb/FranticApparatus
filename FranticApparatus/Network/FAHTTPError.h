@@ -1,5 +1,5 @@
 //
-// FAURLConnectionDownloadTask.h
+// FAHTTPError.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,32 @@
 
 
 
-#import "FAURLConnectionTask.h"
+#import <Foundation/Foundation.h>
 
 
 
-@interface FAURLConnectionDownloadTask : FAURLConnectionTask
+extern NSString * const FAHTTPErrorDomain;
 
-@property (copy) NSString *downloadPath;
+
+
+typedef NS_ENUM(NSInteger, FAHTTPErrorCode) {
+    FAHTTPErrorCodeInvalidResponse              = 1,
+    FAHTTPErrorCodeUnacceptableContentLength    = 2,
+    FAHTTPErrorCodeUnacceptableStatusCode       = 3,
+    FAHTTPErrorCodeUnacceptableContentType      = 4,
+    FAHTTPErrorCodeUnacceptableTextEncodingName = 5,
+    FAHTTPErrorCodeMissingRequiredHeader        = 6,
+    FAHTTPErrorCodeUnexpectedHeaderValue        = 7,
+};
+
+
+
+extern NSString * const FAHTTPErrorResponseKey;
+
+
+
+@interface FAHTTPError : NSError
+
++ (id)errorWithHTTPErrorCode:(FAHTTPErrorCode)code response:(NSURLResponse *)response;
 
 @end

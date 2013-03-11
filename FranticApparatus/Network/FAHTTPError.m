@@ -1,5 +1,5 @@
 //
-// FAURLConnectionDownloadTask.h
+// FAHTTPError.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,22 @@
 
 
 
-#import "FAURLConnectionTask.h"
+#import "FAHTTPError.h"
 
 
 
-@interface FAURLConnectionDownloadTask : FAURLConnectionTask
+NSString * const FAHTTPErrorDomain = @"FAHTTPErrorDomain";
 
-@property (copy) NSString *downloadPath;
+
+
+NSString * const FAHTTPErrorResponseKey = @"response";
+
+
+
+@implementation FAHTTPError
+
++ (id)errorWithHTTPErrorCode:(FAHTTPErrorCode)code response:(NSURLResponse *)response {
+    return [[self alloc] initWithDomain:FAHTTPErrorDomain code:code userInfo:@{FAHTTPErrorResponseKey: response}];
+}
 
 @end

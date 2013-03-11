@@ -1,5 +1,5 @@
 //
-// FAURLConnectionDownloadTask.h
+// FAURLDataResult.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,15 @@
 
 
 
-#import "FAURLConnectionTask.h"
+#import "FAURLResult.h"
 
 
 
-@interface FAURLConnectionDownloadTask : FAURLConnectionTask
+@interface FAURLDataResult : FAURLResult
 
-@property (copy) NSString *downloadPath;
+@property (nonatomic, copy, readonly) NSData *data;
+@property (nonatomic, copy, readonly) NSString *text;
+
+- (void)appendData:(NSData *)data;
 
 @end

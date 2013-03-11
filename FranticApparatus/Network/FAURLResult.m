@@ -25,15 +25,6 @@
 
 
 #import "FAURLResult.h"
-#import "NSURLResponse+StringEncoding.h"
-
-
-
-@interface FAURLResult ()
-
-@property (nonatomic, strong) NSMutableData *mutableData;
-
-@end
 
 
 
@@ -50,31 +41,7 @@
     _response = response;
     if (_response == nil) return nil;
     
-    
-    long long expectedContentLength = [_response expectedContentLength];
-    
-    if (expectedContentLength <= 0 || expectedContentLength > NSUIntegerMax) {
-        _mutableData = [[NSMutableData alloc] init];
-    } else {
-        NSUInteger capacity = (NSUInteger)expectedContentLength;
-        _mutableData = [[NSMutableData alloc] initWithCapacity:capacity];
-    }
-    
-    if (_mutableData == nil) return nil;
-    
     return self;
-}
-
-- (NSData *)data {
-    return self.mutableData;
-}
-
-- (NSString *)text {
-    return [[NSString alloc] initWithData:self.mutableData encoding:[self.response stringEncoding]];
-}
-
-- (void)appendData:(NSData *)data {
-    [self.mutableData appendData:data];
 }
 
 - (NSHTTPURLResponse *)HTTPResponse {

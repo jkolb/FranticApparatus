@@ -1,5 +1,5 @@
 //
-// FAURLConnectionDownloadTask.h
+// FACustomURLResponseValidator.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,18 @@
 
 
 
-#import "FAURLConnectionTask.h"
+#import <Foundation/Foundation.h>
+
+#import "FAURLResponseValidator.h"
 
 
 
-@interface FAURLConnectionDownloadTask : FAURLConnectionTask
+@interface FACustomURLResponseValidator : NSObject <FAURLResponseValidator>
 
-@property (copy) NSString *downloadPath;
+- (id)initWithErrorDomain:(NSString *)errorDomain;
+
+- (void)errorCode:(NSInteger)errorCode addValidator:(BOOL (^)(NSURLResponse *))validator;
+
+- (BOOL)isResponse:(NSURLResponse *)response validForValidator:(BOOL (^)(NSURLResponse *))validator errorCode:(NSInteger)errorCode withError:(NSError **)error;
 
 @end
