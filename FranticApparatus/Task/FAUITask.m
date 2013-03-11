@@ -97,6 +97,10 @@
     [self.backgroundTask triggerEventWithType:type payload:payload];
 }
 
+- (void)forwardEventType:(NSString *)type toTask:(id <FATask>)task {
+    [self.backgroundTask forwardEventType:type toTask:task];
+}
+
 - (NSSet *)registeredEvents {
     return [self.backgroundTask registeredEvents];
 }

@@ -100,6 +100,7 @@ extern NSString * const FATaskEventTypeFinish;
 - (NSSet *)registeredEvents;
 
 - (void)triggerEventWithType:(NSString *)type payload:(id)payload;
+- (void)forwardEventType:(NSString *)type toTask:(id <FATask>)task;
 
 /*!
  @method parameter

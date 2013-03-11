@@ -120,6 +120,12 @@
     }
 }
 
+- (void)forwardEventType:(NSString *)type toTask:(id <FATask>)task {
+    [self eventType:type addTaskHandler:^(id blockTask, FATaskEvent *event) {
+        [blockTask triggerEventWithType:event.type payload:event.payload];
+    }];
+}
+
 - (NSArray *)callbacksForEventType:(NSString *)type {
     return [self.handlersByEventType objectForKey:type];
 }
