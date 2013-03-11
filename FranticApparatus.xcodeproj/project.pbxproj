@@ -51,6 +51,7 @@
 		E5592C5D16D4914600B9C58D /* FAParallelBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445A16D17B4A007BF606 /* FAParallelBatchTask.h */; };
 		E5592C5E16D4914600B9C58D /* FASequentialBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553445C16D17B4A007BF606 /* FASequentialBatchTask.h */; };
 		E57E005E16EE44810066D124 /* FAUITask.m in Sources */ = {isa = PBXBuildFile; fileRef = E57E005D16EE44810066D124 /* FAUITask.m */; };
+		E57E005F16EE55B40066D124 /* FAUITask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E57E005C16EE44810066D124 /* FAUITask.h */; };
 		E5B4799D16E8440200480D10 /* FATask.m in Sources */ = {isa = PBXBuildFile; fileRef = E5B4799C16E8440200480D10 /* FATask.m */; };
 		E5B479A016E8525E00480D10 /* FARetryTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E5B4799F16E8525E00480D10 /* FARetryTask.m */; };
 		E5C0C2B816ECE8BB005DEDFF /* FATaskEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E5C0C2B716ECE8BA005DEDFF /* FATaskEvent.m */; };
@@ -76,6 +77,7 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
+				E57E005F16EE55B40066D124 /* FAUITask.h in CopyFiles */,
 				E5C0C2BD16ED32B6005DEDFF /* FABatchResult.h in CopyFiles */,
 				E5C0C2B916ECEEE8005DEDFF /* FATaskEvent.h in CopyFiles */,
 				2C0A3D4F16E917A200988BB6 /* NSURLResponse+StringEncoding.h in CopyFiles */,
