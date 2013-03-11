@@ -42,7 +42,7 @@ typedef NS_ENUM(NSInteger, FABackgroundTaskPriority) {
 
 @property (nonatomic) FABackgroundTaskPriority priority;
 
-@property (copy) id (^generateResult)(id blockTask, id parameter, NSError **error);
+@property (copy) id (^generateResult)(id <FATask> blockTask, id parameter, NSError **error);
 
 - (id)generateResultWithParameter:(id)parameter error:(NSError **)error;
 
