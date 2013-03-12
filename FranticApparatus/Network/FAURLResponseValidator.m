@@ -1,5 +1,5 @@
 //
-// FAURLResponseValidator.h
+// FAURLResponseValidator.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,16 +24,8 @@
 
 
 
-#import <Foundation/Foundation.h>
+#import "FAURLResponseValidator.h"
 
 
 
-extern NSString * const FAResponseKey;
-
-
-
-@protocol FAURLResponseValidator <NSObject>
-
-- (BOOL)isValidResponse:(NSURLResponse *)response withError:(NSError **)error;
-
-@end
+NSString * const FAResponseKey = @"response";

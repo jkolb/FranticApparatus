@@ -29,17 +29,3 @@
 
 
 NSString * const FAHTTPErrorDomain = @"FAHTTPErrorDomain";
-
-
-
-NSString * const FAHTTPErrorResponseKey = @"response";
-
-
-
-@implementation FAHTTPError
-
-+ (id)errorWithHTTPErrorCode:(FAHTTPErrorCode)code response:(NSURLResponse *)response {
-    return [[self alloc] initWithDomain:FAHTTPErrorDomain code:code userInfo:@{FAHTTPErrorResponseKey: response}];
-}
-
-@end

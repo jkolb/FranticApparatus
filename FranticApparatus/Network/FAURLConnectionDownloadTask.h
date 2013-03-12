@@ -28,6 +28,16 @@
 
 
 
+extern NSString * const FAURLDownloadErrorDomain;
+
+
+
+enum {
+    FAURLDownloadErrorOutputStreamCapacityReached = 1,
+};
+
+
+
 @interface FAURLConnectionDownloadTask : FAURLConnectionTask
 
 @property (copy) NSString *downloadPath;

@@ -35,7 +35,7 @@
 @interface FAURLConnectionTask : FAAbstractTask
 
 @property (nonatomic, weak) NSOperationQueue *queue;
-@property (nonatomic, weak) id <FAURLResponseValidator> responseValidator;
+@property (nonatomic, strong) id <FAURLResponseValidator> responseValidator;
 
 - (id)initWithRequest:(NSURLRequest *)request;
 

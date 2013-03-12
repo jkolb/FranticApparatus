@@ -83,7 +83,7 @@
 - (BOOL)isResponse:(NSURLResponse *)response validForValidator:(BOOL (^)(NSURLResponse *))validator errorCode:(NSInteger)errorCode withError:(NSError **)error {
     if (!validator(response)) {
         if (error != NULL) {
-            *error = [NSError errorWithDomain:self.errorDomain code:errorCode userInfo:@{@"response": response}];
+            *error = [NSError errorWithDomain:self.errorDomain code:errorCode userInfo:@{FAResponseKey: response}];
         }
         
         return NO;

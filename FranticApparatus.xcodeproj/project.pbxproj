@@ -63,6 +63,7 @@
 		E57E007616EEA3F50066D124 /* FAHTTPURLResponseValidator.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E57E006916EE8A2B0066D124 /* FAHTTPURLResponseValidator.h */; };
 		E57E007716EEA3FC0066D124 /* FAURLDataResult.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E57E006616EE80F50066D124 /* FAURLDataResult.h */; };
 		E57E007816EEA3FC0066D124 /* FAURLDownloadResult.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E57E006316EE80BC0066D124 /* FAURLDownloadResult.h */; };
+		E57E00A316EF5E890066D124 /* FAURLResponseValidator.m in Sources */ = {isa = PBXBuildFile; fileRef = E57E00A216EF5E880066D124 /* FAURLResponseValidator.m */; };
 		E5B4799D16E8440200480D10 /* FATask.m in Sources */ = {isa = PBXBuildFile; fileRef = E5B4799C16E8440200480D10 /* FATask.m */; };
 		E5B479A016E8525E00480D10 /* FARetryTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E5B4799F16E8525E00480D10 /* FARetryTask.m */; };
 		E5C0C2B816ECE8BB005DEDFF /* FATaskEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E5C0C2B716ECE8BA005DEDFF /* FATaskEvent.m */; };
@@ -180,6 +181,7 @@
 		E57E006F16EE8B210066D124 /* FAURLResponseValidator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FAURLResponseValidator.h; sourceTree = "<group>"; };
 		E57E007016EE9C520066D124 /* FACustomURLResponseValidator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FACustomURLResponseValidator.h; sourceTree = "<group>"; };
 		E57E007116EE9C520066D124 /* FACustomURLResponseValidator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FACustomURLResponseValidator.m; sourceTree = "<group>"; };
+		E57E00A216EF5E880066D124 /* FAURLResponseValidator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLResponseValidator.m; sourceTree = "<group>"; };
 		E5B4799C16E8440200480D10 /* FATask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FATask.m; sourceTree = "<group>"; };
 		E5B4799E16E8525D00480D10 /* FARetryTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FARetryTask.h; sourceTree = "<group>"; };
 		E5B4799F16E8525E00480D10 /* FARetryTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FARetryTask.m; sourceTree = "<group>"; };
@@ -319,6 +321,7 @@
 				E57E006C16EE8AD20066D124 /* FAHTTPError.h */,
 				E57E006D16EE8AD20066D124 /* FAHTTPError.m */,
 				E57E006F16EE8B210066D124 /* FAURLResponseValidator.h */,
+				E57E00A216EF5E880066D124 /* FAURLResponseValidator.m */,
 				E57E007016EE9C520066D124 /* FACustomURLResponseValidator.h */,
 				E57E007116EE9C520066D124 /* FACustomURLResponseValidator.m */,
 				E57E006916EE8A2B0066D124 /* FAHTTPURLResponseValidator.h */,
@@ -472,6 +475,7 @@
 				E57E006B16EE8A2C0066D124 /* FAHTTPURLResponseValidator.m in Sources */,
 				E57E006E16EE8AD30066D124 /* FAHTTPError.m in Sources */,
 				E57E007216EE9C530066D124 /* FACustomURLResponseValidator.m in Sources */,
+				E57E00A316EF5E890066D124 /* FAURLResponseValidator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

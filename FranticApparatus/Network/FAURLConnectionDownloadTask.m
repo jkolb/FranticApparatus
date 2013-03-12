@@ -30,6 +30,8 @@
 
 
 
+NSString * const FAURLDownloadErrorDomain = @"FAURLDownloadErrorDomain";
+
 static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
 
 
@@ -64,33 +66,56 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+    [self.buffer appendData:data];
+    
     NSError *error = nil;
-    NSUInteger dataOffset = 0;
+    BOOL success = [self writeAsMuchDataAsPossibleToOutputStreamAndReportProgressWithError:&error];
+    
+    if (!success) {
+        [self failWithError:error];
+    }
+}
+
+- (BOOL)writeAsMuchDataAsPossibleToOutputStreamAndReportProgressWithError:(NSError **)error {
+    NSInteger bytesWritten = [self writeData:self.buffer toOutputStream:self.outputStream withError:error];
+    
+    if (bytesWritten < 0) return NO;
+
+    if (bytesWritten > 0) {
+        [self.buffer replaceBytesInRange:NSMakeRange(0, bytesWritten) withBytes:NULL length:0];
+        [self.progress addBytes:bytesWritten];
+        [self triggerEventWithType:FATaskEventTypeProgress payload:[self.progress copy]];
+    }
+
+    return YES;
+}
+
+- (NSInteger)writeData:(NSData *)data toOutputStream:(NSOutputStream *)outputStream withError:(NSError **)error {
+    NSInteger dataOffset = 0;
     NSUInteger dataLength = [data length];
     const uint8_t *dataBytes = [data bytes];
     
-    while (dataOffset < dataLength) {
-        NSInteger bytesWritten = [self.outputStream write:&dataBytes[dataOffset] maxLength:dataLength - dataOffset];
+    while (dataOffset < dataLength && [outputStream hasSpaceAvailable]) {
+        NSInteger bytesWritten = [outputStream write:&dataBytes[dataOffset] maxLength:dataLength - dataOffset];
         
         if (bytesWritten < 0) {
-            error = [self.outputStream streamError];
-            break;
+            if (error != NULL) {
+                *error = [outputStream streamError];
+            }
+            return -1;
         } else if (bytesWritten == 0) {
-            // Stream has reached its capacity
-            break;            
+            if (error != NULL) {
+                *error = [NSError errorWithDomain:FAURLDownloadErrorDomain code:FAURLDownloadErrorOutputStreamCapacityReached userInfo:nil];
+            }
+            return -1;
         } else {
             dataOffset += bytesWritten;
-            [self.progress addBytes:bytesWritten];
         }
-        
-        assert(dataOffset <= dataLength);
     }
     
-    if (error != nil) {
-        [self failWithError:error];
-    } else if (dataOffset > 0) {
-        [self triggerEventWithType:FATaskEventTypeProgress payload:[self.progress copy]];
-    }
+    assert(dataOffset <= dataLength);
+    
+    return dataOffset;
 }
 
 - (void)cleanup {
@@ -102,6 +127,16 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    while ([self.buffer length] > 0) {
+        NSError *error = nil;
+        BOOL success = [self writeAsMuchDataAsPossibleToOutputStreamAndReportProgressWithError:&error];
+        
+        if (!success) {
+            [self failWithError:error];
+            return;
+        }
+    }
+    
     [self succeedWithResult:self.result];
 }
 

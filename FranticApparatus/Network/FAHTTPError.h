@@ -32,24 +32,12 @@ extern NSString * const FAHTTPErrorDomain;
 
 
 
-typedef NS_ENUM(NSInteger, FAHTTPErrorCode) {
-    FAHTTPErrorCodeInvalidResponse              = 1,
-    FAHTTPErrorCodeUnacceptableContentLength    = 2,
-    FAHTTPErrorCodeUnacceptableStatusCode       = 3,
-    FAHTTPErrorCodeUnacceptableContentType      = 4,
-    FAHTTPErrorCodeUnacceptableTextEncodingName = 5,
-    FAHTTPErrorCodeMissingRequiredHeader        = 6,
-    FAHTTPErrorCodeUnexpectedHeaderValue        = 7,
+enum {
+    FAHTTPErrorNotHTTPResponse              = 1,
+    FAHTTPErrorMaximumContentLengthExceeded = 2,
+    FAHTTPErrorUnacceptableStatusCode       = 3,
+    FAHTTPErrorUnacceptableContentType      = 4,
+    FAHTTPErrorUnacceptableTextEncodingName = 5,
+    FAHTTPErrorMissingRequiredHeader        = 6,
+    FAHTTPErrorUnexpectedHeaderValue        = 7,
 };
-
-
-
-extern NSString * const FAHTTPErrorResponseKey;
-
-
-
-@interface FAHTTPError : NSError
-
-+ (id)errorWithHTTPErrorCode:(FAHTTPErrorCode)code response:(NSURLResponse *)response;
-
-@end

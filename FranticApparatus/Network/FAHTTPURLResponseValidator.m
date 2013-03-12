@@ -31,7 +31,11 @@
 @implementation FAHTTPURLResponseValidator
 
 - (id)init {
-    self = [super init];
+    return [self initWithErrorDomain:FAHTTPErrorDomain];
+}
+
+- (id)initWithErrorDomain:(NSString *)errorDomain {
+    self = [super initWithErrorDomain:errorDomain];
     if (self == nil) return nil;
     
     _acceptableStatusCodes = [[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(200, 100)];
@@ -40,12 +44,12 @@
 }
 
 - (BOOL)isValidResponse:(NSURLResponse *)response withError:(NSError **)error {
-    if (![self isResponse:response validForValidator:[self responseIsHTTPValidator] errorCode:FAHTTPErrorCodeInvalidResponse withError:error]) return NO;
+    if (![self isResponse:response validForValidator:[self responseIsHTTPValidator] errorCode:FAHTTPErrorNotHTTPResponse withError:error]) return NO;
     NSHTTPURLResponse *HTTPResponse = (NSHTTPURLResponse *)response;
-    if (![self isHTTPResponse:HTTPResponse validForHTTPValidator:[self contentLengthValidator] errorCode:FAHTTPErrorCodeUnacceptableContentLength withError:error]) return NO;
-    if (![self isHTTPResponse:HTTPResponse validForHTTPValidator:[self statusCodeValidator] errorCode:FAHTTPErrorCodeUnacceptableStatusCode withError:error]) return NO;
-    if (![self isHTTPResponse:HTTPResponse validForHTTPValidator:[self contentTypeValidator] errorCode:FAHTTPErrorCodeUnacceptableContentType withError:error]) return NO;
-    if (![self isHTTPResponse:HTTPResponse validForHTTPValidator:[self textEncodingNameValidator] errorCode:FAHTTPErrorCodeUnacceptableTextEncodingName withError:error]) return NO;
+    if (![self isHTTPResponse:HTTPResponse validForHTTPValidator:[self maximumContentLengthValidator] errorCode:FAHTTPErrorMaximumContentLengthExceeded withError:error]) return NO;
+    if (![self isHTTPResponse:HTTPResponse validForHTTPValidator:[self acceptableStatusCodeValidator] errorCode:FAHTTPErrorUnacceptableStatusCode withError:error]) return NO;
+    if (![self isHTTPResponse:HTTPResponse validForHTTPValidator:[self acceptableContentTypeValidator] errorCode:FAHTTPErrorUnacceptableContentType withError:error]) return NO;
+    if (![self isHTTPResponse:HTTPResponse validForHTTPValidator:[self acceptableTextEncodingNameValidator] errorCode:FAHTTPErrorUnacceptableTextEncodingName withError:error]) return NO;
     return [super isValidResponse:response withError:error];
 }
 
@@ -63,31 +67,31 @@
     };
 }
 
-- (BOOL (^)(NSHTTPURLResponse *))contentLengthValidator {
+- (BOOL (^)(NSHTTPURLResponse *))maximumContentLengthValidator {
     long long maximumContentLength = self.maximumContentLength;
     return ^BOOL(NSHTTPURLResponse *response) {
-        return maximumContentLength > 0 && maximumContentLength <= [response expectedContentLength];
+        return maximumContentLength == 0 || (maximumContentLength > 0 && maximumContentLength >= [response expectedContentLength]);
     };
 }
 
-- (BOOL (^)(NSHTTPURLResponse *))statusCodeValidator {
+- (BOOL (^)(NSHTTPURLResponse *))acceptableStatusCodeValidator {
     NSIndexSet *acceptableStatusCodes = self.acceptableStatusCodes;
     return ^BOOL(NSHTTPURLResponse *response) {
-        return [acceptableStatusCodes count] > 0 && [acceptableStatusCodes containsIndex:[response statusCode]];
+        return [acceptableStatusCodes count] == 0 || ([acceptableStatusCodes count] > 0 && [acceptableStatusCodes containsIndex:[response statusCode]]);
     };
 }
 
-- (BOOL (^)(NSHTTPURLResponse *))contentTypeValidator {
+- (BOOL (^)(NSHTTPURLResponse *))acceptableContentTypeValidator {
     NSSet *acceptableContentTypes = self.acceptableContentTypes;
     return ^BOOL(NSHTTPURLResponse *response) {
-        return [acceptableContentTypes count] > 0 && [acceptableContentTypes containsObject:[response MIMEType]];
+        return [acceptableContentTypes count] == 0 || ([acceptableContentTypes count] > 0 && [acceptableContentTypes containsObject:[response MIMEType]]);
     };
 }
 
-- (BOOL (^)(NSHTTPURLResponse *))textEncodingNameValidator {
+- (BOOL (^)(NSHTTPURLResponse *))acceptableTextEncodingNameValidator {
     NSSet *acceptableTextEncodingNames = self.acceptableTextEncodingNames;
     return ^BOOL(NSHTTPURLResponse *response) {
-        return [acceptableTextEncodingNames count] > 0 && [acceptableTextEncodingNames containsObject:[response textEncodingName]];
+        return [acceptableTextEncodingNames count] == 0 || ([acceptableTextEncodingNames count] > 0 && [acceptableTextEncodingNames containsObject:[response textEncodingName]]);
     };
 }
 
