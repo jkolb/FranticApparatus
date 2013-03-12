@@ -28,6 +28,15 @@
 
 
 
+@interface FAURLReceiveProgress ()
+
+@property (nonatomic, readwrite) long long bytesReceived;
+@property (nonatomic, readwrite) long long totalBytesReceived;
+
+@end
+
+
+
 @implementation FAURLReceiveProgress
 
 - (id)init {

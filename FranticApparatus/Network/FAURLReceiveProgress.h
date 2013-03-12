@@ -42,9 +42,6 @@
 
 @interface FAMutableURLReceiveProgress : FAURLReceiveProgress
 
-@property (nonatomic, readwrite) long long bytesReceived;
-@property (nonatomic, readwrite) long long totalBytesReceived;
-
 - (id)initWithExpectedTotalBytes:(long long)expectedTotalBytes;
 
 - (void)addBytes:(NSUInteger)count;
