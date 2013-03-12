@@ -32,7 +32,7 @@
 
 
 
-@interface FATaskEvent : NSObject
+@interface FATaskEvent : NSObject <NSCopying>
 
 @property (nonatomic, copy, readonly) NSString *type;
 @property (nonatomic, weak, readonly) id <FATask> source;
