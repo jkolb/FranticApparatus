@@ -61,7 +61,7 @@ NSString * const FARetryTaskEventTypeDelay   = @"FARetryTaskEventTypeDelay";
         [blockTask triggerEventWithType:FATaskEventTypeResult payload:event.payload];
         [blockTask triggerEventWithType:FATaskEventTypeFinish payload:nil];
     }];
-    [self.task eventType:FATaskEventTypeResult task:self addTaskHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
+    [self.task eventType:FATaskEventTypeError task:self addTaskHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
         [blockTask tryFailedWithError:event.payload];
     }];
     [self.task startWithParameter:parameter];
