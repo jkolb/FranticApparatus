@@ -19,7 +19,7 @@ Here are a few of the things you can accomplish using composable tasks:
 
 ## What about NSOperation
 
-You may be thinking that FranticApparatus and NSOperation are similar so why would you choose one over the other? Here are a list of things that differentiates FranticApparatus tasks from NSOperations:
+You may be thinking that FranticApparatus and NSOperation are similar so why would you choose one over the other? Here is a list of things that differentiates FranticApparatus tasks from NSOperations:
 
 * All tasks are based off of the FATask protocol, this makes creating a task out of anything much easier than what can be done using NSOperation alone. This includes fake or stub tasks that can be used during testing.
 
