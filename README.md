@@ -15,7 +15,7 @@ Here are a few of the things you can accomplish using composable tasks:
 * ***Conditional tasks*** - Conditionally execute a specific task from a selection of tasks based on the input parameter to the task.
 * ***UI tasks*** - Wrap any task in a UI task to have all of that task's events forwarded to the main thread.
 * ***Network tasks*** - Use tasks to access remote APIs, download files to disk, or upload large files to a server. Chain them with a response handling task, wrap them in a retry task, or both.
-* ***Custom tasks*** - Any useful combination of composed tasks you can come up with. Some good candidates for a custom tasks: reachability, image resizing, disk access, and SQLite queries.
+* ***Custom tasks*** - Any useful combination of composed tasks you can come up with. Some good candidates for a custom task include: reachability, image resizing, disk access, and SQLite queries.
 
 ## What about NSOperation
 
