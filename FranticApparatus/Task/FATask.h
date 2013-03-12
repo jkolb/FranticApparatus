@@ -97,7 +97,7 @@ extern NSString * const FATaskEventTypeFinish;
  */
 - (void)addTarget:(id)target action:(SEL)action forEventType:(NSString *)type;
 
-- (NSSet *)registeredEvents;
+- (NSSet *)registeredEventTypes;
 
 - (void)triggerEventWithType:(NSString *)type payload:(id)payload;
 - (void)forwardEventType:(NSString *)type toTask:(id <FATask>)task;

@@ -101,8 +101,8 @@
     [self.backgroundTask forwardEventType:type toTask:task];
 }
 
-- (NSSet *)registeredEvents {
-    return [self.backgroundTask registeredEvents];
+- (NSSet *)registeredEventTypes {
+    return [self.backgroundTask registeredEventTypes];
 }
 
 - (BOOL)isCancelled {

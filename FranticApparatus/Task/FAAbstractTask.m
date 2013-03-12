@@ -107,7 +107,7 @@
     };
 }
 
-- (NSSet *)registeredEvents {
+- (NSSet *)registeredEventTypes {
     return [NSSet setWithArray:[self.handlersByEventType allKeys]];
 }
 
