@@ -131,7 +131,7 @@ NSString * const FARetryTaskEventTypeDelay   = @"FARetryTaskEventTypeDelay";
 
 - (void)cancel {
     [self cancelTimer];
-    [self cancel];
+    [super cancel];
 }
 
 @end
