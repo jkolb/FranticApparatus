@@ -33,11 +33,11 @@ You may be thinking that FranticApparatus and NSOperation are similar so why wou
 
 ## Example
 
-Unfortunately there are no one liners with Frantic Apparatus that make for good looking examples. An example project is forthcoming.
+Unfortunately there are no one liners with Frantic Apparatus that make for good looking examples, but [FranticMVCNetworking](https://github.com/jkolb/FranticMVCNetworking.git) is an example project based off of [MVCNetworking](http://developer.apple.com/library/ios/#samplecode/MVCNetworking/Introduction/Intro.html) that illustrates replacing ad-hoc NSOperation composition with what is available in FranticApparatus.
 
 ## How To Get Started
 
-Currently FranticApparatus can either be used by copying it's source files directly into your project, or by using it as a static library by dragging and dropping the FranticApparatus.xcodeproj file into your project or workspace. CocoaPods integration is forthcoming.
+Currently FranticApparatus can either be used by copying it's source files directly into your project, or by using it as a static library by dragging and dropping the FranticApparatus.xcodeproj file into your project or workspace. There is also a podspec file that can be used in a project's Podfile as a [local file reference](https://gist.github.com/radiospiel/2009100).
 
 ## Requirements
 
