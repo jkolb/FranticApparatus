@@ -24,7 +24,6 @@
 		E553442F16D17ACB007BF606 /* FranticApparatus.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E553442E16D17ACB007BF606 /* FranticApparatus.h */; };
 		E553443116D17ACB007BF606 /* FranticApparatus.m in Sources */ = {isa = PBXBuildFile; fileRef = E553443016D17ACB007BF606 /* FranticApparatus.m */; };
 		E553443916D17ACB007BF606 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E553443816D17ACB007BF606 /* SenTestingKit.framework */; };
-		E553443B16D17ACB007BF606 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E553443A16D17ACB007BF606 /* UIKit.framework */; };
 		E553443C16D17ACB007BF606 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E553442916D17ACB007BF606 /* Foundation.framework */; };
 		E553443F16D17ACB007BF606 /* libFranticApparatus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E553442616D17ACB007BF606 /* libFranticApparatus.a */; };
 		E553444516D17ACB007BF606 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E553444316D17ACB007BF606 /* InfoPlist.strings */; };
@@ -142,7 +141,6 @@
 		E553443016D17ACB007BF606 /* FranticApparatus.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FranticApparatus.m; sourceTree = "<group>"; };
 		E553443716D17ACB007BF606 /* FranticApparatusTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FranticApparatusTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E553443816D17ACB007BF606 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
-		E553443A16D17ACB007BF606 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		E553444216D17ACB007BF606 /* FranticApparatusTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FranticApparatusTests-Info.plist"; sourceTree = "<group>"; };
 		E553444416D17ACB007BF606 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		E553444616D17ACB007BF606 /* FranticApparatusTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FranticApparatusTests.h; sourceTree = "<group>"; };
@@ -205,7 +203,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E553443916D17ACB007BF606 /* SenTestingKit.framework in Frameworks */,
-				E553443B16D17ACB007BF606 /* UIKit.framework in Frameworks */,
 				E553443C16D17ACB007BF606 /* Foundation.framework in Frameworks */,
 				E553443F16D17ACB007BF606 /* libFranticApparatus.a in Frameworks */,
 			);
@@ -238,7 +235,6 @@
 			children = (
 				E553442916D17ACB007BF606 /* Foundation.framework */,
 				E553443816D17ACB007BF606 /* SenTestingKit.framework */,
-				E553443A16D17ACB007BF606 /* UIKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
