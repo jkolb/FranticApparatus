@@ -69,11 +69,11 @@
 }
 
 - (void)eventType:(NSString *)type context:(id)context addContextHandler:(void (^)(id context, FATaskEvent *event))contextHandler {
-    [self eventType:type addHandler:[[self class] handlerWithContext:context contextHandler:contextHandler]];
+    [self eventType:type addHandler:[FAAbstractTask handlerWithContext:context contextHandler:contextHandler]];
 }
 
 - (void)addTarget:(id)target action:(SEL)action forEventType:(NSString *)type {
-    [self eventType:type addHandler:[[self class] handlerWithContext:target contextHandler:^(id context, FATaskEvent *event) {
+    [self eventType:type addHandler:[FAAbstractTask handlerWithContext:target contextHandler:^(id context, FATaskEvent *event) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
         [context performSelector:action withObject:event];
@@ -107,15 +107,6 @@
 
 - (void)cancel {
     [self.backgroundTask cancel];
-}
-
-- (void)invokeTarget:(id)target action:(SEL)action withObject:(id)object {
-    NSMethodSignature *signature = [[target class] instanceMethodSignatureForSelector:action];
-    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-    invocation.target = target;
-    invocation.selector = action;
-    [invocation setArgument:&object atIndex:2];
-    [invocation invoke];
 }
 
 @end
