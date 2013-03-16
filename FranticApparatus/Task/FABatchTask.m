@@ -38,8 +38,8 @@
 
 @implementation FABatchTask
 
-- (id)init {
-    self = [super init];
+- (id)initWithParameter:(id)parameter {
+    self = [super initWithParameter:parameter];
     if (self == nil) return nil;
     
     _tasks = [[NSMutableDictionary alloc] initWithCapacity:2];
