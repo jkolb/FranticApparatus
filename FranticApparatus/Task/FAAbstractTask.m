@@ -81,29 +81,26 @@
     [handlers addObject:handler];
 }
 
-- (void)eventType:(NSString *)type addTaskHandler:(void (^)(id blockTask, FATaskEvent *event))taskHandler {
-    [self eventType:type addHandler:[[self class] handlerWithTask:self taskHandler:taskHandler]];
-}
-
-- (void)eventType:(NSString *)type task:(id <FATask>)task addTaskHandler:(void (^)(id blockTask, FATaskEvent *event))taskHandler {
-    [self eventType:type addHandler:[[self class] handlerWithTask:task taskHandler:taskHandler]];
+- (void)eventType:(NSString *)type context:(id)context addContextHandler:(void (^)(id context, FATaskEvent *event))contextHandler {
+    [self eventType:type addHandler:[[self class] handlerWithContext:context contextHandler:contextHandler]];
 }
 
 - (void)addTarget:(id)target action:(SEL)action forEventType:(NSString *)type {
-    __typeof__(target) weakTarget = target;
-    [self eventType:type addTaskHandler:^(id blockTask, FATaskEvent *event) {
-        __typeof__(target) blockTarget = weakTarget;
-        if (blockTarget == nil) return;
-        [blockTask invokeTarget:blockTarget action:action withObject:event];
-    }];
+    [self eventType:type addHandler:[[self class] handlerWithContext:target contextHandler:^(id context, FATaskEvent *event) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+        [context performSelector:action withObject:event];
+#pragma clang diagnostic pop
+    }]];
 }
 
-+ (void (^)(FATaskEvent *))handlerWithTask:(id <FATask>)task taskHandler:(void (^)(id blockTask, FATaskEvent *event))taskHandler {
-    __typeof__(task) __weak weakTask = task;
++ (void (^)(FATaskEvent *))handlerWithContext:(id)context contextHandler:(void (^)(id context, FATaskEvent *event))contextHandler {
+    id __weak weakContext = context;
     return ^(FATaskEvent *event) {
-        __typeof__(task) blockTask = weakTask;
-        if (blockTask == nil || [blockTask isCancelled]) return;
-        taskHandler(blockTask, event);
+        id blockContext = weakContext;
+        if (blockContext == nil) return;
+        if ([blockContext respondsToSelector:@selector(isCancelled)] && [blockContext isCancelled]) return;
+        contextHandler(blockContext, event);
     };
 }
 
@@ -121,7 +118,7 @@
 }
 
 - (void)forwardEventType:(NSString *)type toTask:(id <FATask>)task {
-    [self eventType:type task:task addTaskHandler:^(id blockTask, FATaskEvent *event) {
+    [self eventType:type context:task addContextHandler:^(id blockTask, FATaskEvent *event) {
         [blockTask triggerEventWithType:event.type payload:event.payload];
     }];
 }
@@ -134,15 +131,6 @@
     self.cancelled = YES;
     [self triggerEventWithType:FATaskEventTypeCancel payload:nil];
     [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
-}
-
-- (void)invokeTarget:(id)target action:(SEL)action withObject:(id)object {
-    NSMethodSignature *signature = [[target class] instanceMethodSignatureForSelector:action];
-    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-    invocation.target = target;
-    invocation.selector = action;
-    [invocation setArgument:&object atIndex:2];
-    [invocation invoke];
 }
 
 @end

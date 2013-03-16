@@ -68,21 +68,17 @@
     [self.backgroundTask eventType:type addHandler:[self handlerOnMainThread:handler]];
 }
 
-- (void)eventType:(NSString *)type addTaskHandler:(void (^)(id, FATaskEvent *))taskHandler {
-    [self.backgroundTask eventType:type addHandler:[self handlerOnMainThread:[FAAbstractTask handlerWithTask:self taskHandler:taskHandler]]];
-}
-
-- (void)eventType:(NSString *)type task:(id<FATask>)task addTaskHandler:(void (^)(id, FATaskEvent *))taskHandler {
-    [self.backgroundTask eventType:type addHandler:[self handlerOnMainThread:[FAAbstractTask handlerWithTask:task taskHandler:taskHandler]]];
+- (void)eventType:(NSString *)type context:(id)context addContextHandler:(void (^)(id context, FATaskEvent *event))contextHandler {
+    [self eventType:type addHandler:[[self class] handlerWithContext:context contextHandler:contextHandler]];
 }
 
 - (void)addTarget:(id)target action:(SEL)action forEventType:(NSString *)type {
-    __typeof__(target) weakTarget = target;
-    [self eventType:type addTaskHandler:^(id blockTask, FATaskEvent *event) {
-        __typeof__(target) blockTarget = weakTarget;
-        if (blockTarget == nil) return;
-        [blockTask invokeTarget:blockTarget action:action withObject:event];
-    }];
+    [self eventType:type addHandler:[[self class] handlerWithContext:target contextHandler:^(id context, FATaskEvent *event) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+        [context performSelector:action withObject:event];
+#pragma clang diagnostic pop
+    }]];
 }
 
 - (void (^)(FATaskEvent *))handlerOnMainThread:(void (^)(FATaskEvent *))handler {

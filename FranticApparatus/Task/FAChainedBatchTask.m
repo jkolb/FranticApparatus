@@ -31,7 +31,7 @@
 @implementation FAChainedBatchTask
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {
-    [task eventType:FATaskEventTypeResult task:self addTaskHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
+    [task eventType:FATaskEventTypeResult context:self addContextHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
         [blockTask advanceToNextKey];
         
         if ([blockTask isFinished]) {
@@ -42,7 +42,7 @@
         }
     }];
     
-    [task eventType:FATaskEventTypeError task:self addTaskHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
+    [task eventType:FATaskEventTypeError context:self addContextHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
         [blockTask triggerEventWithType:FATaskEventTypeError payload:event.payload];
         [blockTask triggerEventWithType:FATaskEventTypeFinish payload:nil];
     }];
