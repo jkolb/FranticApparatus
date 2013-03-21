@@ -1,4 +1,4 @@
-# [FranticApparatus 0.3](https://github.com/jkolb/FranticApparatus)
+# [FranticApparatus 0.3.1](https://github.com/jkolb/FranticApparatus)
 
 Asynchronous processing is the future, so it needs to be made as easy as possible to include in your applications. I posit that all iOS user interfaces should only make asynchronous calls into their logic layers, and only respond to events from the user or from the logic layer to make things happen. FranticApparatus is designed with that in mind.
 
@@ -41,7 +41,7 @@ Currently FranticApparatus can either be used by copying it's source files direc
 
 ## Requirements
 
-FranticApparatus 0.3 requires ARC and iOS 6.0+.
+FranticApparatus 0.3.1 requires ARC and iOS 6.0+.
 
 ## Contact
 
