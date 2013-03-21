@@ -4,7 +4,7 @@ Asynchronous processing is the future, so it needs to be made as easy as possibl
 
 ## Overview
 
-FranticApparatus is a composable task framework for iOS. Tasks are units of work that execute, optionally generate a result, and trigger events during important points during their life-cycle. Tasks are most useful when they are asynchronous but there is nothing stopping them from being synchronous. Tasks are built on top of a protocol, FATask, this aids in composability and allowing for almost anything to be modeled as a task. If you have existing asynchronous functionality their is a good chance you can hide it behind the FATask protocol and gain the benefits that come from composability.
+FranticApparatus is a composable task framework for iOS. Tasks are units of work that execute, optionally generate a result, and trigger events during important points during their life-cycle. Tasks are most useful when they are asynchronous but there is nothing stopping them from being synchronous. Tasks are built on top of a protocol, FATask, this aids in composability and allowing for almost anything to be modeled as a task. If you have existing asynchronous functionality there is a good chance you can hide it behind the FATask protocol and gain the benefits that come from composability.
 
 Here are a few of the things you can accomplish using composable tasks:
 
