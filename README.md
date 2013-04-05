@@ -1,6 +1,116 @@
 # [FranticApparatus 0.3.1](https://github.com/jkolb/FranticApparatus)
 
-Asynchronous processing is the future, so it needs to be made as easy as possible to include in your applications. I posit that all iOS user interfaces should only make asynchronous calls into their logic layers, and only respond to events from the user or from the logic layer to make things happen. FranticApparatus is designed with that in mind.
+#### FranticApparatus makes asynchronous easy!
+
+How to make an asynchronous network request:
+
+	FAURLConnectionDataTask *networkTask = [[FAURLConnectionDataTask alloc] init];
+	
+	[task eventType:FATaskEventTypeError addHandler:^(FATaskEvent *event) {
+		NSError *error = event.payload;
+		NSLog(@"%@", error);
+	}];
+	
+	[task eventType:FATaskEventTypeResult addHandler:^(FATaskEvent *event) {
+		FAURLDataResult *result = event.payload;
+		NSLog(@"%@", result.response);
+		NSLog(@"%@", result.data);
+	}];
+	
+	NSURL *URL = [[NSURL alloc] initWithString:@"http://www.reddit.com/r/all.json"];
+	NSURLRequest *request = [[NSURLRequest alloc] initWithURL:URL];
+	
+	[networkTask startWithParameter:request];
+
+How to parse the response of an asynchronous network request on a background thread:
+
+	FAURLConnectionDataTask *networkTask = [[FAURLConnectionDataTask alloc] init];
+
+	FABackgroundTask *parseTask = [[FABackgroundTask alloc] init];
+	[parseTask setGenerateResult:^id(id <FATask> blockTask, FAURLDataResult *result, NSError **error) {
+        return [NSJSONSerialization JSONObjectWithData:result.data options:0 error:error];
+    }];
+
+	FAChainedBatchTask *chainedTask = [[FAChainedBatchTask alloc] init];
+	[chainedTask addTask:networkTask];
+	[chainedTask addTask:parseTask];
+	
+	[chainedTask eventType:FATaskEventTypeError addHandler:^(FATaskEvent *event) {
+		NSError *error = event.payload;
+		NSLog(@"%@", error);
+	}];
+	
+	[chainedTask eventType:FATaskEventTypeResult addHandler:^(FATaskEvent *event) {
+		id JSONObject = event.payload;
+		NSLog(@"%@", JSONObject);
+	}];
+		
+	NSURL *URL = [[NSURL alloc] initWithString:@"http://www.reddit.com/r/all.json"];
+	NSURLRequest *request = [[NSURLRequest alloc] initWithURL:URL];
+	
+	[chainedTask startWithParameter:request];
+
+How to do all of the above but also trigger events on the main thread:
+
+	FAURLConnectionDataTask *networkTask = [[FAURLConnectionDataTask alloc] init];
+
+	FABackgroundTask *parseTask = [[FABackgroundTask alloc] init];
+	[parseTask setGenerateResult:^id(id <FATask> blockTask, FAURLDataResult *result, NSError **error) {
+        return [NSJSONSerialization JSONObjectWithData:result.data options:0 error:error];
+    }];
+
+	FAChainedBatchTask *chainedTask = [[FAChainedBatchTask alloc] init];
+	[chainedTask addTask:networkTask];
+	[chainedTask addTask:parseTask];
+
+	FAUITask *mainTask = [[FAUITask alloc] init];
+	mainTask.backgroundTask = chainedTask;
+	[mainTask addTarget:self action:@selector(showActivity:) forEventType:FATaskEventTypeStart];
+	[mainTask addTarget:self action:@selector(displayError:) forEventType:FATaskEventTypeError];
+	[mainTask addTarget:self action:@selector(displayResult:) forEventType:FATaskEventTypeResult];
+	[mainTask addTarget:self action:@selector(hideActivity:) forEventType:FATaskEventTypeFinish];
+			
+	NSURL *URL = [[NSURL alloc] initWithString:@"http://www.reddit.com/r/all.json"];
+	NSURLRequest *request = [[NSURLRequest alloc] initWithURL:URL];
+	
+	[mainTask startWithParameter:request];
+
+How to do all of the above but retry the network task up to 3 times if it fails with an error:
+
+	FARetryTask *retryTask = [[FARetryTask alloc] init];
+
+	retryTask.maximumRetryCount = 3;
+	
+    [retryTask setFactory:^id<FATask>(id parameter) {
+    	return [[FAURLConnectionDataTask alloc] init];
+    }];
+	
+	FABackgroundTask *parseTask = [[FABackgroundTask alloc] init];
+	[parseTask setGenerateResult:^id(id <FATask> blockTask, FAURLDataResult *result, NSError **error) {
+        return [NSJSONSerialization JSONObjectWithData:result.data options:0 error:error];
+    }];
+
+	FAChainedBatchTask *chainedTask = [[FAChainedBatchTask alloc] init];
+	[chainedTask addTask:retryTask];
+	[chainedTask addTask:parseTask];
+
+	FAUITask *mainTask = [[FAUITask alloc] init];
+	
+	[retryTask forwardEventType:FARetryTaskEventTypeDelay toTask:mainTask];
+	[retryTask forwardEventType:FARetryTaskEventTypeRestart toTask:mainTask];
+	
+	mainTask.backgroundTask = chainedTask;
+	[mainTask addTarget:self action:@selector(showActivity:) forEventType:FATaskEventTypeStart];
+	[mainTask addTarget:self action:@selector(displayError:) forEventType:FATaskEventTypeError];
+	[mainTask addTarget:self action:@selector(displayResult:) forEventType:FATaskEventTypeResult];
+	[mainTask addTarget:self action:@selector(hideActivity:) forEventType:FATaskEventTypeFinish];
+	[mainTask addTarget:self action:@selector(showDelayed:) forEventType:FARetryTaskEventTypeDelay];
+	[mainTask addTarget:self action:@selector(showRestarted:) forEventType:FARetryTaskEventTypeRestart];
+
+	NSURL *URL = [[NSURL alloc] initWithString:@"http://www.reddit.com/r/all.json"];
+	NSURLRequest *request = [[NSURLRequest alloc] initWithURL:URL];
+	
+	[mainTask startWithParameter:request];
 
 ## Overview
 
@@ -33,11 +143,11 @@ You may be thinking that FranticApparatus and NSOperation are similar so why wou
 
 ## Example
 
-Unfortunately there are no one liners with Frantic Apparatus that make for good looking examples, but [FranticMVCNetworking](https://github.com/jkolb/FranticMVCNetworking.git) is an example project based off of [MVCNetworking](http://developer.apple.com/library/ios/#samplecode/MVCNetworking/Introduction/Intro.html) that illustrates replacing ad-hoc NSOperation composition with what is available in FranticApparatus.
+[FranticMVCNetworking](https://github.com/jkolb/FranticMVCNetworking.git) is an example project based off of [MVCNetworking](http://developer.apple.com/library/ios/#samplecode/MVCNetworking/Introduction/Intro.html) that illustrates replacing ad-hoc NSOperation composition with what is available in FranticApparatus.
 
 ## How To Get Started
 
-Currently FranticApparatus can either be used by copying it's source files directly into your project, or by using it as a static library by dragging and dropping the FranticApparatus.xcodeproj file into your project or workspace. There is also a podspec file that can be used in a project's Podfile as a [local file reference](https://gist.github.com/radiospiel/2009100).
+Currently FranticApparatus can either be used by copying it's source files directly into your project, or by using it as a static library by dragging and dropping the FranticApparatus.xcodeproj file into your project or workspace. There is also a podspec file that can be used in a project's Podfile as a [local file reference](https://gist.github.com/radiospiel/2009100). FranticApparatus while useable is still in flux and while the general concept should stay the same, the implementation may change a bit more. Consider it in an alpha stage.
 
 ## Requirements
 
