@@ -27,7 +27,6 @@
 #import "FABackgroundTask.h"
 #import "FATaskGenericResultEvent.h"
 #import "FATaskErrorEvent.h"
-#import "FATaskFinishEvent.h"
 
 
 
@@ -51,8 +50,8 @@
     }
 }
 
-- (void)startWithParameter:(id)parameter {
-    [super startWithParameter:parameter];
+- (void)start {
+    [super start];
     __typeof__(self) __weak weakSelf = self;
     dispatch_async([self backgroundQueue], ^{
         __typeof__(self) blockSelf = weakSelf;
@@ -62,14 +61,13 @@
 }
 
 - (void)executeInBackground {
-    id parameter = [self parameter];
     NSError *error = nil;
     id result = nil;
     
-    if (self.generateResult == nil) {
-        result = [self generateResultWithParameter:parameter error:&error];
+    if (self.execute == nil) {
+        result = [self executeWithError:&error];
     } else {
-        result = self.generateResult(self, parameter, &error);
+        result = self.execute(self, &error);
     }
     
     if (result == nil) {
@@ -81,8 +79,8 @@
     }
 }
 
-- (id)generateResultWithParameter:(id)parameter error:(NSError **)error {
-    return [NSNull null];
+- (id)executeWithError:(NSError **)error {
+    return @(YES);
 }
 
 - (FATaskResultEvent *)resultEventForResult:(id)result {

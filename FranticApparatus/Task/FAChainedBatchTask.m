@@ -27,7 +27,6 @@
 #import "FAChainedBatchTask.h"
 #import "FATaskResultEvent.h"
 #import "FATaskErrorEvent.h"
-#import "FATaskFinishEvent.h"
 
 
 
@@ -40,7 +39,7 @@
         [self forwardEvent:event];
         [self finish];
     } else {
-        [self startTaskForKey:[self currentKey] withParameter:result];
+        [self startTaskForKey:[self currentKey] event:event];
     }
 }
 

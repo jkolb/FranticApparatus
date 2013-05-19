@@ -31,21 +31,13 @@
 
 @implementation FASequentialBatchTask
 
-- (id)initWithParameterDictionary:(NSDictionary *)parameters {
-    return [self initWithParameter:parameters];
-}
-
-- (id)parameter {
-    return [[super parameter] objectForKey:[self currentKey]];
-}
-
 - (void)taskFinishEvent:(FATaskFinishEvent *)event withKey:(id)key {
     [self advanceToNextKey];
     
     if ([self isFinished]) {
         [self finish];
     } else {
-        [self startTaskForKey:[self currentKey] withParameter:[self parameter]];
+        [self startTaskForKey:[self currentKey] event:nil];
     }
 }
 

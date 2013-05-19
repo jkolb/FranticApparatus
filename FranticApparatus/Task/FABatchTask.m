@@ -53,7 +53,7 @@
     [self.tasks setObject:task forKey:key];
 }
 
-- (void)setFactory:(id <FATask> (^)(id parameter))factory forKey:(id <NSCopying>)key {
+- (void)setFactory:(id <FATask> (^)(id event))factory forKey:(id <NSCopying>)key {
     [self.tasks setObject:factory forKey:key];
 }
 
@@ -65,7 +65,7 @@
     return [self.tasks count];
 }
 
-- (id <FATask>)taskWithKey:(id)key parameter:(id)parameter {
+- (id <FATask>)taskWithKey:(id)key event:(id)event {
     id object = [self.tasks objectForKey:key];
     if (object == nil) return nil;
     id <FATask> task;
@@ -73,8 +73,8 @@
     if ([object conformsToProtocol:@protocol(FATask)]) {
         task = object;
     } else {
-        id <FATask> (^factory)(id parameter) = object;
-        task = factory(parameter);
+        id <FATask> (^factory)(id event) = object;
+        task = factory(event);
         [self.tasks setObject:task forKey:key];
     }
     
@@ -95,10 +95,10 @@
     }]];
 }
 
-- (void)startTaskForKey:(id)key withParameter:(id)parameter {
-    id <FATask> task = [self taskWithKey:key parameter:parameter];
+- (void)startTaskForKey:(id)key event:(id)event {
+    id <FATask> task = [self taskWithKey:key event:event];
     [self configureTask:task withKey:key];
-    [task startWithParameter:parameter];
+    [task start];
 }
 
 - (void)cancel {

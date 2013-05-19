@@ -41,16 +41,16 @@ typedef void (^FAKeyCallback)(id key, id object);
 @interface FABatchTask : FAAbstractTask
 
 - (void)setTask:(id <FATask>)task forKey:(id <NSCopying>)key;
-- (void)setFactory:(id <FATask> (^)(id parameter))factory forKey:(id <NSCopying>)key;
+- (void)setFactory:(id <FATask> (^)(id event))factory forKey:(id <NSCopying>)key;
 
 - (NSArray *)allKeys;
 - (NSUInteger)count;
 
-- (id <FATask>)taskWithKey:(id)key parameter:(id)parameter;
+- (id <FATask>)taskWithKey:(id)key event:(id)event;
 
 - (void)configureTask:(id <FATask>)task withKey:(id)key;
 
-- (void)startTaskForKey:(id)key withParameter:(id)parameter;
+- (void)startTaskForKey:(id)key event:(id)event;
 
 - (void)taskResultEvent:(FATaskResultEvent *)event withKey:(id)key;
 - (void)taskErrorEvent:(FATaskErrorEvent *)event withKey:(id)key;

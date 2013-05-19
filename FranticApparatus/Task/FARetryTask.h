@@ -30,7 +30,7 @@
 
 @interface FARetryTask : FAAbstractTask
 
-@property (copy) id <FATask> (^factory)(id parameter);
+@property (copy) id <FATask> (^factory)();
 @property NSUInteger maximumRetryCount;
 @property (readonly) NSUInteger retryCount;
 @property (copy) BOOL (^shouldRetry)(id error);

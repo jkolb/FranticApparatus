@@ -51,12 +51,8 @@
 }
 
 - (void)start {
-    [self startWithParameter:nil];
-}
-
-- (void)startWithParameter:(id)parameter {
     [self.backgroundTask forwardToDispatcher:self];
-    [self.backgroundTask startWithParameter:parameter];
+    [self.backgroundTask start];
 }
 
 - (BOOL)isCancelled {

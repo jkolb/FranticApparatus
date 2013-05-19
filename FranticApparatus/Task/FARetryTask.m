@@ -29,7 +29,6 @@
 #import "FATaskErrorEvent.h"
 #import "FATaskRestartEvent.h"
 #import "FATaskDelayEvent.h"
-#import "FATaskFinishEvent.h"
 
 
 
@@ -49,14 +48,13 @@
     if (_delayTimer != nil) dispatch_source_cancel(_delayTimer);
 }
 
-- (void)startWithParameter:(id)parameter {
-    [super startWithParameter:parameter];
+- (void)start {
+    [super start];
     [self try];
 }
 
 - (void)try {
-    id parameter = [self parameter];
-    self.task = self.factory(parameter);
+    self.task = self.factory();
     [self.task addHandler:[FATaskResultEvent handlerWithContext:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
         [blockTask forwardEvent:event];
         [blockTask finish];
@@ -64,7 +62,7 @@
     [self.task addHandler:[FATaskErrorEvent handlerWithContext:self block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
         [blockTask tryFailedWithError:event.error];
     }]];
-    [self.task startWithParameter:parameter];
+    [self.task start];
 }
 
 - (void)tryFailedWithError:(id)error {
@@ -88,7 +86,7 @@
 - (void)delayBeforeRetry {
     NSTimeInterval delayInterval = [self nextDelayInterval];
     
-    if (delayInterval == 0) {
+    if (delayInterval <= 0) {
         [self retry];
     } else {
         [self dispatchEvent:[FATaskDelayEvent eventWithSource:self]];

@@ -39,20 +39,12 @@
 
 @implementation FAParallelBatchTask
 
-- (id)initWithParameterDictionary:(NSDictionary *)parameters {
-    return [self initWithParameter:parameters];
-}
-
-- (void)startWithParameter:(id)parameter {
-    [super startWithParameter:parameter];
+- (void)start {
+    [super start];
     
     for (id key in [self allKeys]) {
-        [self startTaskForKey:key withParameter:[self parameterForKey:key]];
+        [self startTaskForKey:key event:nil];
     }
-}
-
-- (id)parameterForKey:(id)key {
-    return [[self parameter] objectForKey:key];
 }
 
 - (void)taskFinishEvent:(FATaskFinishEvent *)event withKey:(id)key {

@@ -25,16 +25,14 @@
 
 
 #import "FAConditionalBatchTask.h"
-#import "FATaskResultEvent.h"
 #import "FATaskErrorEvent.h"
-#import "FATaskFinishEvent.h"
 
 
 
 @implementation FAConditionalBatchTask
 
-- (void)startWithParameter:(id)parameter {
-    [super startWithParameter:parameter];
+- (void)start {
+    [super start];
     NSError *error = nil;
     id taskKey = [self determineTaskKeyWithError:&error];
     
@@ -44,26 +42,12 @@
         return;
     }
     
-    id taskParameter = [self determineTaskParameterWithError:&error];
-    
-    if (taskParameter == nil) {
-        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:error]];
-        [self finish];
-        return;
-    }
-    
-    [self startTaskForKey:taskKey withParameter:taskParameter];
+    [self startTaskForKey:taskKey event:nil];
 }
 
 - (id)determineTaskKeyWithError:(NSError **)error {
     if (self.determineTaskKey == nil) return [[self allKeys] lastObject];
-    return self.determineTaskKey([self parameter], error);
-}
-
-- (id)determineTaskParameterWithError:(NSError **)error {
-    id parameter = [self parameter];
-    if (self.determineTaskParameter == nil) return parameter;
-    return self.determineTaskParameter(parameter, error);
+    return self.determineTaskKey(error);
 }
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {

@@ -53,7 +53,7 @@
     [self setTask:task forKey:[self nextKey]];
 }
 
-- (void)addFactory:(id <FATask> (^)(id parameter))factory {
+- (void)addFactory:(id <FATask> (^)(id event))factory {
     [self setFactory:factory forKey:[self nextKey]];
 }
 
@@ -61,18 +61,14 @@
     return @([self count]);
 }
 
-- (void)startWithParameter:(id)parameter {
-    [super startWithParameter:parameter];
+- (void)start {
+    [super start];
     self.sortedKeys = [[self allKeys] sortedArrayUsingComparator:self.keyComparator];
-    [self startTaskForKey:[self currentKey] withParameter:[self parameter]];
+    [self startTaskForKey:[self currentKey] event:nil];
 }
 
 - (id)currentKey {
     return [self.sortedKeys objectAtIndex:self.currentIndex];
-}
-
-- (id)currentParamter {
-    return nil;
 }
 
 - (void)advanceToNextKey {

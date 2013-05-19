@@ -53,10 +53,6 @@
 }
 
 - (void)start {
-    [self startWithParameter:nil];
-}
-
-- (void)startWithParameter:(id)parameter {
     [self dispatchEvent:[FATaskStartEvent eventWithSource:self]];
 }
 

@@ -30,6 +30,4 @@
 
 @interface FASequentialBatchTask : FAOrderedBatchTask
 
-- (id)initWithParameterDictionary:(NSDictionary *)parameters;
-
 @end

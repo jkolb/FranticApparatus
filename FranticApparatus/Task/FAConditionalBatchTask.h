@@ -30,7 +30,6 @@
 
 @interface FAConditionalBatchTask : FABatchTask
 
-@property (copy) id (^determineTaskKey)(id parameter, NSError **error);
-@property (copy) id (^determineTaskParameter)(id parameter, NSError **error);
+@property (copy) id (^determineTaskKey)(NSError **error);
 
 @end
