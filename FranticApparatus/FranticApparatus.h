@@ -24,6 +24,14 @@
 
 
 
+// Event
+#import "FAEvent.h"
+#import "FAEventHandler.h"
+#import "FAEventDispatcher.h"
+#import "FAAbstractEventDispatcher.h"
+#import "FASynchronousEventDispatcher.h"
+#import "FAAsynchronousEventDispatcher.h"
+
 // Task
 #import "FATask.h"
 #import "FAAbstractTask.h"
@@ -60,5 +68,7 @@
 
 // Network Events
 #import "FAURLConnectionTaskResultEvent.h"
+#import "FAURLConnectionTaskDataResultEvent.h"
+#import "FAURLConnectionTaskDownloadResultEvent.h"
 #import "FAURLConnectionTaskSendProgressEvent.h"
 #import "FAURLConnectionTaskReceiveProgressEvent.h"
