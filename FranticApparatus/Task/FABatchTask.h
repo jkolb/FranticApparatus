@@ -32,6 +32,12 @@ typedef void (^FAKeyCallback)(id key, id object);
 
 
 
+@class FATaskResultEvent;
+@class FATaskErrorEvent;
+@class FATaskFinishEvent;
+
+
+
 @interface FABatchTask : FAAbstractTask
 
 - (void)setTask:(id <FATask>)task forKey:(id <NSCopying>)key;
@@ -45,5 +51,9 @@ typedef void (^FAKeyCallback)(id key, id object);
 - (void)configureTask:(id <FATask>)task withKey:(id)key;
 
 - (void)startTaskForKey:(id)key withParameter:(id)parameter;
+
+- (void)taskResultEvent:(FATaskResultEvent *)event withKey:(id)key;
+- (void)taskErrorEvent:(FATaskErrorEvent *)event withKey:(id)key;
+- (void)taskFinishEvent:(FATaskFinishEvent *)event withKey:(id)key;
 
 @end

@@ -1,5 +1,5 @@
 //
-// FARetryTask.h
+// FAEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,17 +24,29 @@
 
 
 
-#import "FAAbstractTask.h"
+#import <Foundation/Foundation.h>
 
 
 
-@interface FARetryTask : FAAbstractTask
+@class FAEventHandler;
 
-@property (copy) id <FATask> (^factory)(id parameter);
-@property NSUInteger maximumRetryCount;
-@property (readonly) NSUInteger retryCount;
-@property (copy) BOOL (^shouldRetry)(id error);
-@property (copy) NSTimeInterval (^calculateDelayInterval)(NSUInteger retryCount);
-@property NSTimeInterval delayInterval;
+@protocol FAEventDispatcher;
+
+
+
+@interface FAEvent : NSObject <NSCopying>
+
+@property (nonatomic, weak, readonly) id source;
+
++ (id)eventWithSource:(id)source;
+
+- (id)initWithSource:(id)source;
+
+- (id)eventForwardedToSource:(id)source;
+
++ (FAEventHandler *)handlerWithBlock:(void (^)(id event))block;
++ (FAEventHandler *)handlerWithContext:(id)context block:(void (^)(id context, id event))block;
++ (FAEventHandler *)handlerWithTarget:(id)target action:(SEL)action;
++ (FAEventHandler *)handlerWithDispatcher:(id <FAEventDispatcher>)dispatcher;
 
 @end

@@ -25,7 +25,7 @@
 
 
 #import "FAParallelBatchTask.h"
-#import "FABatchResult.h"
+#import "FATaskFinishEvent.h"
 
 
 
@@ -55,24 +55,12 @@
     return [[self parameter] objectForKey:key];
 }
 
-- (void)configureTask:(id<FATask>)task withKey:(id)key {
-    [task eventType:FATaskEventTypeResult context:self addContextHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
-        FABatchResult *result = [[FABatchResult alloc] initWithKey:key value:event.payload];
-        [blockTask triggerEventWithType:FATaskEventTypeResult payload:result];
-    }];
+- (void)taskFinishEvent:(FATaskFinishEvent *)event withKey:(id)key {
+    ++self.finishedCount;
     
-    [task eventType:FATaskEventTypeError context:self addContextHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
-        FABatchResult *error = [[FABatchResult alloc] initWithKey:key value:event.payload];
-        [blockTask triggerEventWithType:FATaskEventTypeError payload:error];
-    }];
-
-    [task eventType:FATaskEventTypeFinish context:self addContextHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
-        ++blockTask.finishedCount;
-        
-        if (blockTask.finishedCount >= [blockTask count]) {
-            [blockTask triggerEventWithType:FATaskEventTypeFinish payload:nil];
-        }
-    }];
+    if (self.finishedCount >= [self count]) {
+        [self finish];
+    }
 }
 
 @end

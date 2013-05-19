@@ -25,8 +25,9 @@
 
 
 #import "FAURLConnectionDownloadTask.h"
-#import "FAURLDownloadResult.h"
-#import "FAURLReceiveProgress.h"
+#import "FAURLConnectionTaskReceiveProgressEvent.h"
+#import "FAURLConnectionTaskDownloadResultEvent.h"
+#import "FATaskFinishEvent.h"
 
 
 
@@ -40,8 +41,9 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
 
 @property (nonatomic, strong) NSMutableData *buffer;
 @property (nonatomic, strong) NSOutputStream *outputStream;
-@property (nonatomic, strong) FAMutableURLReceiveProgress *progress;
-@property (nonatomic, strong) FAURLDownloadResult *result;
+@property (nonatomic, strong) NSURLResponse *response;
+@property (nonatomic, readwrite) long long bytesReceived;
+@property (nonatomic, readwrite) long long totalBytesReceived;
 
 @end
 
@@ -50,12 +52,12 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
 @implementation FAURLConnectionDownloadTask
 
 - (void)handleValidResponse:(NSURLResponse *)response {
-    self.result = [[FAURLDownloadResult alloc] initWithResponse:response];
-    self.result.downloadPath = self.downloadPath;
-    self.progress = [[FAMutableURLReceiveProgress alloc] initWithExpectedTotalBytes:[response expectedContentLength]];
+    self.response = response;
+    self.bytesReceived = 0;
+    self.totalBytesReceived = 0;
     
     [self.outputStream close];
-    self.outputStream = [NSOutputStream outputStreamToFileAtPath:self.result.downloadPath append:NO];
+    self.outputStream = [NSOutputStream outputStreamToFileAtPath:self.downloadPath append:NO];
     [self.outputStream open];
 
     if (self.buffer == nil) {
@@ -83,8 +85,9 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
 
     if (bytesWritten > 0) {
         [self.buffer replaceBytesInRange:NSMakeRange(0, bytesWritten) withBytes:NULL length:0];
-        [self.progress addBytes:bytesWritten];
-        [self triggerEventWithType:FATaskEventTypeProgress payload:[self.progress copy]];
+        self.bytesReceived = bytesWritten;
+        self.totalBytesReceived += bytesWritten;
+        [self dispatchEvent:[[FAURLConnectionTaskReceiveProgressEvent alloc] initWithSource:self bytesReceived:self.bytesReceived totalBytesReceived:self.totalBytesReceived expectedTotalBytes:[self.response expectedContentLength]]];
     }
 
     return YES;
@@ -122,7 +125,6 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
     [super cleanup];
     [self.outputStream close];
     self.outputStream = nil;
-    self.progress = nil;
     self.buffer = nil;
 }
 
@@ -137,7 +139,9 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
         }
     }
     
-    [self succeedWithResult:self.result];
+    [self cleanup];
+    [self dispatchEvent:[[FAURLConnectionTaskDownloadResultEvent alloc] initWithSource:self response:self.response downloadPath:self.downloadPath]];
+    [self finish];
 }
 
 @end

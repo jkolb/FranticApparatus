@@ -1,5 +1,5 @@
 //
-// FARetryTask.h
+// FAURLConnectionTaskSendProgressEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,17 +24,29 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FAURLConnectionTaskSendProgressEvent.h"
+
+@implementation FAURLConnectionTaskSendProgressEvent
+
+- (id)initWithSource:(id)source {
+    return [self initWithSource:source bytesSent:0 totalBytesSent:0 totalBytesExpectedToSend:0];
+}
+
+- (id)initWithSource:(id)source bytesSent:(NSInteger)bytesSent totalBytesSent:(NSInteger)totalBytesSent totalBytesExpectedToSend:(NSInteger)totalBytesExpectedToSend {
+    self = [super initWithSource:source];
+    if (self == nil) return nil;
+    _bytesSent = bytesSent;
+    _totalBytesSent = totalBytesSent;
+    _totalBytesExpectedToSend = totalBytesExpectedToSend;
+    return self;
+}
 
 
 
-@interface FARetryTask : FAAbstractTask
+#pragma mark - NSCopying
 
-@property (copy) id <FATask> (^factory)(id parameter);
-@property NSUInteger maximumRetryCount;
-@property (readonly) NSUInteger retryCount;
-@property (copy) BOOL (^shouldRetry)(id error);
-@property (copy) NSTimeInterval (^calculateDelayInterval)(NSUInteger retryCount);
-@property NSTimeInterval delayInterval;
+- (id)copyWithZone:(NSZone *)zone {
+    return [[[self class] alloc] initWithSource:self.source bytesSent:self.bytesSent totalBytesSent:self.totalBytesSent totalBytesExpectedToSend:self.totalBytesExpectedToSend];
+}
 
 @end

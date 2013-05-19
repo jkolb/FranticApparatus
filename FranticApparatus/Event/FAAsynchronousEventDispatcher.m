@@ -1,5 +1,5 @@
 //
-// FARetryTask.h
+// FAAsynchronousEventDispatcher.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,17 +24,37 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FAAsynchronousEventDispatcher.h"
+#import "FAEventHandler.h"
 
 
 
-@interface FARetryTask : FAAbstractTask
+@interface FAAsynchronousEventDispatcher ()
 
-@property (copy) id <FATask> (^factory)(id parameter);
-@property NSUInteger maximumRetryCount;
-@property (readonly) NSUInteger retryCount;
-@property (copy) BOOL (^shouldRetry)(id error);
-@property (copy) NSTimeInterval (^calculateDelayInterval)(NSUInteger retryCount);
-@property NSTimeInterval delayInterval;
+@property (nonatomic, strong) dispatch_queue_t dispatchQueue;
+
+@end
+
+
+
+@implementation FAAsynchronousEventDispatcher
+
+- (id)init {
+    return [self initWithDispatchQueue:dispatch_get_main_queue()];
+}
+
+- (id)initWithDispatchQueue:(dispatch_queue_t)dispatchQueue {
+    self = [super init];
+    if (self == nil) return nil;
+    _dispatchQueue = dispatchQueue;
+    if (_dispatchQueue == nil) return nil;
+    return self;
+}
+
+- (void)handleEvent:(FAEvent *)event withHandler:(FAEventHandler *)handler {
+    dispatch_async(self.dispatchQueue, ^{
+        [handler handleEvent:event];
+    });
+}
 
 @end

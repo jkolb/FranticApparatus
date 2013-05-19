@@ -1,5 +1,5 @@
 //
-// FAURLDownloadResult.m
+// FATaskErrorEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,10 +24,16 @@
 
 
 
-#import "FAURLDownloadResult.h"
+#import "FAEvent.h"
 
 
 
-@implementation FAURLDownloadResult
+@interface FATaskErrorEvent : FAEvent
+
+@property (nonatomic, strong, readonly) NSError *error;
+
++ (id)eventWithSource:(id)source error:(NSError *)error;
+
+- (id)initWithSource:(id)source error:(NSError *)error;
 
 @end

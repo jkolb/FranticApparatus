@@ -1,5 +1,5 @@
 //
-// FARetryTask.h
+// FATaskFinishEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,17 +24,10 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FATaskFinishEvent.h"
 
 
 
-@interface FARetryTask : FAAbstractTask
-
-@property (copy) id <FATask> (^factory)(id parameter);
-@property NSUInteger maximumRetryCount;
-@property (readonly) NSUInteger retryCount;
-@property (copy) BOOL (^shouldRetry)(id error);
-@property (copy) NSTimeInterval (^calculateDelayInterval)(NSUInteger retryCount);
-@property NSTimeInterval delayInterval;
+@implementation FATaskFinishEvent
 
 @end

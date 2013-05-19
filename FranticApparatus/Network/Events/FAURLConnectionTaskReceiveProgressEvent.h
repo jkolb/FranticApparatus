@@ -1,5 +1,5 @@
 //
-// FARetryTask.h
+// FAURLConnectionTaskReceiveProgressEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,17 +24,17 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FAEvent.h"
 
 
 
-@interface FARetryTask : FAAbstractTask
+@interface FAURLConnectionTaskReceiveProgressEvent : FAEvent
 
-@property (copy) id <FATask> (^factory)(id parameter);
-@property NSUInteger maximumRetryCount;
-@property (readonly) NSUInteger retryCount;
-@property (copy) BOOL (^shouldRetry)(id error);
-@property (copy) NSTimeInterval (^calculateDelayInterval)(NSUInteger retryCount);
-@property NSTimeInterval delayInterval;
+@property (nonatomic, readonly) long long bytesReceived;
+@property (nonatomic, readonly) long long totalBytesReceived;
+@property (nonatomic, readonly) long long expectedTotalBytes;
+
+- (id)initWithSource:(id)source bytesReceived:(long long)bytesReceived totalBytesReceived:(long long)totalBytesReceived expectedTotalBytes:(long long)expectedTotalBytes;
+
 
 @end

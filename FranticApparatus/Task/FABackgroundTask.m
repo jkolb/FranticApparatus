@@ -25,6 +25,9 @@
 
 
 #import "FABackgroundTask.h"
+#import "FATaskGenericResultEvent.h"
+#import "FATaskErrorEvent.h"
+#import "FATaskFinishEvent.h"
 
 
 
@@ -70,16 +73,20 @@
     }
     
     if (result == nil) {
-        [self triggerEventWithType:FATaskEventTypeError payload:error];
-        [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
+        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:error]];
+        [self finish];
     } else {
-        [self triggerEventWithType:FATaskEventTypeResult payload:result];
-        [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
+        [self dispatchEvent:[self resultEventForResult:result]];
+        [self finish];
     }
 }
 
 - (id)generateResultWithParameter:(id)parameter error:(NSError **)error {
     return [NSNull null];
+}
+
+- (FATaskResultEvent *)resultEventForResult:(id)result {
+    return [FATaskGenericResultEvent eventWithSource:self result:result];
 }
 
 @end

@@ -1,5 +1,5 @@
 //
-// FAURLResult.m
+// FAURLConnectionTaskSendProgressEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,29 +24,16 @@
 
 
 
-#import "FAURLResult.h"
+#import "FAEvent.h"
 
 
 
-@implementation FAURLResult
+@interface FAURLConnectionTaskSendProgressEvent : FAEvent
 
-- (id)init {
-    return [self initWithResponse:[[NSURLResponse alloc] init]];
-}
+@property (nonatomic, readonly) NSInteger bytesSent;
+@property (nonatomic, readonly) NSInteger totalBytesSent;
+@property (nonatomic, readonly) NSInteger totalBytesExpectedToSend;
 
-- (id)initWithResponse:(NSURLResponse *)response {
-    self = [super init];
-    if (self == nil) return nil;
-    
-    _response = response;
-    if (_response == nil) return nil;
-    
-    return self;
-}
-
-- (NSHTTPURLResponse *)HTTPResponse {
-    if ([self.response isKindOfClass:[NSHTTPURLResponse class]] == NO) return nil;
-    return (NSHTTPURLResponse *)self.response;
-}
+- (id)initWithSource:(id)source bytesSent:(NSInteger)bytesSent totalBytesSent:(NSInteger)totalBytesSent totalBytesExpectedToSend:(NSInteger)totalBytesExpectedToSend;
 
 @end

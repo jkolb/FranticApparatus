@@ -1,5 +1,5 @@
 //
-// FARetryTask.h
+// FAURLConnectionTaskResultEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,17 +24,35 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FAURLConnectionTaskResultEvent.h"
 
 
 
-@interface FARetryTask : FAAbstractTask
+@implementation FAURLConnectionTaskResultEvent
 
-@property (copy) id <FATask> (^factory)(id parameter);
-@property NSUInteger maximumRetryCount;
-@property (readonly) NSUInteger retryCount;
-@property (copy) BOOL (^shouldRetry)(id error);
-@property (copy) NSTimeInterval (^calculateDelayInterval)(NSUInteger retryCount);
-@property NSTimeInterval delayInterval;
+- (id)initWithSource:(id)source {
+    return [self initWithSource:source response:[[NSURLResponse alloc] init]];
+}
+
+- (id)initWithSource:(id)source response:(NSURLResponse *)response {
+    self = [super initWithSource:source];
+    if (self == nil) return nil;
+    _response = response;
+    if (_response == nil) return nil;
+    return self;
+}
+
+- (NSHTTPURLResponse *)HTTPResponse {
+    if ([self.response isKindOfClass:[NSHTTPURLResponse class]] == NO) return nil;
+    return (NSHTTPURLResponse *)self.response;
+}
+
+
+
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone {
+    return [[[self class] alloc] initWithSource:self.source response:self.response];
+}
 
 @end

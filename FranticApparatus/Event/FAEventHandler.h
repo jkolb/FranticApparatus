@@ -1,5 +1,5 @@
 //
-// FAURLResult.h
+// FAEventHandler.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -28,12 +28,23 @@
 
 
 
-@interface FAURLResult : NSObject
+@class FAEvent;
 
-@property (nonatomic, strong) NSURLResponse *response;
+@protocol FAEventDispatcher;
 
-- (id)initWithResponse:(NSURLResponse *)response;
 
-- (NSHTTPURLResponse *)HTTPResponse;
+
+@interface FAEventHandler : NSObject
+
++ (id)eventHandlerWithEventClass:(Class)eventClass block:(void (^)(id event))block;
++ (id)eventHandlerWithEventClass:(Class)eventClass context:(id)context block:(void (^)(id context, id event))block;
++ (id)eventHandlerWithEventClass:(Class)eventClass target:(id)target action:(SEL)action;
++ (id)eventHandlerWithEventClass:(Class)eventClass dispatcher:(id <FAEventDispatcher>)dispatcher;
+
+- (id)initWithEventClass:(Class)eventClass block:(void (^)(id event))block;
+
+- (BOOL)canHandleEvent:(FAEvent *)event;
+
+- (void)handleEvent:(FAEvent *)event;
 
 @end

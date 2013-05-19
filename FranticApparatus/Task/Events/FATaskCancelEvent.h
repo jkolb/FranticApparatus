@@ -1,5 +1,5 @@
 //
-// FAURLSendProgress.m
+// FATaskCancelEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,25 +24,10 @@
 
 
 
-#import "FAURLSendProgress.h"
+#import "FAEvent.h"
 
 
 
-@implementation FAURLSendProgress
-
-- (id)init {
-    return [self initWithBytesSent:0 totalBytesSent:0 totalBytesExpectedToSend:0];
-}
-
-- (id)initWithBytesSent:(NSInteger)bytesSent totalBytesSent:(NSInteger)totalBytesSent totalBytesExpectedToSend:(NSInteger)totalBytesExpectedToSend {
-    self = [super init];
-    if (self == nil) return nil;
-    
-    return self;
-}
-
-- (id)copyWithZone:(NSZone *)zone {
-    return self;
-}
+@interface FATaskCancelEvent : FAEvent
 
 @end

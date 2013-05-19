@@ -25,7 +25,7 @@
 
 
 #import "FASequentialBatchTask.h"
-#import "FABatchResult.h"
+#import "FATaskFinishEvent.h"
 
 
 
@@ -39,26 +39,14 @@
     return [[super parameter] objectForKey:[self currentKey]];
 }
 
-- (void)configureTask:(id<FATask>)task withKey:(id)key {
-    [task eventType:FATaskEventTypeResult context:self addContextHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
-        FABatchResult *result = [[FABatchResult alloc] initWithKey:key value:event.payload];
-        [blockTask triggerEventWithType:FATaskEventTypeResult payload:result];
-    }];
+- (void)taskFinishEvent:(FATaskFinishEvent *)event withKey:(id)key {
+    [self advanceToNextKey];
     
-    [task eventType:FATaskEventTypeError context:self addContextHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
-        FABatchResult *error = [[FABatchResult alloc] initWithKey:key value:event.payload];
-        [blockTask triggerEventWithType:FATaskEventTypeError payload:error];
-    }];
-
-    [task eventType:FATaskEventTypeFinish context:self addContextHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
-        [blockTask advanceToNextKey];
-        
-        if ([blockTask isFinished]) {
-            [blockTask triggerEventWithType:FATaskEventTypeFinish payload:nil];
-        } else {
-            [blockTask startTaskForKey:[blockTask currentKey] withParameter:[blockTask parameter]];
-        }
-    }];
+    if ([self isFinished]) {
+        [self finish];
+    } else {
+        [self startTaskForKey:[self currentKey] withParameter:[self parameter]];
+    }
 }
 
 @end

@@ -25,13 +25,15 @@
 
 
 #import "FAURLConnectionDataTask.h"
-#import "FAURLDataResult.h"
+#import "FAURLConnectionTaskDataResultEvent.h"
+#import "FATaskFinishEvent.h"
 
 
 
 @interface FAURLConnectionDataTask ()
 
-@property (nonatomic, strong) FAURLDataResult *result;
+@property (nonatomic, strong) NSURLResponse *response;
+@property (nonatomic, strong) NSMutableData *data;
 
 @end
 
@@ -40,15 +42,29 @@
 @implementation FAURLConnectionDataTask
 
 - (void)handleValidResponse:(NSURLResponse *)response {
-    self.result = [[FAURLDataResult alloc] initWithResponse:response];
+    self.response = response;
+    self.data = [self dataForResponse:response];
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-    [self.result appendData:data];
+    [self.data appendData:data];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    [self succeedWithResult:self.result];
+    [self cleanup];
+    [self dispatchEvent:[[FAURLConnectionTaskDataResultEvent alloc] initWithSource:self response:self.response data:self.data]];
+    [self finish];
+}
+
+- (NSMutableData *)dataForResponse:(NSURLResponse *)response {
+    long long expectedContentLength = [response expectedContentLength];
+    
+    if (expectedContentLength <= 0 || expectedContentLength > NSUIntegerMax) {
+        return [[NSMutableData alloc] init];
+    } else {
+        NSUInteger capacity = (NSUInteger)expectedContentLength;
+        return [[NSMutableData alloc] initWithCapacity:capacity];
+    }
 }
 
 @end

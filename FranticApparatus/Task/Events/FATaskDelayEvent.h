@@ -1,5 +1,5 @@
 //
-// FATaskEvent.h
+// FATaskDelayEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,20 +24,10 @@
 
 
 
-#import <Foundation/Foundation.h>
+#import "FAEvent.h"
 
 
 
-@protocol FATask;
-
-
-
-@interface FATaskEvent : NSObject <NSCopying>
-
-@property (nonatomic, copy, readonly) NSString *type;
-@property (nonatomic, weak, readonly) id <FATask> source;
-@property (nonatomic, strong, readonly) id payload;
-
-- (id)initWithType:(NSString *)type source:(id <FATask>)source payload:(id)payload;
+@interface FATaskDelayEvent : FAEvent
 
 @end

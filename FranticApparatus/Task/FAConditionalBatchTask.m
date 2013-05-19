@@ -25,6 +25,9 @@
 
 
 #import "FAConditionalBatchTask.h"
+#import "FATaskResultEvent.h"
+#import "FATaskErrorEvent.h"
+#import "FATaskFinishEvent.h"
 
 
 
@@ -36,16 +39,16 @@
     id taskKey = [self determineTaskKeyWithError:&error];
     
     if (taskKey == nil) {
-        [self triggerEventWithType:FATaskEventTypeError payload:error];
-        [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
+        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:error]];
+        [self finish];
         return;
     }
     
     id taskParameter = [self determineTaskParameterWithError:&error];
     
     if (taskParameter == nil) {
-        [self triggerEventWithType:FATaskEventTypeError payload:error];
-        [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
+        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:error]];
+        [self finish];
         return;
     }
     
@@ -64,9 +67,7 @@
 }
 
 - (void)configureTask:(id<FATask>)task withKey:(id)key {
-    for (NSString *eventType in [self registeredEventTypes]) {
-        [task forwardEventType:eventType toTask:self];
-    }
+    [task forwardToDispatcher:self];
 }
 
 @end

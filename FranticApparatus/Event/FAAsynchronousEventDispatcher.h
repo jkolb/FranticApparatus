@@ -1,5 +1,5 @@
 //
-// FAURLReceiveProgress.h
+// FAAsynchronousEventDispatcher.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,26 +24,12 @@
 
 
 
-#import <Foundation/Foundation.h>
+#import "FAAbstractEventDispatcher.h"
 
 
 
-@interface FAURLReceiveProgress : NSObject <NSCopying, NSMutableCopying>
+@interface FAAsynchronousEventDispatcher : FAAbstractEventDispatcher
 
-@property (nonatomic, readonly) long long bytesReceived;
-@property (nonatomic, readonly) long long totalBytesReceived;
-@property (nonatomic, readonly) long long expectedTotalBytes;
-
-- (id)initWithBytesReceived:(long long)bytesReceived totalBytesReceived:(long long)totalBytesReceived expectedTotalBytes:(long long)expectedTotalBytes;
-
-@end
-
-
-
-@interface FAMutableURLReceiveProgress : FAURLReceiveProgress
-
-- (id)initWithExpectedTotalBytes:(long long)expectedTotalBytes;
-
-- (void)addBytes:(NSUInteger)count;
+- (id)initWithDispatchQueue:(dispatch_queue_t)dispatchQueue;
 
 @end

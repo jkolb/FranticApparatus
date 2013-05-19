@@ -1,5 +1,5 @@
 //
-// FABatchResult.h
+// FATaskStartEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,15 +24,10 @@
 
 
 
-#import <Foundation/Foundation.h>
+#import "FAEvent.h"
 
 
 
-@interface FABatchResult : NSObject
-
-@property (nonatomic, strong, readonly) id key;
-@property (nonatomic, strong, readonly) id value;
-
-- (id)initWithKey:(id)key value:(id)value;
+@interface FATaskStartEvent : FAEvent
 
 @end

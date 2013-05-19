@@ -1,5 +1,5 @@
 //
-// FABatchResult.m
+// FATaskStartEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,24 +24,10 @@
 
 
 
-#import "FABatchResult.h"
+#import "FATaskStartEvent.h"
 
 
 
-@implementation FABatchResult
-
-- (id)init {
-    return [self initWithKey:[NSNull null] value:[NSNull null]];
-}
-
-- (id)initWithKey:(id)key value:(id)value {
-    self = [super init];
-    if (self == nil) return nil;
-    
-    _key = key;
-    _value = value;
-    
-    return self;
-}
+@implementation FATaskStartEvent
 
 @end

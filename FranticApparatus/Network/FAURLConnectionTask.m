@@ -25,6 +25,9 @@
 
 
 #import "FAURLConnectionTask.h"
+#import "FATaskResultEvent.h"
+#import "FATaskErrorEvent.h"
+#import "FATaskFinishEvent.h"
 #import "FAURLResponseValidator.h"
 
 
@@ -68,14 +71,8 @@
 
 - (void)failWithError:(NSError *)error {
     [self cleanup];
-    [self triggerEventWithType:FATaskEventTypeError payload:error];
-    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
-}
-
-- (void)succeedWithResult:(id)result {
-    [self cleanup];
-    [self triggerEventWithType:FATaskEventTypeResult payload:result];
-    [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
+    [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:error]];
+    [self finish];
 }
 
 - (void)cleanup {

@@ -25,6 +25,9 @@
 
 
 #import "FABatchTask.h"
+#import "FATaskResultEvent.h"
+#import "FATaskErrorEvent.h"
+#import "FATaskFinishEvent.h"
 
 
 
@@ -38,13 +41,11 @@
 
 @implementation FABatchTask
 
-- (id)initWithParameter:(id)parameter {
-    self = [super initWithParameter:parameter];
+- (id)init {
+    self = [super init];
     if (self == nil) return nil;
-    
     _tasks = [[NSMutableDictionary alloc] initWithCapacity:2];
     if (_tasks == nil) return nil;
-    
     return self;
 }
 
@@ -81,6 +82,17 @@
 }
 
 - (void)configureTask:(id <FATask>)task withKey:(id)key {
+    [task addHandler:[FATaskResultEvent handlerWithContext:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
+        [blockTask taskResultEvent:event withKey:key];
+    }]];
+    
+    [task addHandler:[FATaskErrorEvent handlerWithContext:self block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
+        [blockTask taskErrorEvent:event withKey:key];
+    }]];
+
+    [task addHandler:[FATaskFinishEvent handlerWithContext:self block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
+        [blockTask taskFinishEvent:event withKey:key];
+    }]];
 }
 
 - (void)startTaskForKey:(id)key withParameter:(id)parameter {
@@ -96,6 +108,15 @@
     }
     
     [super cancel];
+}
+
+- (void)taskResultEvent:(FATaskResultEvent *)event withKey:(id)key {
+}
+
+- (void)taskErrorEvent:(FATaskErrorEvent *)event withKey:(id)key {
+}
+
+- (void)taskFinishEvent:(FATaskFinishEvent *)event withKey:(id)key {
 }
 
 @end

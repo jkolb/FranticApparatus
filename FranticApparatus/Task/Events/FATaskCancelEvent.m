@@ -1,5 +1,5 @@
 //
-// FAURLDataResult.m
+// FATaskCancelEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,48 +24,10 @@
 
 
 
-#import "FAURLDataResult.h"
-#import "NSURLResponse+StringEncoding.h"
+#import "FATaskCancelEvent.h"
 
 
 
-@interface FAURLDataResult ()
-
-@property (nonatomic, strong) NSMutableData *mutableData;
-
-@end
-
-
-
-@implementation FAURLDataResult
-
-- (id)initWithResponse:(NSURLResponse *)response {
-    self = [super initWithResponse:response];
-    
-    long long expectedContentLength = [response expectedContentLength];
-    
-    if (expectedContentLength <= 0 || expectedContentLength > NSUIntegerMax) {
-        _mutableData = [[NSMutableData alloc] init];
-    } else {
-        NSUInteger capacity = (NSUInteger)expectedContentLength;
-        _mutableData = [[NSMutableData alloc] initWithCapacity:capacity];
-    }
-    
-    if (_mutableData == nil) return nil;
-
-    return self;
-}
-
-- (NSData *)data {
-    return self.mutableData;
-}
-
-- (NSString *)text {
-    return [[NSString alloc] initWithData:self.mutableData encoding:[self.response stringEncoding]];
-}
-
-- (void)appendData:(NSData *)data {
-    [self.mutableData appendData:data];
-}
+@implementation FATaskCancelEvent
 
 @end

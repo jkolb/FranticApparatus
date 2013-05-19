@@ -42,7 +42,6 @@
 - (void)handleValidResponse:(NSURLResponse *)response;
 
 - (void)failWithError:(NSError *)error;
-- (void)succeedWithResult:(id)result;
 
 - (void)cleanup;
 

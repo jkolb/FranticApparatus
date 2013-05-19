@@ -1,5 +1,5 @@
 //
-// FAURLDownloadResult.h
+// FATaskGenericResultEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,16 @@
 
 
 
-#import "FAURLResult.h"
+#import "FATaskResultEvent.h"
 
 
 
-@interface FAURLDownloadResult : FAURLResult
+@interface FATaskGenericResultEvent : FATaskResultEvent
 
-@property (nonatomic, copy) NSString *downloadPath;
+@property (nonatomic, strong) id result;
+
++ (id)eventWithSource:(id)source result:(id)result;
+
+- (id)initWithSource:(id)source result:(id)result;
 
 @end

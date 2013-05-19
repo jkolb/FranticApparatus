@@ -25,27 +25,28 @@
 
 
 #import "FAChainedBatchTask.h"
+#import "FATaskResultEvent.h"
+#import "FATaskErrorEvent.h"
+#import "FATaskFinishEvent.h"
 
 
 
 @implementation FAChainedBatchTask
 
-- (void)configureTask:(id<FATask>)task withKey:(id)key {
-    [task eventType:FATaskEventTypeResult context:self addContextHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
-        [blockTask advanceToNextKey];
-        
-        if ([blockTask isFinished]) {
-            [blockTask triggerEventWithType:FATaskEventTypeResult payload:event.payload];
-            [blockTask triggerEventWithType:FATaskEventTypeFinish payload:nil];
-        } else {
-            [blockTask startTaskForKey:[blockTask currentKey] withParameter:event.payload];
-        }
-    }];
+- (void)taskResultEvent:(FATaskResultEvent *)event withKey:(id)key {
+    [self advanceToNextKey];
     
-    [task eventType:FATaskEventTypeError context:self addContextHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
-        [blockTask triggerEventWithType:FATaskEventTypeError payload:event.payload];
-        [blockTask triggerEventWithType:FATaskEventTypeFinish payload:nil];
-    }];
+    if ([self isFinished]) {
+        [self forwardEvent:event];
+        [self finish];
+    } else {
+        [self startTaskForKey:[self currentKey] withParameter:result];
+    }
+}
+
+- (void)taskErrorEvent:(FATaskErrorEvent *)event withKey:(id)key {
+    [self forwardEvent:event];
+    [self finish];
 }
 
 @end

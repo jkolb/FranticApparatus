@@ -1,5 +1,5 @@
 //
-// FAURLDataResult.h
+// FATaskGenericResultEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,15 +24,33 @@
 
 
 
-#import "FAURLResult.h"
+#import "FATaskGenericResultEvent.h"
 
 
 
-@interface FAURLDataResult : FAURLResult
+@implementation FATaskGenericResultEvent
 
-@property (nonatomic, copy, readonly) NSData *data;
-@property (nonatomic, copy, readonly) NSString *text;
++ (id)eventWithSource:(id)source result:(id)result {
+    return [[self alloc] initWithSource:source result:result];
+}
 
-- (void)appendData:(NSData *)data;
+- (id)initWithSource:(id)source {
+    return [self initWithSource:source result:nil];
+}
+
+- (id)initWithSource:(id)source result:(id)result {
+    self = [super initWithSource:source];
+    if (self == nil) return nil;
+    _result = result;
+    return self;
+}
+
+
+
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone {
+    return [[[self class] alloc] initWithSource:self.source result:self.result];
+}
 
 @end

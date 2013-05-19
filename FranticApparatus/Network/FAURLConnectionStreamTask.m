@@ -25,7 +25,7 @@
 
 
 #import "FAURLConnectionStreamTask.h"
-#import "FAURLSendProgress.h"
+#import "FAURLConnectionTaskSendProgressEvent.h"
 
 
 
@@ -42,8 +42,7 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
-    FAURLSendProgress *progress = [[FAURLSendProgress alloc] initWithBytesSent:bytesWritten totalBytesSent:totalBytesWritten totalBytesExpectedToSend:totalBytesExpectedToWrite];
-    [self triggerEventWithType:FATaskEventTypeProgress payload:progress];
+    [self dispatchEvent:[[FAURLConnectionTaskSendProgressEvent alloc] initWithSource:self bytesSent:bytesWritten totalBytesSent:totalBytesWritten totalBytesExpectedToSend:totalBytesExpectedToWrite]];
 }
 
 @end

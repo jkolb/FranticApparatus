@@ -1,5 +1,5 @@
 //
-// FATask.m
+// FAURLConnectionTaskReceiveProgressEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,13 +24,31 @@
 
 
 
-#import "FATask.h"
+#import "FAURLConnectionTaskReceiveProgressEvent.h"
 
 
 
-NSString *const FATaskEventTypeStart    = @"FATaskEventTypeStart";
-NSString *const FATaskEventTypeProgress = @"FATaskEventTypeProgress";
-NSString *const FATaskEventTypeResult   = @"FATaskEventTypeResult";
-NSString *const FATaskEventTypeError    = @"FATaskEventTypeError";
-NSString *const FATaskEventTypeCancel   = @"FATaskEventTypeCancel";
-NSString *const FATaskEventTypeFinish   = @"FATaskEventTypeFinish";
+@implementation FAURLConnectionTaskReceiveProgressEvent
+
+- (id)initWithSource:(id)source {
+    return [self initWithSource:source bytesReceived:0 totalBytesReceived:0 expectedTotalBytes:0];
+}
+
+- (id)initWithSource:(id)source bytesReceived:(long long)bytesReceived totalBytesReceived:(long long)totalBytesReceived expectedTotalBytes:(long long)expectedTotalBytes {
+    self = [super initWithSource:source];
+    if (self == nil) return nil;
+    _bytesReceived = bytesReceived;
+    _totalBytesReceived = totalBytesReceived;
+    _expectedTotalBytes = expectedTotalBytes;
+    return self;
+}
+
+
+
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone {
+    return [[[self class] alloc] initWithSource:self.source bytesReceived:self.bytesReceived totalBytesReceived:self.totalBytesReceived expectedTotalBytes:self.expectedTotalBytes];
+}
+
+@end

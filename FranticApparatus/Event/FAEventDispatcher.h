@@ -1,5 +1,5 @@
 //
-// FATaskEvent.m
+// FAEventDispatcher.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,41 +24,24 @@
 
 
 
-#import "FATaskEvent.h"
+#import <Foundation/Foundation.h>
 
 
 
-@interface FATaskEvent ()
-
-@property (nonatomic) BOOL consumed;
-
-@end
+@class FAEvent;
+@class FAEventHandler;
 
 
 
-@implementation FATaskEvent
+@protocol FAEventDispatcher <NSObject>
 
-- (id)init {
-    return [self initWithType:@"" source:nil payload:nil];
-}
+- (void)addHandler:(FAEventHandler *)handler;
+- (void)removeHandler:(FAEventHandler *)handler;
+- (void)removeAllHandlers;
 
-- (id)initWithType:(NSString *)type source:(id <FATask>)source payload:(id)payload {
-    self = [super init];
-    if (self == nil) return nil;
-    
-    _type = type;
-    if ([_type length] == 0) return nil;
-    
-    _source = source;
-    if (_source == nil) return nil;
-    
-    _payload = payload;
-    
-    return self;
-}
+- (void)forwardToDispatcher:(id <FAEventDispatcher>)dispatcher;
 
-- (id)copyWithZone:(NSZone *)zone {
-    return self;
-}
+- (void)dispatchEvent:(FAEvent *)event;
+- (void)forwardEvent:(FAEvent *)event;
 
 @end

@@ -26,12 +26,15 @@
 
 #import "FAUITask.h"
 #import "FAAbstractTask.h"
+#import "FAAsynchronousEventDispatcher.h"
+#import "FAEvent.h"
+#import "FAEventHandler.h"
 
 
 
 @interface FAUITask ()
 
-@property (nonatomic, strong) id backgroundParameter;
+@property (nonatomic, strong) FAAsynchronousEventDispatcher *eventDispatcher;
 
 @end
 
@@ -40,65 +43,20 @@
 @implementation FAUITask
 
 - (id)init {
-    return [self initWithParameter:nil];
-}
-
-- (id)initWithParameter:(id)parameter {
     self = [super init];
     if (self == nil) return nil;
-    
-    _backgroundParameter = parameter;
-    
+    _eventDispatcher = [[FAAsynchronousEventDispatcher alloc] init];
+    if (_eventDispatcher == nil) return nil;
     return self;
 }
 
 - (void)start {
-    [self startWithParameter:self.backgroundParameter];
+    [self startWithParameter:nil];
 }
 
 - (void)startWithParameter:(id)parameter {
+    [self.backgroundTask forwardToDispatcher:self];
     [self.backgroundTask startWithParameter:parameter];
-}
-
-- (id)parameter {
-    return [self.backgroundTask parameter];
-}
-
-- (void)eventType:(NSString *)type addHandler:(void (^)(FATaskEvent *))handler {
-    [self.backgroundTask eventType:type addHandler:[self handlerOnMainThread:handler]];
-}
-
-- (void)eventType:(NSString *)type context:(id)context addContextHandler:(void (^)(id context, FATaskEvent *event))contextHandler {
-    [self eventType:type addHandler:[FAAbstractTask handlerWithContext:context contextHandler:contextHandler]];
-}
-
-- (void)addTarget:(id)target action:(SEL)action forEventType:(NSString *)type {
-    [self eventType:type addHandler:[FAAbstractTask handlerWithContext:target contextHandler:^(id context, FATaskEvent *event) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-        [context performSelector:action withObject:event];
-#pragma clang diagnostic pop
-    }]];
-}
-
-- (void (^)(FATaskEvent *))handlerOnMainThread:(void (^)(FATaskEvent *))handler {
-    return ^(FATaskEvent *event) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            handler(event);
-        });
-    };
-}
-
-- (void)triggerEventWithType:(NSString *)type payload:(id)payload {
-    [self.backgroundTask triggerEventWithType:type payload:payload];
-}
-
-- (void)forwardEventType:(NSString *)type toTask:(id <FATask>)task {
-    [self.backgroundTask forwardEventType:type toTask:task];
-}
-
-- (NSSet *)registeredEventTypes {
-    return [self.backgroundTask registeredEventTypes];
 }
 
 - (BOOL)isCancelled {
@@ -107,6 +65,34 @@
 
 - (void)cancel {
     [self.backgroundTask cancel];
+}
+
+- (void)finish {
+    [self.backgroundTask finish];
+}
+
+- (void)addHandler:(FAEventHandler *)handler {
+    [self.eventDispatcher addHandler:handler];
+}
+
+- (void)removeHandler:(FAEventHandler *)handler {
+    [self.eventDispatcher removeHandler:handler];
+}
+
+- (void)removeAllHandlers {
+    [self.eventDispatcher removeAllHandlers];
+}
+
+- (void)forwardToDispatcher:(id <FAEventDispatcher>)dispatcher {
+    [self.eventDispatcher forwardToDispatcher:dispatcher];
+}
+
+- (void)dispatchEvent:(FAEvent *)event {
+    [self.eventDispatcher dispatchEvent:event];
+}
+
+- (void)forwardEvent:(FAEvent *)event {
+    [self.eventDispatcher forwardEvent:event];
 }
 
 @end

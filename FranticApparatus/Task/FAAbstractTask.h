@@ -32,6 +32,4 @@
 
 @interface FAAbstractTask : NSObject <FATask>
 
-+ (void (^)(FATaskEvent *))handlerWithContext:(id)context contextHandler:(void (^)(id context, FATaskEvent *event))contextHandler;
-
 @end

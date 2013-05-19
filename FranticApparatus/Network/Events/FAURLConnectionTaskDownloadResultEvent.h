@@ -1,5 +1,5 @@
 //
-// FARetryTask.h
+// FAURLConnectionTaskDownloadResultEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,17 +24,14 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FAURLConnectionTaskResultEvent.h"
 
 
 
-@interface FARetryTask : FAAbstractTask
+@interface FAURLConnectionTaskDownloadResultEvent : FAURLConnectionTaskResultEvent
 
-@property (copy) id <FATask> (^factory)(id parameter);
-@property NSUInteger maximumRetryCount;
-@property (readonly) NSUInteger retryCount;
-@property (copy) BOOL (^shouldRetry)(id error);
-@property (copy) NSTimeInterval (^calculateDelayInterval)(NSUInteger retryCount);
-@property NSTimeInterval delayInterval;
+@property (nonatomic, copy) NSString *downloadPath;
+
+- (id)initWithSource:(id)source response:(NSURLResponse *)response downloadPath:(NSString *)downloadPath;
 
 @end

@@ -1,5 +1,5 @@
 //
-// FAAbstractTask.m
+// FAAbstractEventDispatcher.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,78 +24,58 @@
 
 
 
-#import "FAAbstractTask.h"
-#import "FASynchronousEventDispatcher.h"
-#import "FATaskStartEvent.h"
-#import "FATaskCancelEvent.h"
-#import "FATaskFinishEvent.h"
+#import "FAAbstractEventDispatcher.h"
+#import "FAEventHandler.h"
 #import "FAEvent.h"
 
 
 
-@interface FAAbstractTask ()
+@interface FAAbstractEventDispatcher ()
 
-@property (nonatomic, strong) FASynchronousEventDispatcher *eventDispatcher;
-@property BOOL cancelled;
+@property (nonatomic, strong) NSMutableArray *handlers;
 
 @end
 
 
 
-@implementation FAAbstractTask
+@implementation FAAbstractEventDispatcher
 
 - (id)init {
     self = [super init];
     if (self == nil) return nil;
-    _eventDispatcher = [[FASynchronousEventDispatcher alloc] init];
-    if (_eventDispatcher == nil) return nil;
+    _handlers = [[NSMutableArray alloc] initWithCapacity:5];
+    if (_handlers == nil) return nil;
     return self;
 }
 
-- (void)start {
-    [self startWithParameter:nil];
-}
-
-- (void)startWithParameter:(id)parameter {
-    [self dispatchEvent:[FATaskStartEvent eventWithSource:self]];
-}
-
-- (BOOL)isCancelled {
-    return self.cancelled;
-}
-
-- (void)cancel {
-    self.cancelled = YES;
-    [self dispatchEvent:[FATaskCancelEvent eventWithSource:self]];
-    [self finish];
-}
-
-- (void)finish {
-    [self dispatchEvent:[FATaskFinishEvent eventWithSource:self]];
-}
-
 - (void)addHandler:(FAEventHandler *)handler {
-    [self.eventDispatcher addHandler:handler];
+    [self.handlers addObject:handler];
 }
 
 - (void)removeHandler:(FAEventHandler *)handler {
-    [self.eventDispatcher removeHandler:handler];
+    [self.handlers removeObjectIdenticalTo:handler];
 }
 
 - (void)removeAllHandlers {
-    [self.eventDispatcher removeAllHandlers];
+    [self.handlers removeAllObjects];
 }
 
 - (void)forwardToDispatcher:(id <FAEventDispatcher>)dispatcher {
-    [self.eventDispatcher forwardToDispatcher:dispatcher];
+    [self addHandler:[FAEvent handlerWithDispatcher:dispatcher]];
 }
 
 - (void)dispatchEvent:(FAEvent *)event {
-    [self.eventDispatcher dispatchEvent:event];
+    for (FAEventHandler *handler in self.handlers) {
+        if (![handler canHandleEvent:event]) continue;
+        [self handleEvent:event withHandler:handler];
+    }
 }
 
 - (void)forwardEvent:(FAEvent *)event {
-    [self.eventDispatcher forwardEvent:event];
+    [self dispatchEvent:[event eventForwardedToSource:self]];
+}
+
+- (void)handleEvent:(FAEvent *)event withHandler:(FAEventHandler *)handler {
 }
 
 @end

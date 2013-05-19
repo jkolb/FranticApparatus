@@ -1,5 +1,5 @@
 //
-// FAURLSendProgress.h
+// FATaskFinishEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,16 +24,10 @@
 
 
 
-#import <Foundation/Foundation.h>
+#import "FAEvent.h"
 
 
 
-@interface FAURLSendProgress : NSObject <NSCopying>
-
-@property (nonatomic, readonly) NSInteger bytesSent;
-@property (nonatomic, readonly) NSInteger totalBytesSent;
-@property (nonatomic, readonly) NSInteger totalBytesExpectedToSend;
-
-- (id)initWithBytesSent:(NSInteger)bytesSent totalBytesSent:(NSInteger)totalBytesSent totalBytesExpectedToSend:(NSInteger)totalBytesExpectedToSend;
+@interface FATaskFinishEvent : FAEvent
 
 @end

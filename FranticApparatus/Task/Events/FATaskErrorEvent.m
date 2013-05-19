@@ -1,5 +1,5 @@
 //
-// FARetryTask.h
+// FATaskErrorEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,17 +24,33 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FATaskErrorEvent.h"
 
 
 
-@interface FARetryTask : FAAbstractTask
+@implementation FATaskErrorEvent
 
-@property (copy) id <FATask> (^factory)(id parameter);
-@property NSUInteger maximumRetryCount;
-@property (readonly) NSUInteger retryCount;
-@property (copy) BOOL (^shouldRetry)(id error);
-@property (copy) NSTimeInterval (^calculateDelayInterval)(NSUInteger retryCount);
-@property NSTimeInterval delayInterval;
++ (id)eventWithSource:(id)source error:(NSError *)error {
+    return [[self alloc] initWithSource:source error:error];
+}
+
+- (id)initWithSource:(id)source {
+    return [self initWithSource:source error:nil];
+}
+
+- (id)initWithSource:(id)source error:(NSError *)error {
+    self = [super initWithSource:source];
+    if (self == nil) return nil;
+    _error = error;
+    return nil;
+}
+
+
+
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone {
+    return [[[self class] alloc] initWithSource:self.source error:self.error];
+}
 
 @end

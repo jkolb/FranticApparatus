@@ -25,11 +25,11 @@
 
 
 #import "FARetryTask.h"
-
-
-
-NSString * const FARetryTaskEventTypeRestart = @"FARetryTaskEventTypeRestart";
-NSString * const FARetryTaskEventTypeDelay   = @"FARetryTaskEventTypeDelay";
+#import "FATaskResultEvent.h"
+#import "FATaskErrorEvent.h"
+#import "FATaskRestartEvent.h"
+#import "FATaskDelayEvent.h"
+#import "FATaskFinishEvent.h"
 
 
 
@@ -57,13 +57,13 @@ NSString * const FARetryTaskEventTypeDelay   = @"FARetryTaskEventTypeDelay";
 - (void)try {
     id parameter = [self parameter];
     self.task = self.factory(parameter);
-    [self.task eventType:FATaskEventTypeResult context:self addContextHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
-        [blockTask triggerEventWithType:FATaskEventTypeResult payload:event.payload];
-        [blockTask triggerEventWithType:FATaskEventTypeFinish payload:nil];
-    }];
-    [self.task eventType:FATaskEventTypeError context:self addContextHandler:^(__typeof__(self) blockTask, FATaskEvent *event) {
-        [blockTask tryFailedWithError:event.payload];
-    }];
+    [self.task addHandler:[FATaskResultEvent handlerWithContext:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
+        [blockTask forwardEvent:event];
+        [blockTask finish];
+    }]];
+    [self.task addHandler:[FATaskErrorEvent handlerWithContext:self block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
+        [blockTask tryFailedWithError:event.error];
+    }]];
     [self.task startWithParameter:parameter];
 }
 
@@ -72,8 +72,8 @@ NSString * const FARetryTaskEventTypeDelay   = @"FARetryTaskEventTypeDelay";
     BOOL shouldNotRetry = [self shouldRetryAfterError:error] == NO;
     
     if (exceededMaximumRetryCount || shouldNotRetry) {
-        [self triggerEventWithType:FATaskEventTypeError payload:error];
-        [self triggerEventWithType:FATaskEventTypeFinish payload:nil];
+        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:error]];
+        [self finish];
     } else {
         [self delayBeforeRetry];
     }
@@ -81,7 +81,7 @@ NSString * const FARetryTaskEventTypeDelay   = @"FARetryTaskEventTypeDelay";
 
 - (void)retry {
     ++self.retryCount;
-    [self triggerEventWithType:FARetryTaskEventTypeRestart payload:nil];
+    [self dispatchEvent:[FATaskRestartEvent eventWithSource:self]];
     [self try];
 }
 
@@ -91,7 +91,7 @@ NSString * const FARetryTaskEventTypeDelay   = @"FARetryTaskEventTypeDelay";
     if (delayInterval == 0) {
         [self retry];
     } else {
-        [self triggerEventWithType:FARetryTaskEventTypeDelay payload:nil];
+        [self dispatchEvent:[FATaskDelayEvent eventWithSource:self]];
         [self retryAfterDelayInterval:delayInterval];
     }
 }
