@@ -25,7 +25,6 @@
 
 
 #import "FAAbstractTask.h"
-#import "FASynchronousEventDispatcher.h"
 #import "FATaskStartEvent.h"
 #import "FATaskCancelEvent.h"
 #import "FATaskFinishEvent.h"
@@ -35,7 +34,6 @@
 
 @interface FAAbstractTask ()
 
-@property (nonatomic, strong) FASynchronousEventDispatcher *eventDispatcher;
 @property BOOL cancelled;
 
 @end
@@ -43,14 +41,6 @@
 
 
 @implementation FAAbstractTask
-
-- (id)init {
-    self = [super init];
-    if (self == nil) return nil;
-    _eventDispatcher = [[FASynchronousEventDispatcher alloc] init];
-    if (_eventDispatcher == nil) return nil;
-    return self;
-}
 
 - (void)start {
     [self dispatchEvent:[FATaskStartEvent eventWithSource:self]];
@@ -68,30 +58,6 @@
 
 - (void)finish {
     [self dispatchEvent:[FATaskFinishEvent eventWithSource:self]];
-}
-
-- (void)addHandler:(FAEventHandler *)handler {
-    [self.eventDispatcher addHandler:handler];
-}
-
-- (void)removeHandler:(FAEventHandler *)handler {
-    [self.eventDispatcher removeHandler:handler];
-}
-
-- (void)removeAllHandlers {
-    [self.eventDispatcher removeAllHandlers];
-}
-
-- (void)forwardToDispatcher:(id <FAEventDispatcher>)dispatcher {
-    [self.eventDispatcher forwardToDispatcher:dispatcher];
-}
-
-- (void)dispatchEvent:(FAEvent *)event {
-    [self.eventDispatcher dispatchEvent:event];
-}
-
-- (void)forwardEvent:(FAEvent *)event {
-    [self.eventDispatcher forwardEvent:event];
 }
 
 @end

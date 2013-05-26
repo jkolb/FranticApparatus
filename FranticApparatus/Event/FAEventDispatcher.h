@@ -45,3 +45,8 @@
 - (void)forwardEvent:(FAEvent *)event;
 
 @end
+
+
+
+@interface FAEventDispatcher : NSObject <FAEventDispatcher>
+@end

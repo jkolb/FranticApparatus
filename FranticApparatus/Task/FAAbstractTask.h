@@ -27,9 +27,10 @@
 #import <Foundation/Foundation.h>
 
 #import "FATask.h"
+#import "FAEventDispatcher.h"
 
 
 
-@interface FAAbstractTask : NSObject <FATask>
+@interface FAAbstractTask : FAEventDispatcher <FATask>
 
 @end

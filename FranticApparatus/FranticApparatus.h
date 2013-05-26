@@ -28,9 +28,6 @@
 #import "FAEvent.h"
 #import "FAEventHandler.h"
 #import "FAEventDispatcher.h"
-#import "FAAbstractEventDispatcher.h"
-#import "FASynchronousEventDispatcher.h"
-#import "FAAsynchronousEventDispatcher.h"
 
 // Task
 #import "FATask.h"
@@ -43,7 +40,6 @@
 #import "FAChainedBatchTask.h"
 #import "FAConditionalBatchTask.h"
 #import "FARetryTask.h"
-#import "FAUITask.h"
 
 // Task Events
 #import "FATaskStartEvent.h"

@@ -41,15 +41,15 @@
 
 @implementation FAEventHandler
 
-+ (id)eventHandlerWithEventClass:(Class)eventClass block:(void (^)(id event))block {
++ (instancetype)eventHandlerWithEventClass:(Class)eventClass block:(void (^)(id event))block {
     return [[self alloc] initWithEventClass:eventClass block:block];
 }
 
-+ (id)eventHandlerWithEventClass:(Class)eventClass context:(id)context block:(void (^)(id context, id event))block {
++ (instancetype)eventHandlerWithEventClass:(Class)eventClass context:(id)context block:(void (^)(id context, id event))block {
     return [[self alloc] initWithEventClass:eventClass block:[self blockForContext:context block:block]];
 }
 
-+ (id)eventHandlerWithEventClass:(Class)eventClass target:(id)target action:(SEL)action {
++ (instancetype)eventHandlerWithEventClass:(Class)eventClass target:(id)target action:(SEL)action {
     return [[self alloc] initWithEventClass:eventClass block:[self blockForContext:target block:^(id context, id event) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
@@ -58,7 +58,7 @@
     }]];
 }
 
-+ (id)eventHandlerWithEventClass:(Class)eventClass dispatcher:(id <FAEventDispatcher>)dispatcher {
++ (instancetype)eventHandlerWithEventClass:(Class)eventClass dispatcher:(id <FAEventDispatcher>)dispatcher {
     return [[self alloc] initWithEventClass:eventClass block:[self blockForContext:dispatcher block:^(id <FAEventDispatcher> blockDispatcher, id event) {
         [blockDispatcher forwardEvent:event];
     }]];
@@ -95,6 +95,28 @@
         if ([blockContext respondsToSelector:@selector(isCancelled)] && [blockContext isCancelled]) return;
         block(blockContext, event);
     };
+}
+
+- (instancetype)onMainQueue {
+    return [self onDispatchQueue:dispatch_get_main_queue()];
+}
+
+- (instancetype)onDispatchQueue:(dispatch_queue_t)dispatchQueue {
+    void (^blockBlock)(id event) = self.block;
+    [self setBlock:^(id event) {
+        dispatch_async(dispatchQueue, ^{
+            blockBlock(event);
+        });
+    }];
+    return self;
+}
+
+
+
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone {
+    return [[[self class] allocWithZone:zone] initWithEventClass:self.eventClass block:self.block];
 }
 
 @end

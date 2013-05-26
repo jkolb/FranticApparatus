@@ -34,17 +34,20 @@
 
 
 
-@interface FAEventHandler : NSObject
+@interface FAEventHandler : NSObject <NSCopying>
 
-+ (id)eventHandlerWithEventClass:(Class)eventClass block:(void (^)(id event))block;
-+ (id)eventHandlerWithEventClass:(Class)eventClass context:(id)context block:(void (^)(id context, id event))block;
-+ (id)eventHandlerWithEventClass:(Class)eventClass target:(id)target action:(SEL)action;
-+ (id)eventHandlerWithEventClass:(Class)eventClass dispatcher:(id <FAEventDispatcher>)dispatcher;
++ (instancetype)eventHandlerWithEventClass:(Class)eventClass block:(void (^)(id event))block;
++ (instancetype)eventHandlerWithEventClass:(Class)eventClass context:(id)context block:(void (^)(id context, id event))block;
++ (instancetype)eventHandlerWithEventClass:(Class)eventClass target:(id)target action:(SEL)action;
++ (instancetype)eventHandlerWithEventClass:(Class)eventClass dispatcher:(id <FAEventDispatcher>)dispatcher;
 
 - (id)initWithEventClass:(Class)eventClass block:(void (^)(id event))block;
 
 - (BOOL)canHandleEvent:(FAEvent *)event;
 
 - (void)handleEvent:(FAEvent *)event;
+
+- (instancetype)onMainQueue;
+- (instancetype)onDispatchQueue:(dispatch_queue_t)dispatchQueue;
 
 @end

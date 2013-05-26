@@ -1,5 +1,5 @@
 //
-// FAAsynchronousEventDispatcher.h
+// FAEventDispatcher.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,55 @@
 
 
 
-#import "FAAbstractEventDispatcher.h"
+#import "FAEventDispatcher.h"
+#import "FAEventHandler.h"
+#import "FAEvent.h"
 
 
 
-@interface FAAsynchronousEventDispatcher : FAAbstractEventDispatcher
+@interface FAEventDispatcher ()
 
-- (id)initWithDispatchQueue:(dispatch_queue_t)dispatchQueue;
+@property (nonatomic, strong) NSMutableArray *handlers;
+
+@end
+
+
+
+@implementation FAEventDispatcher
+
+- (id)init {
+    self = [super init];
+    if (self == nil) return nil;
+    _handlers = [[NSMutableArray alloc] initWithCapacity:5];
+    if (_handlers == nil) return nil;
+    return self;
+}
+
+- (void)addHandler:(FAEventHandler *)handler {
+    [self.handlers addObject:handler];
+}
+
+- (void)removeHandler:(FAEventHandler *)handler {
+    [self.handlers removeObjectIdenticalTo:handler];
+}
+
+- (void)removeAllHandlers {
+    [self.handlers removeAllObjects];
+}
+
+- (void)forwardToDispatcher:(id <FAEventDispatcher>)dispatcher {
+    [self addHandler:[FAEvent handlerWithDispatcher:dispatcher]];
+}
+
+- (void)dispatchEvent:(FAEvent *)event {
+    for (FAEventHandler *handler in self.handlers) {
+        if (![handler canHandleEvent:event]) continue;
+        [handler handleEvent:event];
+    }
+}
+
+- (void)forwardEvent:(FAEvent *)event {
+    [self dispatchEvent:[event eventForwardedToSource:self]];
+}
 
 @end
