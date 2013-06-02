@@ -25,7 +25,8 @@
 
 
 #import "FAURLConnectionDataTask.h"
-#import "FAURLConnectionTaskDataResultEvent.h"
+#import "FAURLConnectionDataResult.h"
+#import "FATaskResultEvent.h"
 #import "FATaskFinishEvent.h"
 
 
@@ -52,7 +53,8 @@
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
     [self cleanup];
-    [self dispatchEvent:[[FAURLConnectionTaskDataResultEvent alloc] initWithSource:self response:self.response data:self.data]];
+    FAURLConnectionDataResult *result = [[FAURLConnectionDataResult alloc] initWithResponse:self.response data:self.data];
+    [self dispatchEvent:[[FATaskResultEvent alloc] initWithSource:self result:result]];
     [self finish];
 }
 

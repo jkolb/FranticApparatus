@@ -1,5 +1,5 @@
 //
-// FAParallelBatchTask.h
+// FAURLConnectionDataResult.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,32 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FAURLConnectionDataResult.h"
 
 
 
-@interface FAParallelBatchTask : FAAbstractTask
+@implementation FAURLConnectionDataResult
 
-- (id)initWithDictionary:(NSDictionary *)dictionary;
+- (id)init {
+    return [self initWithResponse:[[NSURLResponse alloc] init] data:[[NSData alloc] init]];
+}
+
+- (id)initWithResponse:(NSURLResponse *)response data:(NSData *)data {
+    self = [super init];
+    if (self == nil) return nil;
+    _response = response;
+    if (_response == nil) return nil;
+    _data = data;
+    if (_data == nil) return nil;
+    return self;
+}
+
+
+
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone {
+    return self;
+}
 
 @end

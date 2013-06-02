@@ -24,10 +24,16 @@
 
 
 
-#import "FAEvent.h"
+#import "FATaskEvent.h"
 
 
 
-@interface FATaskResultEvent : FAEvent
+@interface FATaskResultEvent : FATaskEvent
+
+@property (nonatomic, copy, readonly) id result;
+
++ (instancetype)eventWithSource:(id)source result:(id <NSCopying>)result;
+
+- (id)initWithSource:(id)source result:(id <NSCopying>)result;
 
 @end

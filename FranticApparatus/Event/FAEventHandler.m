@@ -92,7 +92,6 @@
     return ^(id event) {
         id blockContext = weakContext;
         if (blockContext == nil) return;
-        if ([blockContext respondsToSelector:@selector(isCancelled)] && [blockContext isCancelled]) return;
         block(blockContext, event);
     };
 }

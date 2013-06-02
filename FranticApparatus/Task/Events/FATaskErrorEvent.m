@@ -30,7 +30,7 @@
 
 @implementation FATaskErrorEvent
 
-+ (id)eventWithSource:(id)source error:(NSError *)error {
++ (instancetype)eventWithSource:(id)source error:(NSError *)error {
     return [[self alloc] initWithSource:source error:error];
 }
 
@@ -45,12 +45,8 @@
     return nil;
 }
 
-
-
-#pragma mark - NSCopying
-
-- (id)copyWithZone:(NSZone *)zone {
-    return [[[self class] alloc] initWithSource:self.source error:self.error];
+- (instancetype)eventForwardedToSource:(id)source {
+    return [[[self class] alloc] initWithSource:source error:self.error];
 }
 
 @end

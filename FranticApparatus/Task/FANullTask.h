@@ -1,5 +1,5 @@
 //
-// FATaskGenericResultEvent.h
+// FANullTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,16 +24,10 @@
 
 
 
-#import "FATaskResultEvent.h"
+#import "FAAbstractTask.h"
 
 
 
-@interface FATaskGenericResultEvent : FATaskResultEvent
-
-@property (nonatomic, strong) id result;
-
-+ (id)eventWithSource:(id)source result:(id)result;
-
-- (id)initWithSource:(id)source result:(id)result;
+@interface FANullTask : FAAbstractTask
 
 @end

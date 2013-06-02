@@ -16,6 +16,10 @@
 		2C439C1616DDC55F002381F0 /* FAChainedBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2C439C1316DDBCAB002381F0 /* FAChainedBatchTask.h */; };
 		E504DCE816DAAF0B00DEB30C /* FAOrderedBatchTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E504DCE716DAAF0B00DEB30C /* FAOrderedBatchTask.m */; };
 		E504DCEC16DC5F5700DEB30C /* FAOrderedBatchTask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E504DCE616DAAF0A00DEB30C /* FAOrderedBatchTask.h */; };
+		E51F2BC8175A521B00A1F33B /* FATaskFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = E51F2BC7175A521B00A1F33B /* FATaskFactory.m */; };
+		E51F2BCB175A644900A1F33B /* FANullTask.m in Sources */ = {isa = PBXBuildFile; fileRef = E51F2BCA175A644900A1F33B /* FANullTask.m */; };
+		E51F2BD3175A832700A1F33B /* FAURLConnectionDataResult.m in Sources */ = {isa = PBXBuildFile; fileRef = E51F2BD2175A832700A1F33B /* FAURLConnectionDataResult.m */; };
+		E51F2BD6175A99BD00A1F33B /* FATaskEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E51F2BD5175A99BC00A1F33B /* FATaskEvent.m */; };
 		E522239B1751C3C500FB59CB /* FAEventDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E522239A1751C3C500FB59CB /* FAEventDispatcher.m */; };
 		E54342161747D74A00F7E66B /* FAEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E54342131747D74A00F7E66B /* FAEvent.m */; };
 		E543421B1747D80000F7E66B /* FATaskStartEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E543421A1747D80000F7E66B /* FATaskStartEvent.m */; };
@@ -42,10 +46,6 @@
 		E543425917484E1800F7E66B /* FATaskErrorEvent.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E54342311748291C00F7E66B /* FATaskErrorEvent.h */; };
 		E543425A17484E1800F7E66B /* FATaskRestartEvent.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E543423E1748453200F7E66B /* FATaskRestartEvent.h */; };
 		E543425B17484E1800F7E66B /* FATaskDelayEvent.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E54342411748456700F7E66B /* FATaskDelayEvent.h */; };
-		E543425E17484EAD00F7E66B /* FAURLConnectionTaskDataResultEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E543425D17484EAD00F7E66B /* FAURLConnectionTaskDataResultEvent.m */; };
-		E5434261174851D400F7E66B /* FATaskGenericResultEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E5434260174851D300F7E66B /* FATaskGenericResultEvent.m */; };
-		E54342621748554300F7E66B /* FAURLConnectionTaskDataResultEvent.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E543425C17484EAD00F7E66B /* FAURLConnectionTaskDataResultEvent.h */; };
-		E54342631748554A00F7E66B /* FATaskGenericResultEvent.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E543425F174851D200F7E66B /* FATaskGenericResultEvent.h */; };
 		E54342661748569400F7E66B /* FAURLConnectionTaskDownloadResultEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E54342651748569400F7E66B /* FAURLConnectionTaskDownloadResultEvent.m */; };
 		E54342671748584D00F7E66B /* FAURLConnectionTaskDownloadResultEvent.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E54342641748569300F7E66B /* FAURLConnectionTaskDownloadResultEvent.h */; };
 		E553442A16D17ACB007BF606 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E553442916D17ACB007BF606 /* Foundation.framework */; };
@@ -104,8 +104,6 @@
 			dstSubfolderSpec = 16;
 			files = (
 				E54342671748584D00F7E66B /* FAURLConnectionTaskDownloadResultEvent.h in CopyFiles */,
-				E54342631748554A00F7E66B /* FATaskGenericResultEvent.h in CopyFiles */,
-				E54342621748554300F7E66B /* FAURLConnectionTaskDataResultEvent.h in CopyFiles */,
 				E543425517484E1800F7E66B /* FATaskStartEvent.h in CopyFiles */,
 				E543425617484E1800F7E66B /* FATaskCancelEvent.h in CopyFiles */,
 				E543425717484E1800F7E66B /* FATaskFinishEvent.h in CopyFiles */,
@@ -153,6 +151,14 @@
 		2C439C1416DDBCAC002381F0 /* FAChainedBatchTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAChainedBatchTask.m; sourceTree = "<group>"; };
 		E504DCE616DAAF0A00DEB30C /* FAOrderedBatchTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAOrderedBatchTask.h; sourceTree = "<group>"; };
 		E504DCE716DAAF0B00DEB30C /* FAOrderedBatchTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAOrderedBatchTask.m; sourceTree = "<group>"; };
+		E51F2BC6175A521B00A1F33B /* FATaskFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FATaskFactory.h; sourceTree = "<group>"; };
+		E51F2BC7175A521B00A1F33B /* FATaskFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FATaskFactory.m; sourceTree = "<group>"; };
+		E51F2BC9175A644900A1F33B /* FANullTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FANullTask.h; sourceTree = "<group>"; };
+		E51F2BCA175A644900A1F33B /* FANullTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FANullTask.m; sourceTree = "<group>"; };
+		E51F2BD1175A832700A1F33B /* FAURLConnectionDataResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLConnectionDataResult.h; sourceTree = "<group>"; };
+		E51F2BD2175A832700A1F33B /* FAURLConnectionDataResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLConnectionDataResult.m; sourceTree = "<group>"; };
+		E51F2BD4175A99BC00A1F33B /* FATaskEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FATaskEvent.h; sourceTree = "<group>"; };
+		E51F2BD5175A99BC00A1F33B /* FATaskEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FATaskEvent.m; sourceTree = "<group>"; };
 		E522239A1751C3C500FB59CB /* FAEventDispatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAEventDispatcher.m; sourceTree = "<group>"; };
 		E54342121747D74A00F7E66B /* FAEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAEvent.h; sourceTree = "<group>"; };
 		E54342131747D74A00F7E66B /* FAEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAEvent.m; sourceTree = "<group>"; };
@@ -179,10 +185,6 @@
 		E543423F1748453200F7E66B /* FATaskRestartEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FATaskRestartEvent.m; sourceTree = "<group>"; };
 		E54342411748456700F7E66B /* FATaskDelayEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FATaskDelayEvent.h; sourceTree = "<group>"; };
 		E54342421748456700F7E66B /* FATaskDelayEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FATaskDelayEvent.m; sourceTree = "<group>"; };
-		E543425C17484EAD00F7E66B /* FAURLConnectionTaskDataResultEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLConnectionTaskDataResultEvent.h; sourceTree = "<group>"; };
-		E543425D17484EAD00F7E66B /* FAURLConnectionTaskDataResultEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLConnectionTaskDataResultEvent.m; sourceTree = "<group>"; };
-		E543425F174851D200F7E66B /* FATaskGenericResultEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FATaskGenericResultEvent.h; sourceTree = "<group>"; };
-		E5434260174851D300F7E66B /* FATaskGenericResultEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FATaskGenericResultEvent.m; sourceTree = "<group>"; };
 		E54342641748569300F7E66B /* FAURLConnectionTaskDownloadResultEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAURLConnectionTaskDownloadResultEvent.h; sourceTree = "<group>"; };
 		E54342651748569400F7E66B /* FAURLConnectionTaskDownloadResultEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAURLConnectionTaskDownloadResultEvent.m; sourceTree = "<group>"; };
 		E553442616D17ACB007BF606 /* libFranticApparatus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libFranticApparatus.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -249,6 +251,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E51F2BD0175A831200A1F33B /* Result */ = {
+			isa = PBXGroup;
+			children = (
+				E51F2BD1175A832700A1F33B /* FAURLConnectionDataResult.h */,
+				E51F2BD2175A832700A1F33B /* FAURLConnectionDataResult.m */,
+			);
+			path = Result;
+			sourceTree = "<group>";
+		};
 		E54342111747D72F00F7E66B /* Event */ = {
 			isa = PBXGroup;
 			children = (
@@ -265,6 +276,8 @@
 		E54342181747D7EF00F7E66B /* Events */ = {
 			isa = PBXGroup;
 			children = (
+				E51F2BD4175A99BC00A1F33B /* FATaskEvent.h */,
+				E51F2BD5175A99BC00A1F33B /* FATaskEvent.m */,
 				E54342191747D80000F7E66B /* FATaskStartEvent.h */,
 				E543421A1747D80000F7E66B /* FATaskStartEvent.m */,
 				E543421C1747DC8100F7E66B /* FATaskCancelEvent.h */,
@@ -279,8 +292,6 @@
 				E543423F1748453200F7E66B /* FATaskRestartEvent.m */,
 				E54342411748456700F7E66B /* FATaskDelayEvent.h */,
 				E54342421748456700F7E66B /* FATaskDelayEvent.m */,
-				E543425F174851D200F7E66B /* FATaskGenericResultEvent.h */,
-				E5434260174851D300F7E66B /* FATaskGenericResultEvent.m */,
 			);
 			path = Events;
 			sourceTree = "<group>";
@@ -290,8 +301,6 @@
 			children = (
 				E54342351748335900F7E66B /* FAURLConnectionTaskResultEvent.h */,
 				E54342361748335900F7E66B /* FAURLConnectionTaskResultEvent.m */,
-				E543425C17484EAD00F7E66B /* FAURLConnectionTaskDataResultEvent.h */,
-				E543425D17484EAD00F7E66B /* FAURLConnectionTaskDataResultEvent.m */,
 				E54342641748569300F7E66B /* FAURLConnectionTaskDownloadResultEvent.h */,
 				E54342651748569400F7E66B /* FAURLConnectionTaskDownloadResultEvent.m */,
 				E54342381748348E00F7E66B /* FAURLConnectionTaskSendProgressEvent.h */,
@@ -393,6 +402,10 @@
 				2C0A3D4316E9016F00988BB6 /* FAConditionalBatchTask.m */,
 				E5B4799E16E8525D00480D10 /* FARetryTask.h */,
 				E5B4799F16E8525E00480D10 /* FARetryTask.m */,
+				E51F2BC6175A521B00A1F33B /* FATaskFactory.h */,
+				E51F2BC7175A521B00A1F33B /* FATaskFactory.m */,
+				E51F2BC9175A644900A1F33B /* FANullTask.h */,
+				E51F2BCA175A644900A1F33B /* FANullTask.m */,
 			);
 			path = Task;
 			sourceTree = "<group>";
@@ -400,6 +413,7 @@
 		E553446516D17C08007BF606 /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				E51F2BD0175A831200A1F33B /* Result */,
 				E54342341748333E00F7E66B /* Events */,
 				E57E006C16EE8AD20066D124 /* FAHTTPError.h */,
 				E57E006D16EE8AD20066D124 /* FAHTTPError.m */,
@@ -552,10 +566,12 @@
 				E543423D1748368D00F7E66B /* FAURLConnectionTaskReceiveProgressEvent.m in Sources */,
 				E54342401748453300F7E66B /* FATaskRestartEvent.m in Sources */,
 				E54342431748456800F7E66B /* FATaskDelayEvent.m in Sources */,
-				E543425E17484EAD00F7E66B /* FAURLConnectionTaskDataResultEvent.m in Sources */,
-				E5434261174851D400F7E66B /* FATaskGenericResultEvent.m in Sources */,
 				E54342661748569400F7E66B /* FAURLConnectionTaskDownloadResultEvent.m in Sources */,
 				E522239B1751C3C500FB59CB /* FAEventDispatcher.m in Sources */,
+				E51F2BC8175A521B00A1F33B /* FATaskFactory.m in Sources */,
+				E51F2BCB175A644900A1F33B /* FANullTask.m in Sources */,
+				E51F2BD3175A832700A1F33B /* FAURLConnectionDataResult.m in Sources */,
+				E51F2BD6175A99BD00A1F33B /* FATaskEvent.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

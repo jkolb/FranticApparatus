@@ -1,5 +1,5 @@
 //
-// FAParallelBatchTask.h
+// FAURLConnectionDataResult.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,15 @@
 
 
 
-#import "FAAbstractTask.h"
+#import <Foundation/Foundation.h>
 
 
 
-@interface FAParallelBatchTask : FAAbstractTask
+@interface FAURLConnectionDataResult : NSObject <NSCopying>
 
-- (id)initWithDictionary:(NSDictionary *)dictionary;
+@property (nonatomic, copy, readonly) NSURLResponse *response;
+@property (nonatomic, copy, readonly) NSData *data;
+
+- (id)initWithResponse:(NSURLResponse *)response data:(NSData *)data;
 
 @end

@@ -33,4 +33,8 @@
 
 @interface FAAbstractTask : FAEventDispatcher <FATask>
 
+@property (nonatomic, strong, readonly) dispatch_queue_t synchronizationQueue;
+
+- (void)synchronizeWithBlock:(void (^)(id blockTask))block;
+
 @end

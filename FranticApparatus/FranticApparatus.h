@@ -49,7 +49,6 @@
 #import "FATaskErrorEvent.h"
 #import "FATaskRestartEvent.h"
 #import "FATaskDelayEvent.h"
-#import "FATaskGenericResultEvent.h"
 
 // Network
 #import "FAHTTPError.h"
@@ -64,7 +63,9 @@
 
 // Network Events
 #import "FAURLConnectionTaskResultEvent.h"
-#import "FAURLConnectionTaskDataResultEvent.h"
 #import "FAURLConnectionTaskDownloadResultEvent.h"
 #import "FAURLConnectionTaskSendProgressEvent.h"
 #import "FAURLConnectionTaskReceiveProgressEvent.h"
+
+// Network Results
+#import "FAURLConnectionDataResult.h"

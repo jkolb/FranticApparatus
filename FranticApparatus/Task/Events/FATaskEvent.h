@@ -1,5 +1,5 @@
 //
-// FAURLConnectionTaskDataResultEvent.h
+// FATaskEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,14 +24,20 @@
 
 
 
-#import "FAURLConnectionTaskResultEvent.h"
+#import "FAEvent.h"
 
 
 
-@interface FAURLConnectionTaskDataResultEvent : FAURLConnectionTaskResultEvent
+@protocol FATask;
 
-@property (nonatomic, copy, readonly) NSData *data;
 
-- (id)initWithSource:(id)source response:(NSURLResponse *)response data:(NSData *)data;
+
+@interface FATaskEvent : FAEvent
+
++ (instancetype)eventWithTask:(id <FATask>)task;
+
+- (id)initWithTask:(id <FATask>)task;
+
++ (FAEventHandler *)handlerWithTask:(id <FATask>)task block:(void (^)(id <FATask> blockTask, id event))block;
 
 @end

@@ -32,11 +32,13 @@
 
 @protocol FATask <FAEventDispatcher>
 
+- (BOOL)isStarted;
 - (void)start;
 
 - (BOOL)isCancelled;
 - (void)cancel;
 
+- (BOOL)isFinished;
 - (void)finish;
 
 @end

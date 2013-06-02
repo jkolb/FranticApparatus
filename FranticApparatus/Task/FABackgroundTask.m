@@ -25,7 +25,7 @@
 
 
 #import "FABackgroundTask.h"
-#import "FATaskGenericResultEvent.h"
+#import "FATaskResultEvent.h"
 #import "FATaskErrorEvent.h"
 
 
@@ -84,7 +84,7 @@
 }
 
 - (FATaskResultEvent *)resultEventForResult:(id)result {
-    return [FATaskGenericResultEvent eventWithSource:self result:result];
+    return [FATaskResultEvent eventWithSource:self result:result];
 }
 
 @end

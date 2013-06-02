@@ -1,5 +1,5 @@
 //
-// FAParallelBatchTask.h
+// FANullTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,15 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FANullTask.h"
 
 
 
-@interface FAParallelBatchTask : FAAbstractTask
+@implementation FANullTask
 
-- (id)initWithDictionary:(NSDictionary *)dictionary;
+- (void)start {
+    [super start];
+    [self finish];
+}
 
 @end

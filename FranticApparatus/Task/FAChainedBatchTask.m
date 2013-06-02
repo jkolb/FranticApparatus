@@ -27,23 +27,42 @@
 #import "FAChainedBatchTask.h"
 #import "FATaskResultEvent.h"
 #import "FATaskErrorEvent.h"
+#import "FATaskFactory.h"
+
+
+
+@interface FAChainedBatchTask ()
+
+@property (nonatomic, copy, readonly) NSArray *taskFactories;
+
+@end
 
 
 
 @implementation FAChainedBatchTask
 
-- (void)taskResultEvent:(FATaskResultEvent *)event withKey:(id)key {
-    [self advanceToNextKey];
+- (void)start {
+    [super start];
+    [self startTaskAtIndex:0 withLastResult:nil];
+}
+
+- (void)startTaskAtIndex:(NSUInteger)index withLastResult:(id)lastResult {
+    FATaskFactory *taskFactory = [self.taskFactories objectAtIndex:index];
+    id <FATask> task = [taskFactory taskWithLastResult:lastResult];
+    [task start];
+}
+
+- (void)handleTaskResultEvent:(FATaskResultEvent *)event forIndex:(NSUInteger)index {
+    NSUInteger nextIndex = index + 1;
     
-    if ([self isFinished]) {
-        [self forwardEvent:event];
-        [self finish];
+    if (nextIndex < [self.taskFactories count]) {
+        [self startTaskAtIndex:nextIndex withLastResult:event.result];
     } else {
-        [self startTaskForKey:[self currentKey] event:event];
+        [self finish];
     }
 }
 
-- (void)taskErrorEvent:(FATaskErrorEvent *)event withKey:(id)key {
+- (void)handleTaskErrorEvent:(FATaskErrorEvent *)event forIndex:(NSUInteger)index {
     [self forwardEvent:event];
     [self finish];
 }

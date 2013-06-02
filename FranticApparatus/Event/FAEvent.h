@@ -38,11 +38,11 @@
 
 @property (nonatomic, weak, readonly) id source;
 
-+ (id)eventWithSource:(id)source;
++ (instancetype)eventWithSource:(id)source;
 
 - (id)initWithSource:(id)source;
 
-- (id)eventForwardedToSource:(id)source;
+- (instancetype)eventForwardedToSource:(id)source;
 
 + (FAEventHandler *)handlerWithBlock:(void (^)(id event))block;
 + (FAEventHandler *)handlerWithContext:(id)context block:(void (^)(id context, id event))block;

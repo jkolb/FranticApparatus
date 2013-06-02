@@ -24,13 +24,13 @@
 
 
 
-#import "FAEvent.h"
+#import "FATaskEvent.h"
 
 
 
-@interface FATaskErrorEvent : FAEvent
+@interface FATaskErrorEvent : FATaskEvent
 
-@property (nonatomic, strong, readonly) NSError *error;
+@property (nonatomic, copy, readonly) NSError *error;
 
 + (id)eventWithSource:(id)source error:(NSError *)error;
 

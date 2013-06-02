@@ -24,10 +24,10 @@
 
 
 
-#import "FAEvent.h"
+#import "FATaskEvent.h"
 
 
 
-@interface FATaskFinishEvent : FAEvent
+@interface FATaskFinishEvent : FATaskEvent
 
 @end

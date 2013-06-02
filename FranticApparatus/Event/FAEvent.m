@@ -29,17 +29,9 @@
 
 
 
-@interface FAEvent ()
-
-@property (nonatomic, weak, readwrite) id source;
-
-@end
-
-
-
 @implementation FAEvent
 
-+ (id)eventWithSource:(id)source {
++ (instancetype)eventWithSource:(id)source {
     return [[self alloc] initWithSource:source];
 }
 
@@ -54,10 +46,8 @@
     return self;
 }
 
-- (id)eventForwardedToSource:(id)source {
-    FAEvent *event = [self copy];
-    event.source = source;
-    return event;
+- (instancetype)eventForwardedToSource:(id)source {
+    return [[[self class] alloc] initWithSource:source];
 }
 
 + (FAEventHandler *)handlerWithBlock:(void (^)(id event))block {
@@ -81,7 +71,7 @@
 #pragma mark - NSCopying
 
 - (id)copyWithZone:(NSZone *)zone {
-    return [[[self class] alloc] initWithSource:self.source];
+    return self;
 }
 
 @end

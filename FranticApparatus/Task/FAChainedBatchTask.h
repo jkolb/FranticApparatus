@@ -24,10 +24,10 @@
 
 
 
-#import "FAOrderedBatchTask.h"
+#import "FAAbstractTask.h"
 
 
 
-@interface FAChainedBatchTask : FAOrderedBatchTask
+@interface FAChainedBatchTask : FAAbstractTask
 
 @end

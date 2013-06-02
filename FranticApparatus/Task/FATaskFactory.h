@@ -1,5 +1,5 @@
 //
-// FAURLConnectionTaskDataResultEvent.m
+// FATaskFactory.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,30 +24,23 @@
 
 
 
-#import "FAURLConnectionTaskDataResultEvent.h"
+#import <Foundation/Foundation.h>
 
 
 
-@implementation FAURLConnectionTaskDataResultEvent
-
-- (id)initWithSource:(id)source response:(NSURLResponse *)response {
-    return [self initWithSource:source response:response data:[NSData data]];
-}
-
-- (id)initWithSource:(id)source response:(NSURLResponse *)response data:(NSData *)data {
-    self = [super initWithSource:source response:response];
-    if (self == nil) return nil;
-    _data = data;
-    if (_data == nil) return nil;
-    return self;
-}
+@protocol FATask;
 
 
 
-#pragma mark - NSCopying
+@interface FATaskFactory : NSObject <NSCopying>
 
-- (id)copyWithZone:(NSZone *)zone {
-    return [[[self class] alloc] initWithSource:self.source response:self.response data:self.data];
-}
++ (instancetype)taskFactoryWithTask:(id <FATask>)task;
++ (instancetype)taskFactoryWithBlock:(id <FATask> (^)())block;
++ (instancetype)taskFactoryWithChainBlock:(id <FATask> (^)(id lastResult))chainBlock;
+
+- (id)initWithChainBlock:(id <FATask> (^)(id lastResult))chainBlock;
+
+- (id <FATask>)task;
+- (id <FATask>)taskWithLastResult:(id)lastResult;
 
 @end

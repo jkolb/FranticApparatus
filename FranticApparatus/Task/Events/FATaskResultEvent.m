@@ -30,4 +30,23 @@
 
 @implementation FATaskResultEvent
 
++ (instancetype)eventWithSource:(id)source result:(id <NSCopying>)result {
+    return [[self alloc] initWithSource:source result:result];
+}
+
+- (id)initWithSource:(id)source {
+    return [self initWithSource:source result:nil];
+}
+
+- (id)initWithSource:(id)source result:(id <NSCopying>)result {
+    self = [super initWithSource:source];
+    if (self == nil) return nil;
+    _result = result;
+    return self;
+}
+
+- (instancetype)eventForwardedToSource:(id)source {
+    return [[[self class] alloc] initWithSource:source result:self.result];
+}
+
 @end

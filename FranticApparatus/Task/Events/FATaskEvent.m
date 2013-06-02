@@ -1,5 +1,5 @@
 //
-// FATaskGenericResultEvent.m
+// FATaskEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,33 +24,26 @@
 
 
 
-#import "FATaskGenericResultEvent.h"
+#import "FATaskEvent.h"
+#import "FATask.h"
 
 
 
-@implementation FATaskGenericResultEvent
+@implementation FATaskEvent
 
-+ (id)eventWithSource:(id)source result:(id)result {
-    return [[self alloc] initWithSource:source result:result];
++ (instancetype)eventWithTask:(id <FATask>)task {
+    return [[self alloc] initWithTask:task];
 }
 
-- (id)initWithSource:(id)source {
-    return [self initWithSource:source result:nil];
+- (id)initWithTask:(id <FATask>)task {
+    return [self initWithSource:task];
 }
 
-- (id)initWithSource:(id)source result:(id)result {
-    self = [super initWithSource:source];
-    if (self == nil) return nil;
-    _result = result;
-    return self;
-}
-
-
-
-#pragma mark - NSCopying
-
-- (id)copyWithZone:(NSZone *)zone {
-    return [[[self class] alloc] initWithSource:self.source result:self.result];
++ (FAEventHandler *)handlerWithTask:(id <FATask>)task block:(void (^)(id <FATask> blockTask, id event))block {
+    return [self handlerWithContext:task block:^(id <FATask> blockTask, id event) {
+        if ([blockTask isCancelled] || [blockTask isFinished]) return;
+        block(blockTask, event);
+    }];
 }
 
 @end
