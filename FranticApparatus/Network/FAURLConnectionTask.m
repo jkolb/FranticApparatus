@@ -36,6 +36,7 @@
 
 @property (nonatomic, copy) NSURLRequest *request;
 @property (nonatomic, strong) NSURLConnection *connection;
+@property (nonatomic, strong) NSError *error;
 
 @end
 
@@ -51,35 +52,24 @@
     return self;
 }
 
-- (void)start {
-    [super start];
-    self.connection = [[NSURLConnection alloc] initWithRequest:self.request delegate:self startImmediately:NO];
-    
-    if (self.queue != nil) {
-        [self.connection setDelegateQueue:self.queue];
-    }
-    
+- (void)didStart {
+    self.connection = [[NSURLConnection alloc] initWithRequest:self.request
+                                                      delegate:self
+                                              startImmediately:NO];
+    NSOperationQueue *queue = self.queue;
+    if (queue != nil) [self.connection setDelegateQueue:queue];
     [self.connection start];
 }
 
-- (void)cancel {
+- (id)result {
+    return nil;
+}
+
+- (void)willCancel {
     [self.connection cancel];
-    [super cancel];
-    self.responseValidator = nil;
 }
 
 - (void)handleValidResponse:(NSURLResponse *)response {
-}
-
-- (void)failWithError:(NSError *)error {
-    [self cleanup];
-    [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:error]];
-    [self finish];
-}
-
-- (void)cleanup {
-    [self.connection cancel];
-    self.connection = nil;
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
@@ -93,12 +83,23 @@
     if (isValidResponse) {
         [self handleValidResponse:response];
     } else {
-        [self failWithError:error];
+        [connection cancel];
+        self.error = error;
+        [self finish];
     }
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    [self failWithError:error];
+    self.error = error;
+    [self finish];
+}
+
+- (void)willFinish {
+    if (self.error == nil) {
+        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:[self result]]];
+    } else {
+        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:self.error]];
+    }
 }
 
 @end

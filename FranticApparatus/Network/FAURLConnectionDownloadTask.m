@@ -25,8 +25,8 @@
 
 
 #import "FAURLConnectionDownloadTask.h"
+#import "FAURLConnectionDownloadResult.h"
 #import "FAURLConnectionTaskReceiveProgressEvent.h"
-#import "FAURLConnectionTaskDownloadResultEvent.h"
 #import "FATaskFinishEvent.h"
 
 
@@ -39,17 +39,33 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
 
 @interface FAURLConnectionDownloadTask () <NSURLConnectionDataDelegate>
 
+@property (nonatomic, copy) NSString *downloadPath;
 @property (nonatomic, strong) NSMutableData *buffer;
 @property (nonatomic, strong) NSOutputStream *outputStream;
 @property (nonatomic, strong) NSURLResponse *response;
 @property (nonatomic, readwrite) long long bytesReceived;
 @property (nonatomic, readwrite) long long totalBytesReceived;
+@property (nonatomic, strong) NSError *error;
 
 @end
 
 
 
 @implementation FAURLConnectionDownloadTask
+
+- (id)initWithRequest:(NSURLRequest *)request {
+    NSArray *directories = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *downloadPath = [directories lastObject];
+    return [self initWithRequest:request downloadPath:downloadPath];
+}
+
+- (id)initWithRequest:(NSURLRequest *)request downloadPath:(NSString *)downloadPath {
+    self = [super initWithRequest:request];
+    if (self == nil) return nil;
+    _downloadPath = downloadPath;
+    if ([_downloadPath length] == 0) return nil;
+    return self;
+}
 
 - (void)handleValidResponse:(NSURLResponse *)response {
     self.response = response;
@@ -74,7 +90,9 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
     BOOL success = [self writeAsMuchDataAsPossibleToOutputStreamAndReportProgressWithError:&error];
     
     if (!success) {
-        [self failWithError:error];
+        [connection cancel];
+        self.error = error;
+        [self finish];
     }
 }
 
@@ -121,8 +139,21 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
     return dataOffset;
 }
 
+- (id)result {
+    return [[FAURLConnectionDownloadResult alloc] initWithResponse:self.response downloadPath:self.downloadPath];
+}
+
+- (void)willCancel {
+    [super cancel];
+    [self cleanup];
+}
+
+- (void)willFinish {
+    [self cleanup];
+    [super willFinish];
+}
+
 - (void)cleanup {
-    [super cleanup];
     [self.outputStream close];
     self.outputStream = nil;
     self.buffer = nil;
@@ -134,13 +165,12 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
         BOOL success = [self writeAsMuchDataAsPossibleToOutputStreamAndReportProgressWithError:&error];
         
         if (!success) {
-            [self failWithError:error];
+            self.error = error;
+            [self finish];
             return;
         }
     }
     
-    [self cleanup];
-    [self dispatchEvent:[[FAURLConnectionTaskDownloadResultEvent alloc] initWithSource:self response:self.response downloadPath:self.downloadPath]];
     [self finish];
 }
 

@@ -1,5 +1,5 @@
 //
-// FAConditionalBatchTask.m
+// FAURLConnectionResult.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,34 +24,30 @@
 
 
 
-#import "FAConditionalBatchTask.h"
-#import "FATaskErrorEvent.h"
+#import "FAURLConnectionResult.h"
 
 
 
-@implementation FAConditionalBatchTask
+@implementation FAURLConnectionResult
 
-- (void)start {
-    [super start];
-    NSError *error = nil;
-    id taskKey = [self determineTaskKeyWithError:&error];
-    
-    if (taskKey == nil) {
-        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:error]];
-        [self finish];
-        return;
-    }
-    
-    [self startTaskForKey:taskKey event:nil];
+- (id)init {
+    return [self initWithResponse:[[NSURLResponse alloc] init]];
 }
 
-- (id)determineTaskKeyWithError:(NSError **)error {
-    if (self.determineTaskKey == nil) return [[self allKeys] lastObject];
-    return self.determineTaskKey(error);
+- (id)initWithResponse:(NSURLResponse *)response {
+    self = [super init];
+    if (self == nil) return nil;
+    _response = response;
+    if (_response == nil) return nil;
+    return self;
 }
 
-- (void)configureTask:(id<FATask>)task withKey:(id)key {
-    [task forwardToDispatcher:self];
+
+
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone {
+    return self;
 }
 
 @end

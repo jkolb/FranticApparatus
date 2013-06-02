@@ -25,18 +25,25 @@
 
 
 #import "FARetryTask.h"
+#import "FATaskFactory.h"
 #import "FATaskResultEvent.h"
 #import "FATaskErrorEvent.h"
 #import "FATaskRestartEvent.h"
 #import "FATaskDelayEvent.h"
+#import "FATaskCancelEvent.h"
+#import "FATaskFinishEvent.h"
 
 
 
 @interface FARetryTask ()
 
+@property (nonatomic, copy, readonly) FATaskFactory *taskFactory;
+@property (nonatomic, readonly) NSUInteger maximumRetryCount;
+@property (nonatomic) NSUInteger retryCount;
 @property (nonatomic, strong) id <FATask> task;
-@property (readwrite) NSUInteger retryCount;
-@property (strong) dispatch_source_t delayTimer;
+@property (nonatomic, strong) dispatch_source_t delayTimer;
+@property (nonatomic, strong) id result;
+@property (nonatomic, strong) NSError *error;
 
 @end
 
@@ -44,33 +51,50 @@
 
 @implementation FARetryTask
 
+- (id)init {
+    return [self initWithTaskFactory:[[FATaskFactory alloc] init] maximumRetryCount:0];
+}
+
+- (id)initWithTaskFactory:(FATaskFactory *)taskFactory maximumRetryCount:(NSUInteger)maximumRetryCount {
+    self = [super init];
+    if (self == nil) return nil;
+    _taskFactory = taskFactory;
+    if (_taskFactory == nil) return nil;
+    _maximumRetryCount = maximumRetryCount;
+    return self;
+}
+
 - (void)dealloc {
     if (_delayTimer != nil) dispatch_source_cancel(_delayTimer);
 }
 
-- (void)start {
-    [super start];
+- (void)didStart {
     [self try];
 }
 
 - (void)try {
-    self.task = self.factory();
-    [self.task addHandler:[FATaskResultEvent handlerWithContext:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
-        [blockTask forwardEvent:event];
-        [blockTask finish];
+    id <FATask> task = [self.taskFactory task];
+    [task addHandler:[FATaskResultEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
+        [blockTask handleTaskResultEvent:event];
     }]];
-    [self.task addHandler:[FATaskErrorEvent handlerWithContext:self block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
-        [blockTask tryFailedWithError:event.error];
+    [task addHandler:[FATaskErrorEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
+        [blockTask handleTaskErrorEvent:event];
     }]];
+    [task addHandler:[FATaskCancelEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
+        [blockTask handleTaskCancelEvent:event];
+    }]];
+    [task addHandler:[FATaskFinishEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
+        [blockTask handleTaskFinishEvent:event];
+    }]];
+    self.task = task;
     [self.task start];
 }
 
-- (void)tryFailedWithError:(id)error {
+- (void)tryFailed {
     BOOL exceededMaximumRetryCount = self.retryCount == NSUIntegerMax || (self.retryCount == self.maximumRetryCount && self.maximumRetryCount > 0);
-    BOOL shouldNotRetry = [self shouldRetryAfterError:error] == NO;
+    BOOL shouldNotRetry = [self shouldRetryAfterError:self.error] == NO;
     
     if (exceededMaximumRetryCount || shouldNotRetry) {
-        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:error]];
         [self finish];
     } else {
         [self delayBeforeRetry];
@@ -127,9 +151,44 @@
     self.delayTimer = nil;
 }
 
-- (void)cancel {
+- (void)willCancel {
     [self cancelTimer];
-    [super cancel];
+    [self.task cancel];
+}
+
+- (void)handleTaskResultEvent:(FATaskResultEvent *)event {
+    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+        blockTask.result = event.result;
+    }];
+}
+
+- (void)handleTaskErrorEvent:(FATaskErrorEvent *)event {
+    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+        blockTask.error = event.error;
+    }];
+}
+
+- (void)handleTaskCancelEvent:(FATaskCancelEvent *)event {
+    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+    }];
+}
+
+- (void)handleTaskFinishEvent:(FATaskFinishEvent *)event {
+    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+        if (blockTask.error == nil) {
+            [blockTask finish];
+        } else {
+            [blockTask tryFailed];
+        }
+    }];
+}
+
+- (void)willFinish {
+    if (self.result == nil) {
+        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:self.error]];
+    } else {
+        [self dispatchEvent:[FATaskResultEvent eventWithSource:self result:self.result]];
+    }
 }
 
 @end

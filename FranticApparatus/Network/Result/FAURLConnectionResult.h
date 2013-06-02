@@ -1,5 +1,5 @@
 //
-// FAConditionalBatchTask.h
+// FAURLConnectionResult.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,12 +24,14 @@
 
 
 
-#import "FABatchTask.h"
+#import <Foundation/Foundation.h>
 
 
 
-@interface FAConditionalBatchTask : FABatchTask
+@interface FAURLConnectionResult : NSObject <NSCopying>
 
-@property (copy) id (^determineTaskKey)(NSError **error);
+@property (nonatomic, copy, readonly) NSURLResponse *response;
+
+- (id)initWithResponse:(NSURLResponse *)response;
 
 @end

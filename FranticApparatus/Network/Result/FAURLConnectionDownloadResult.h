@@ -1,5 +1,5 @@
 //
-// FAURLConnectionStreamTask.h
+// FAURLConnectionDownloadResult.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,10 +24,14 @@
 
 
 
-#import "FAURLConnectionTask.h"
+#import "FAURLConnectionResult.h"
 
 
 
-@interface FAURLConnectionStreamTask : FAURLConnectionTask
+@interface FAURLConnectionDownloadResult : FAURLConnectionResult
+
+@property (nonatomic, copy, readonly) NSString *downloadPath;
+
+- (id)initWithResponse:(NSURLResponse *)response downloadPath:(NSString *)downloadPath;
 
 @end

@@ -40,6 +40,6 @@ enum {
 
 @interface FAURLConnectionDownloadTask : FAURLConnectionTask
 
-@property (copy) NSString *downloadPath;
+- (id)initWithRequest:(NSURLRequest *)request downloadPath:(NSString *)downloadPath;
 
 @end

@@ -31,17 +31,9 @@
 
 @implementation FATaskEvent
 
-+ (instancetype)eventWithTask:(id <FATask>)task {
-    return [[self alloc] initWithTask:task];
-}
-
-- (id)initWithTask:(id <FATask>)task {
-    return [self initWithSource:task];
-}
-
 + (FAEventHandler *)handlerWithTask:(id <FATask>)task block:(void (^)(id <FATask> blockTask, id event))block {
     return [self handlerWithContext:task block:^(id <FATask> blockTask, id event) {
-        if ([blockTask isCancelled] || [blockTask isFinished]) return;
+        if ([blockTask isCancelled]) return;
         block(blockTask, event);
     }];
 }

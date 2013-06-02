@@ -34,10 +34,6 @@
 
 @interface FATaskEvent : FAEvent
 
-+ (instancetype)eventWithTask:(id <FATask>)task;
-
-- (id)initWithTask:(id <FATask>)task;
-
 + (FAEventHandler *)handlerWithTask:(id <FATask>)task block:(void (^)(id <FATask> blockTask, id event))block;
 
 @end

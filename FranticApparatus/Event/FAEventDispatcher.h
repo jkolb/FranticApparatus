@@ -39,10 +39,7 @@
 - (void)removeHandler:(FAEventHandler *)handler;
 - (void)removeAllHandlers;
 
-- (void)forwardToDispatcher:(id <FAEventDispatcher>)dispatcher;
-
 - (void)dispatchEvent:(FAEvent *)event;
-- (void)forwardEvent:(FAEvent *)event;
 
 @end
 

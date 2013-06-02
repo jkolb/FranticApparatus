@@ -28,11 +28,14 @@
 
 
 
+@class FATaskFactory;
+
+
+
 @interface FARetryTask : FAAbstractTask
 
-@property (copy) id <FATask> (^factory)();
-@property NSUInteger maximumRetryCount;
-@property (readonly) NSUInteger retryCount;
+- (id)initWithTaskFactory:(FATaskFactory *)taskFactory maximumRetryCount:(NSUInteger)maximumRetryCount;
+
 @property (copy) BOOL (^shouldRetry)(id error);
 @property (copy) NSTimeInterval (^calculateDelayInterval)(NSUInteger retryCount);
 @property NSTimeInterval delayInterval;

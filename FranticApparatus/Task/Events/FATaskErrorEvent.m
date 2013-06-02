@@ -45,8 +45,4 @@
     return nil;
 }
 
-- (instancetype)eventForwardedToSource:(id)source {
-    return [[[self class] alloc] initWithSource:source error:self.error];
-}
-
 @end

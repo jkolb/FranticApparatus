@@ -45,8 +45,4 @@
     return self;
 }
 
-- (instancetype)eventForwardedToSource:(id)source {
-    return [[[self class] alloc] initWithSource:source result:self.result];
-}
-
 @end

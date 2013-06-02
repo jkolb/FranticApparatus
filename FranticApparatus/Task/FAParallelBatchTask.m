@@ -36,7 +36,7 @@
 
 @interface FAParallelBatchTask ()
 
-@property (nonatomic, strong) NSMutableDictionary *tasks;
+@property (nonatomic, strong, readonly) NSMutableDictionary *tasks;
 @property (nonatomic, strong) NSMutableDictionary *results;
 @property (nonatomic, strong) NSError *error;
 

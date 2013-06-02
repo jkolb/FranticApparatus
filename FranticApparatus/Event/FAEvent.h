@@ -42,11 +42,8 @@
 
 - (id)initWithSource:(id)source;
 
-- (instancetype)eventForwardedToSource:(id)source;
-
 + (FAEventHandler *)handlerWithBlock:(void (^)(id event))block;
 + (FAEventHandler *)handlerWithContext:(id)context block:(void (^)(id context, id event))block;
 + (FAEventHandler *)handlerWithTarget:(id)target action:(SEL)action;
-+ (FAEventHandler *)handlerWithDispatcher:(id <FAEventDispatcher>)dispatcher;
 
 @end

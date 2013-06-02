@@ -50,6 +50,4 @@ typedef NS_ENUM(NSInteger, FABackgroundTaskPriority) {
 
 - (id)executeWithError:(NSError **)error;
 
-- (FATaskResultEvent *)resultEventForResult:(id)result;
-
 @end

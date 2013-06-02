@@ -39,7 +39,6 @@
 + (instancetype)eventHandlerWithEventClass:(Class)eventClass block:(void (^)(id event))block;
 + (instancetype)eventHandlerWithEventClass:(Class)eventClass context:(id)context block:(void (^)(id context, id event))block;
 + (instancetype)eventHandlerWithEventClass:(Class)eventClass target:(id)target action:(SEL)action;
-+ (instancetype)eventHandlerWithEventClass:(Class)eventClass dispatcher:(id <FAEventDispatcher>)dispatcher;
 
 - (id)initWithEventClass:(Class)eventClass block:(void (^)(id event))block;
 

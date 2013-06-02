@@ -30,8 +30,7 @@
 
 @implementation FANullTask
 
-- (void)start {
-    [super start];
+- (void)didStart {
     [self finish];
 }
 

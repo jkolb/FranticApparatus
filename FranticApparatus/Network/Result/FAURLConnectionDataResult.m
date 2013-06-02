@@ -30,25 +30,15 @@
 
 @implementation FAURLConnectionDataResult
 
-- (id)init {
-    return [self initWithResponse:[[NSURLResponse alloc] init] data:[[NSData alloc] init]];
+- (id)initWithResponse:(NSURLResponse *)response {
+    return [self initWithResponse:response data:[[NSData alloc] init]];
 }
 
 - (id)initWithResponse:(NSURLResponse *)response data:(NSData *)data {
-    self = [super init];
+    self = [super initWithResponse:response];
     if (self == nil) return nil;
-    _response = response;
-    if (_response == nil) return nil;
     _data = data;
     if (_data == nil) return nil;
-    return self;
-}
-
-
-
-#pragma mark - NSCopying
-
-- (id)copyWithZone:(NSZone *)zone {
     return self;
 }
 

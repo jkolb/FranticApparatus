@@ -30,6 +30,15 @@
 
 
 
+@interface FABackgroundTask ()
+
+@property (nonatomic, strong) id result;
+@property (nonatomic, strong) NSError *error;
+
+@end
+
+
+
 @implementation FABackgroundTask
 
 - (dispatch_queue_t)backgroundQueue {
@@ -54,7 +63,8 @@
     __typeof__(self) __weak weakSelf = self;
     dispatch_async([self backgroundQueue], ^{
         __typeof__(self) blockSelf = weakSelf;
-        if (blockSelf == nil || [blockSelf isCancelled]) return;
+        if (blockSelf == nil) return;
+        if ([blockSelf isCancelled]) return;
         [blockSelf executeInBackground];
     });
 }
@@ -69,17 +79,21 @@
         result = self.execute(self, &error);
     }
     
-    if (result == nil) {
-        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:error]];
-    } else {
-        [self dispatchEvent:[FATaskResultEvent eventWithSource:self result:result]];
-    }
-    
+    self.result = result;
+    self.error = error;
     [self finish];
 }
 
 - (id)executeWithError:(NSError **)error {
     return @(YES);
+}
+
+- (void)willFinish {
+    if (self.result == nil) {
+        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:self.error]];
+    } else {
+        [self dispatchEvent:[FATaskResultEvent eventWithSource:self result:self.result]];
+    }
 }
 
 @end

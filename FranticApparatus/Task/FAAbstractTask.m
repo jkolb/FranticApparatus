@@ -38,9 +38,8 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
 
 @interface FAAbstractTask ()
 
-@property (nonatomic, strong, readonly) dispatch_queue_t synchronizationQueue;
-@property (nonatomic) BOOL started;
-@property (nonatomic) BOOL cancelled;
+@property (strong, readonly) dispatch_queue_t synchronizationQueue;
+@property BOOL cancelled;
 @property (nonatomic) BOOL finished;
 
 @end
@@ -57,14 +56,9 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
     return self;
 }
 
-- (BOOL)isStarted {
-    return self.started;
-}
-
 - (void)start {
     [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
         [blockTask willStart];
-        blockTask.started = YES;
         [blockTask dispatchEvent:[FATaskStartEvent eventWithSource:self]];
         [blockTask didStart];
     }];
@@ -97,10 +91,6 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
 
 - (void)didCancel {
     
-}
-
-- (BOOL)isFinished {
-    return self.finished;
 }
 
 - (void)finish {

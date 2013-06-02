@@ -33,12 +33,8 @@
 #import "FATask.h"
 #import "FAAbstractTask.h"
 #import "FABackgroundTask.h"
-#import "FABatchTask.h"
-#import "FAOrderedBatchTask.h"
 #import "FAParallelBatchTask.h"
-#import "FASequentialBatchTask.h"
 #import "FAChainedBatchTask.h"
-#import "FAConditionalBatchTask.h"
 #import "FARetryTask.h"
 
 // Task Events
@@ -58,14 +54,13 @@
 #import "FAURLConnectionTask.h"
 #import "FAURLConnectionDataTask.h"
 #import "FAURLConnectionDownloadTask.h"
-#import "FAURLConnectionStreamTask.h"
 #import "NSURLResponse+StringEncoding.h"
 
 // Network Events
-#import "FAURLConnectionTaskResultEvent.h"
-#import "FAURLConnectionTaskDownloadResultEvent.h"
 #import "FAURLConnectionTaskSendProgressEvent.h"
 #import "FAURLConnectionTaskReceiveProgressEvent.h"
 
 // Network Results
+#import "FAURLConnectionResult.h"
 #import "FAURLConnectionDataResult.h"
+#import "FAURLConnectionDownloadResult.h"

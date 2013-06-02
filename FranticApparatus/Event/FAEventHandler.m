@@ -32,8 +32,8 @@
 
 @interface FAEventHandler ()
 
-@property (nonatomic, strong) Class eventClass;
-@property (nonatomic, copy) void (^block)(id event);
+@property (nonatomic, strong, readonly) Class eventClass;
+@property (nonatomic, copy, readonly) void (^block)(id event);
 
 @end
 
@@ -55,12 +55,6 @@
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
         [context performSelector:action withObject:event];
 #pragma clang diagnostic pop
-    }]];
-}
-
-+ (instancetype)eventHandlerWithEventClass:(Class)eventClass dispatcher:(id <FAEventDispatcher>)dispatcher {
-    return [[self alloc] initWithEventClass:eventClass block:[self blockForContext:dispatcher block:^(id <FAEventDispatcher> blockDispatcher, id event) {
-        [blockDispatcher forwardEvent:event];
     }]];
 }
 
@@ -102,12 +96,11 @@
 
 - (instancetype)onDispatchQueue:(dispatch_queue_t)dispatchQueue {
     void (^blockBlock)(id event) = self.block;
-    [self setBlock:^(id event) {
+    return [[[self class] alloc] initWithEventClass:self.eventClass block:^(id event) {
         dispatch_async(dispatchQueue, ^{
             blockBlock(event);
         });
     }];
-    return self;
 }
 
 
@@ -115,7 +108,7 @@
 #pragma mark - NSCopying
 
 - (id)copyWithZone:(NSZone *)zone {
-    return [[[self class] allocWithZone:zone] initWithEventClass:self.eventClass block:self.block];
+    return self;
 }
 
 @end

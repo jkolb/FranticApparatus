@@ -1,5 +1,5 @@
 //
-// FAOrderedBatchTask.h
+// FAURLConnectionDownloadResult.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,19 +24,22 @@
 
 
 
-#import "FABatchTask.h"
+#import "FAURLConnectionDownloadResult.h"
 
 
 
-@interface FAOrderedBatchTask : FABatchTask
+@implementation FAURLConnectionDownloadResult
 
-@property (nonatomic, copy) NSComparator keyComparator;
+- (id)initWithResponse:(NSURLResponse *)response {
+    return [self initWithResponse:response downloadPath:@""];
+}
 
-- (void)addTask:(id <FATask>)task;
-- (void)addFactory:(id <FATask> (^)(id event))factory;
-
-- (id)currentKey;
-- (void)advanceToNextKey;
-- (BOOL)isFinished;
+- (id)initWithResponse:(NSURLResponse *)response downloadPath:(NSString *)downloadPath {
+    self = [super initWithResponse:response];
+    if (self == nil) return nil;
+    _downloadPath = downloadPath;
+    if ([_downloadPath length] == 0) return nil;
+    return self;
+}
 
 @end

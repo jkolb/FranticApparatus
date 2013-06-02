@@ -46,10 +46,6 @@
     return self;
 }
 
-- (instancetype)eventForwardedToSource:(id)source {
-    return [[[self class] alloc] initWithSource:source];
-}
-
 + (FAEventHandler *)handlerWithBlock:(void (^)(id event))block {
     return [FAEventHandler eventHandlerWithEventClass:self block:block];
 }
@@ -60,10 +56,6 @@
 
 + (FAEventHandler *)handlerWithTarget:(id)target action:(SEL)action {
     return [FAEventHandler eventHandlerWithEventClass:self target:target action:action];
-}
-
-+ (FAEventHandler *)handlerWithDispatcher:(id <FAEventDispatcher>)dispatcher {
-    return [FAEventHandler eventHandlerWithEventClass:self dispatcher:dispatcher];
 }
 
 

@@ -51,10 +51,11 @@
     [self.data appendData:data];
 }
 
+- (id)result {
+    return [[FAURLConnectionDataResult alloc] initWithResponse:self.response data:self.data];
+}
+
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    [self cleanup];
-    FAURLConnectionDataResult *result = [[FAURLConnectionDataResult alloc] initWithResponse:self.response data:self.data];
-    [self dispatchEvent:[[FATaskResultEvent alloc] initWithSource:self result:result]];
     [self finish];
 }
 

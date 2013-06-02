@@ -24,13 +24,12 @@
 
 
 
-#import <Foundation/Foundation.h>
+#import "FAURLConnectionResult.h"
 
 
 
-@interface FAURLConnectionDataResult : NSObject <NSCopying>
+@interface FAURLConnectionDataResult : FAURLConnectionResult
 
-@property (nonatomic, copy, readonly) NSURLResponse *response;
 @property (nonatomic, copy, readonly) NSData *data;
 
 - (id)initWithResponse:(NSURLResponse *)response data:(NSData *)data;

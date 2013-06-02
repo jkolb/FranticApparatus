@@ -60,19 +60,11 @@
     [self.handlers removeAllObjects];
 }
 
-- (void)forwardToDispatcher:(id <FAEventDispatcher>)dispatcher {
-    [self addHandler:[FAEvent handlerWithDispatcher:dispatcher]];
-}
-
 - (void)dispatchEvent:(FAEvent *)event {
     for (FAEventHandler *handler in self.handlers) {
         if (![handler canHandleEvent:event]) continue;
         [handler handleEvent:event];
     }
-}
-
-- (void)forwardEvent:(FAEvent *)event {
-    [self dispatchEvent:[event eventForwardedToSource:self]];
 }
 
 @end
