@@ -57,18 +57,18 @@
         if (![object isKindOfClass:[FATaskFactory class]]) return nil;
         FATaskFactory *taskFactory = object;
         id <FATask> task = [taskFactory task];
-        [task addHandler:[[FATaskResultEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
+        [task addHandler:[FATaskResultEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
             [blockTask handleTaskResultEvent:event forKey:key];
-        }] onDispatchQueue:self.synchronizationQueue]];
-        [task addHandler:[[FATaskErrorEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
+        }]];
+        [task addHandler:[FATaskErrorEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
             [blockTask handleTaskErrorEvent:event forKey:key];
-        }] onDispatchQueue:self.synchronizationQueue]];
-        [task addHandler:[[FATaskCancelEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
+        }]];
+        [task addHandler:[FATaskCancelEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
             [blockTask handleTaskCancelEvent:event forKey:key];
-        }] onDispatchQueue:self.synchronizationQueue]];
-        [task addHandler:[[FATaskFinishEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
+        }]];
+        [task addHandler:[FATaskFinishEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
             [blockTask handleTaskFinishEvent:event forKey:key];
-        }] onDispatchQueue:self.synchronizationQueue]];
+        }]];
         [_tasks setObject:task forKey:key];
     }
     _results = [[NSMutableDictionary alloc] initWithCapacity:[_tasks count]];
@@ -76,28 +76,20 @@
     return self;
 }
 
-- (void)start {
-    [super start];
-    
-    for (id <FATask> task in [self.tasks allValues]) {
-        [task start];
-    }
-    
+- (void)didStart {
+    for (id <FATask> task in [self.tasks allValues]) [task start];
     if ([self.tasks count] == 0) [self finish];
 }
 
-- (void)cancel {
+- (void)willCancel {
     [self cancelOutstandingTasks];
-    [super cancel];
 }
 
 - (void)cancelOutstandingTasks {
-    for (id <FATask> task in [self.tasks allValues]) {
-        [task cancel];
-    }
+    for (id <FATask> task in [self.tasks allValues]) [task cancel];
 }
 
-- (void)finish {
+- (void)willFinish {
     [self cancelOutstandingTasks];
     
     if (self.error == nil) {
@@ -105,7 +97,6 @@
     } else {
         [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:self.error]];
     }
-    [super finish];
 }
 
 - (BOOL)shouldFailOnError:(NSError *)error forKey:(id)key {
@@ -113,24 +104,32 @@
 }
 
 - (void)handleTaskResultEvent:(FATaskResultEvent *)event forKey:(id)key {
-    [self.results setObject:event.result forKey:key];
+    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+        [blockTask.results setObject:event.result forKey:key];
+    }];
 }
 
 - (void)handleTaskErrorEvent:(FATaskErrorEvent *)event forKey:(id)key {
-    if ([self shouldFailOnError:event.error forKey:key]) {
-        self.error = event.error;
-    }
+    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+        if ([blockTask shouldFailOnError:event.error forKey:key]) {
+            blockTask.error = event.error;
+        }
+    }];
 }
 
 - (void)handleTaskCancelEvent:(FATaskCancelEvent *)event forKey:(id)key {
-    [self.tasks removeObjectForKey:key];
+    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+        [blockTask.tasks removeObjectForKey:key];
+    }];
 }
 
 - (void)handleTaskFinishEvent:(FATaskFinishEvent *)event forKey:(id)key {
-    [self.tasks removeObjectForKey:key];
-    if ([self.tasks count] == 0 || self.error != nil) {
-        [self finish];
-    }
+    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+        [blockTask.tasks removeObjectForKey:key];
+        if ([blockTask.tasks count] == 0 || blockTask.error != nil) {
+            [blockTask finish];
+        }
+    }];
 }
 
 @end

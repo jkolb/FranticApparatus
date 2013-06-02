@@ -290,8 +290,8 @@
 				E54342321748291D00F7E66B /* FATaskErrorEvent.m */,
 				E543423E1748453200F7E66B /* FATaskRestartEvent.h */,
 				E543423F1748453200F7E66B /* FATaskRestartEvent.m */,
-				E54342411748456700F7E66B /* FATaskDelayEvent.h */,
 				E54342421748456700F7E66B /* FATaskDelayEvent.m */,
+				E54342411748456700F7E66B /* FATaskDelayEvent.h */,
 			);
 			path = Events;
 			sourceTree = "<group>";

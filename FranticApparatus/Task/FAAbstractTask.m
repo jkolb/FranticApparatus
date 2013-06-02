@@ -38,7 +38,7 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
 
 @interface FAAbstractTask ()
 
-@property (nonatomic, strong) NSLock *synchronizationLock;
+@property (nonatomic, strong, readonly) dispatch_queue_t synchronizationQueue;
 @property (nonatomic) BOOL started;
 @property (nonatomic) BOOL cancelled;
 @property (nonatomic) BOOL finished;
@@ -54,16 +54,11 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
     if (self == nil) return nil;
     _synchronizationQueue = dispatch_queue_create(FATaskSynchronizationQueueLabel, DISPATCH_QUEUE_SERIAL);
     if (_synchronizationQueue == nil) return nil;
-    _synchronizationLock = [[NSLock alloc] init];
-    if (_synchronizationLock == nil) return nil;
     return self;
 }
 
 - (BOOL)isStarted {
-    [self.synchronizationLock lock];
-    BOOL isStarted = self.started;
-    [self.synchronizationLock unlock];
-    return isStarted;
+    return self.started;
 }
 
 - (void)start {
@@ -84,10 +79,7 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
 }
 
 - (BOOL)isCancelled {
-    [self.synchronizationLock lock];
-    BOOL isCancelled = self.cancelled;
-    [self.synchronizationLock unlock];
-    return isCancelled;
+    return self.cancelled;
 }
 
 - (void)cancel {
@@ -108,10 +100,7 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
 }
 
 - (BOOL)isFinished {
-    [self.synchronizationLock lock];
-    BOOL isFinished = self.finished;
-    [self.synchronizationLock unlock];
-    return isFinished;
+    return self.finished;
 }
 
 - (void)finish {
@@ -136,17 +125,9 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
     dispatch_async(self.synchronizationQueue, ^{
         __typeof__(self) blockSelf = weakSelf;
         if (blockSelf == nil) return;
-        [blockSelf.synchronizationLock lock];
-        if (blockSelf.cancelled) {
-            [blockSelf.synchronizationLock unlock];
-            return;
-        }
-        if (blockSelf.finished) {
-            [blockSelf.synchronizationLock unlock];
-            return;
-        }
+        if (blockSelf.cancelled) return;
+        if (blockSelf.finished) return;
         block(blockSelf);
-        [blockSelf.synchronizationLock unlock];
     });
 }
 

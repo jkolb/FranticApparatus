@@ -27,6 +27,8 @@
 #import "FAChainedBatchTask.h"
 #import "FATaskResultEvent.h"
 #import "FATaskErrorEvent.h"
+#import "FATaskCancelEvent.h"
+#import "FATaskFinishEvent.h"
 #import "FATaskFactory.h"
 
 
@@ -34,6 +36,9 @@
 @interface FAChainedBatchTask ()
 
 @property (nonatomic, copy, readonly) NSArray *taskFactories;
+@property (nonatomic, strong) id <FATask> currentTask;
+@property (nonatomic, strong) id lastResult;
+@property (nonatomic, strong) NSError *lastError;
 
 @end
 
@@ -41,30 +46,74 @@
 
 @implementation FAChainedBatchTask
 
-- (void)start {
-    [super start];
+- (void)didStart {
     [self startTaskAtIndex:0 withLastResult:nil];
 }
 
 - (void)startTaskAtIndex:(NSUInteger)index withLastResult:(id)lastResult {
     FATaskFactory *taskFactory = [self.taskFactories objectAtIndex:index];
     id <FATask> task = [taskFactory taskWithLastResult:lastResult];
+    [task addHandler:[FATaskResultEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
+        [blockTask handleTaskResultEvent:event forIndex:index];
+    }]];
+    [task addHandler:[FATaskErrorEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
+        [blockTask handleTaskErrorEvent:event forIndex:index];
+    }]];
+    [task addHandler:[FATaskCancelEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
+        [blockTask handleTaskCancelEvent:event forIndex:index];
+    }]];
+    [task addHandler:[FATaskFinishEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
+        [blockTask handleTaskFinishEvent:event forIndex:index];
+    }]];
+    self.currentTask = task;
     [task start];
 }
 
-- (void)handleTaskResultEvent:(FATaskResultEvent *)event forIndex:(NSUInteger)index {
-    NSUInteger nextIndex = index + 1;
-    
-    if (nextIndex < [self.taskFactories count]) {
-        [self startTaskAtIndex:nextIndex withLastResult:event.result];
+- (void)willCancel {
+    [self.currentTask cancel];
+}
+
+- (void)willFinish {
+    if (self.lastError == nil) {
+        [self dispatchEvent:[FATaskResultEvent eventWithSource:self result:self.lastResult]];
     } else {
-        [self finish];
+        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:self.lastError]];
     }
 }
 
+- (void)handleTaskResultEvent:(FATaskResultEvent *)event forIndex:(NSUInteger)index {
+    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+        blockTask.lastResult = event.result;
+    }];
+}
+
 - (void)handleTaskErrorEvent:(FATaskErrorEvent *)event forIndex:(NSUInteger)index {
-    [self forwardEvent:event];
-    [self finish];
+    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+        blockTask.lastError = event.error;
+    }];
+}
+
+- (void)handleTaskCancelEvent:(FATaskCancelEvent *)event forIndex:(NSUInteger)index {
+    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+        [blockTask cancel];
+    }];
+}
+
+- (void)handleTaskFinishEvent:(FATaskFinishEvent *)event forIndex:(NSUInteger)index {
+    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+        if (blockTask.lastError == nil) {
+            NSUInteger nextIndex = index + 1;
+            
+            if (nextIndex < [blockTask.taskFactories count]) {
+                [blockTask startTaskAtIndex:nextIndex withLastResult:blockTask.lastResult];
+            } else {
+                [blockTask finish];
+            }
+        } else {
+            [blockTask finish];
+        }
+
+    }];
 }
 
 @end

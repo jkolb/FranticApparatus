@@ -50,8 +50,7 @@
     }
 }
 
-- (void)start {
-    [super start];
+- (void)didStart {
     __typeof__(self) __weak weakSelf = self;
     dispatch_async([self backgroundQueue], ^{
         __typeof__(self) blockSelf = weakSelf;
@@ -72,19 +71,15 @@
     
     if (result == nil) {
         [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:error]];
-        [self finish];
     } else {
-        [self dispatchEvent:[self resultEventForResult:result]];
-        [self finish];
+        [self dispatchEvent:[FATaskResultEvent eventWithSource:self result:result]];
     }
+    
+    [self finish];
 }
 
 - (id)executeWithError:(NSError **)error {
     return @(YES);
-}
-
-- (FATaskResultEvent *)resultEventForResult:(id)result {
-    return [FATaskResultEvent eventWithSource:self result:result];
 }
 
 @end
