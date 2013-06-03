@@ -46,6 +46,21 @@
 
 @implementation FAChainedBatchTask
 
+- (id)init {
+    return [self initWithArray:[[NSArray alloc] init]];
+}
+
+- (id)initWithArray:(NSArray *)array {
+    self = [super init];
+    if (self == nil) return nil;
+    _taskFactories = array;
+    if (_taskFactories == nil) return nil;
+    for (id object in _taskFactories) {
+        if (![object isKindOfClass:[FATaskFactory class]]) return nil;
+    }
+    return self;
+}
+
 - (void)didStart {
     [self startTaskAtIndex:0 withLastResult:nil];
 }

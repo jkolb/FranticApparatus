@@ -30,4 +30,6 @@
 
 @interface FAChainedBatchTask : FAAbstractTask
 
+- (id)initWithArray:(NSArray *)array;
+
 @end
