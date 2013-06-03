@@ -95,7 +95,7 @@
 
 - (void)willFinish {
     if (self.error == nil) {
-        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:[self result]]];
+        [self dispatchEvent:[FATaskResultEvent eventWithSource:self result:[self result]]];
     } else {
         [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:self.error]];
     }
