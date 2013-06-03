@@ -1,5 +1,5 @@
 //
-// FAChainedBatchTask.m
+// FAChainedTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,7 +24,7 @@
 
 
 
-#import "FAChainedBatchTask.h"
+#import "FAChainedTask.h"
 #import "FATaskResultEvent.h"
 #import "FATaskErrorEvent.h"
 #import "FATaskCancelEvent.h"
@@ -33,7 +33,7 @@
 
 
 
-@interface FAChainedBatchTask ()
+@interface FAChainedTask ()
 
 @property (nonatomic, copy, readonly) NSArray *taskFactories;
 @property (nonatomic, strong) id <FATask> currentTask;
@@ -44,7 +44,7 @@
 
 
 
-@implementation FAChainedBatchTask
+@implementation FAChainedTask
 
 - (id)init {
     return [self initWithArray:[[NSArray alloc] init]];

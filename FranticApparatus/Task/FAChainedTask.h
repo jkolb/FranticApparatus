@@ -1,5 +1,5 @@
 //
-// FAParallelBatchTask.h
+// FAChainedTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -28,8 +28,8 @@
 
 
 
-@interface FAParallelBatchTask : FAAbstractTask
+@interface FAChainedTask : FAAbstractTask
 
-- (id)initWithDictionary:(NSDictionary *)dictionary;
+- (id)initWithArray:(NSArray *)array;
 
 @end

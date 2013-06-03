@@ -33,8 +33,8 @@
 #import "FATask.h"
 #import "FAAbstractTask.h"
 #import "FABackgroundTask.h"
-#import "FAParallelBatchTask.h"
-#import "FAChainedBatchTask.h"
+#import "FAParallelTask.h"
+#import "FAChainedTask.h"
 #import "FARetryTask.h"
 #import "FANullTask.h"
 

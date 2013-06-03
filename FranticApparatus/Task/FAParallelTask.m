@@ -1,5 +1,5 @@
 //
-// FAParallelBatchTask.m
+// FAParallelTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,7 +24,7 @@
 
 
 
-#import "FAParallelBatchTask.h"
+#import "FAParallelTask.h"
 #import "FATaskResultEvent.h"
 #import "FATaskErrorEvent.h"
 #import "FATaskCancelEvent.h"
@@ -34,7 +34,7 @@
 
 
 
-@interface FAParallelBatchTask ()
+@interface FAParallelTask ()
 
 @property (nonatomic, strong, readonly) NSMutableDictionary *tasks;
 @property (nonatomic, strong) NSMutableDictionary *results;
@@ -44,7 +44,7 @@
 
 
 
-@implementation FAParallelBatchTask
+@implementation FAParallelTask
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
     self = [super init];
