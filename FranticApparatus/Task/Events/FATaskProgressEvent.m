@@ -1,5 +1,5 @@
 //
-// FAURLConnectionTaskReceiveProgressEvent.m
+// FATaskProgressEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,31 +24,25 @@
 
 
 
-#import "FAURLConnectionTaskReceiveProgressEvent.h"
+#import "FATaskProgressEvent.h"
 
 
 
-@implementation FAURLConnectionTaskReceiveProgressEvent
+@implementation FATaskProgressEvent
+
++ (instancetype)eventWithSource:(id)source progress:(id <NSCopying>)progress {
+    return [[self alloc] initWithSource:source progress:progress];
+}
 
 - (id)initWithSource:(id)source {
-    return [self initWithSource:source bytesReceived:0 totalBytesReceived:0 expectedTotalBytes:0];
+    return [self initWithSource:source progress:nil];
 }
 
-- (id)initWithSource:(id)source bytesReceived:(long long)bytesReceived totalBytesReceived:(long long)totalBytesReceived expectedTotalBytes:(long long)expectedTotalBytes {
+- (id)initWithSource:(id)source progress:(id <NSCopying>)progress {
     self = [super initWithSource:source];
     if (self == nil) return nil;
-    _bytesReceived = bytesReceived;
-    _totalBytesReceived = totalBytesReceived;
-    _expectedTotalBytes = expectedTotalBytes;
+    _progress = progress;
     return self;
-}
-
-
-
-#pragma mark - NSCopying
-
-- (id)copyWithZone:(NSZone *)zone {
-    return [[[self class] alloc] initWithSource:self.source bytesReceived:self.bytesReceived totalBytesReceived:self.totalBytesReceived expectedTotalBytes:self.expectedTotalBytes];
 }
 
 @end

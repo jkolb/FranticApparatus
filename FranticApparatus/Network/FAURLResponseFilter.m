@@ -1,5 +1,5 @@
 //
-// FAURLResponseValidator.m
+// FAURLResponseFilter.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,8 +24,8 @@
 
 
 
-#import "FAURLResponseValidator.h"
+#import "FAURLResponseFilter.h"
 
 
 
-NSString * const FAResponseKey = @"response";
+NSString * const FAErrorResponseKey = @"response";

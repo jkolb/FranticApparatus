@@ -1,5 +1,5 @@
 //
-// FAURLConnectionTaskSendProgressEvent.m
+// FAURLConnectionReceiveProgress.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,20 +24,25 @@
 
 
 
-#import "FAURLConnectionTaskSendProgressEvent.h"
+#import "FAURLConnectionReceiveProgress.h"
 
-@implementation FAURLConnectionTaskSendProgressEvent
 
-- (id)initWithSource:(id)source {
-    return [self initWithSource:source bytesSent:0 totalBytesSent:0 totalBytesExpectedToSend:0];
+
+@implementation FAURLConnectionReceiveProgress
+
+- (id)init {
+    return [self initWithBytesReceived:0 totalBytesReceived:0 expectedTotalBytes:0];
 }
 
-- (id)initWithSource:(id)source bytesSent:(NSInteger)bytesSent totalBytesSent:(NSInteger)totalBytesSent totalBytesExpectedToSend:(NSInteger)totalBytesExpectedToSend {
-    self = [super initWithSource:source];
+- (id)initWithBytesReceived:(long long)bytesReceived
+         totalBytesReceived:(long long)totalBytesReceived
+         expectedTotalBytes:(long long)expectedTotalBytes
+{
+    self = [super init];
     if (self == nil) return nil;
-    _bytesSent = bytesSent;
-    _totalBytesSent = totalBytesSent;
-    _totalBytesExpectedToSend = totalBytesExpectedToSend;
+    _bytesReceived = bytesReceived;
+    _totalBytesReceived = totalBytesReceived;
+    _expectedTotalBytes = expectedTotalBytes;
     return self;
 }
 
@@ -46,7 +51,7 @@
 #pragma mark - NSCopying
 
 - (id)copyWithZone:(NSZone *)zone {
-    return [[[self class] alloc] initWithSource:self.source bytesSent:self.bytesSent totalBytesSent:self.totalBytesSent totalBytesExpectedToSend:self.totalBytesExpectedToSend];
+    return self;
 }
 
 @end

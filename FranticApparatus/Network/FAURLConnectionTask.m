@@ -27,8 +27,7 @@
 #import "FAURLConnectionTask.h"
 #import "FATaskResultEvent.h"
 #import "FATaskErrorEvent.h"
-#import "FATaskFinishEvent.h"
-#import "FAURLResponseValidator.h"
+#import "FAURLResponseFilter.h"
 
 
 
@@ -69,19 +68,19 @@
     [self.connection cancel];
 }
 
-- (void)handleValidResponse:(NSURLResponse *)response {
+- (void)handleResponse:(NSURLResponse *)response {
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
     NSError *error = nil;
-    BOOL isValidResponse = YES;
+    BOOL allowResponse = YES;
     
-    if (self.responseValidator != nil) {
-        isValidResponse = [self.responseValidator isValidResponse:response withError:&error];
+    if (self.responseFilter != nil) {
+        allowResponse = [self.responseFilter shouldAllowResponse:response withError:&error];
     }
     
-    if (isValidResponse) {
-        [self handleValidResponse:response];
+    if (allowResponse) {
+        [self handleResponse:response];
     } else {
         [connection cancel];
         self.error = error;

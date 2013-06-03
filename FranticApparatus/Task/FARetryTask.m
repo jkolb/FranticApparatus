@@ -134,7 +134,8 @@
     dispatch_resume(self.delayTimer);
 }
 
-- (BOOL)shouldRetryAfterError:(id)error {
+- (BOOL)shouldRetryAfterError:(NSError *)error {
+    if ([[error domain] isEqualToString:@"FARetryTaskErrorDomain"] && [error code] == -1) return NO;
     if (self.shouldRetry == nil) return YES;
     return self.shouldRetry(error);
 }
@@ -170,6 +171,8 @@
 
 - (void)handleTaskCancelEvent:(FATaskCancelEvent *)event {
     [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+        blockTask.error = [NSError errorWithDomain:@"FARetryTaskErrorDomain" code:-1 userInfo:nil];
+        [blockTask tryFailed];
     }];
 }
 

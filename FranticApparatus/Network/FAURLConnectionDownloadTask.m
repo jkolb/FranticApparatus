@@ -26,8 +26,8 @@
 
 #import "FAURLConnectionDownloadTask.h"
 #import "FAURLConnectionDownloadResult.h"
-#import "FAURLConnectionTaskReceiveProgressEvent.h"
-#import "FATaskFinishEvent.h"
+#import "FAURLConnectionReceiveProgress.h"
+#import "FATaskProgressEvent.h"
 
 
 
@@ -67,7 +67,7 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
     return self;
 }
 
-- (void)handleValidResponse:(NSURLResponse *)response {
+- (void)handleResponse:(NSURLResponse *)response {
     self.response = response;
     self.bytesReceived = 0;
     self.totalBytesReceived = 0;
@@ -105,7 +105,10 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
         [self.buffer replaceBytesInRange:NSMakeRange(0, bytesWritten) withBytes:NULL length:0];
         self.bytesReceived = bytesWritten;
         self.totalBytesReceived += bytesWritten;
-        [self dispatchEvent:[[FAURLConnectionTaskReceiveProgressEvent alloc] initWithSource:self bytesReceived:self.bytesReceived totalBytesReceived:self.totalBytesReceived expectedTotalBytes:[self.response expectedContentLength]]];
+        FAURLConnectionReceiveProgress *progress = [[FAURLConnectionReceiveProgress alloc] initWithBytesReceived:self.bytesReceived
+                                                                                              totalBytesReceived:self.totalBytesReceived
+                                                                                              expectedTotalBytes:[self.response expectedContentLength]];
+        [self dispatchEvent:[[FATaskProgressEvent alloc] initWithSource:self progress:progress]];
     }
 
     return YES;

@@ -26,8 +26,6 @@
 
 #import "FAURLConnectionDataTask.h"
 #import "FAURLConnectionDataResult.h"
-#import "FATaskResultEvent.h"
-#import "FATaskFinishEvent.h"
 
 
 
@@ -42,7 +40,7 @@
 
 @implementation FAURLConnectionDataTask
 
-- (void)handleValidResponse:(NSURLResponse *)response {
+- (void)handleResponse:(NSURLResponse *)response {
     self.response = response;
     self.data = [self dataForResponse:response];
 }

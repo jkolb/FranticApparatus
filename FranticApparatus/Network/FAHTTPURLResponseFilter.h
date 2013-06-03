@@ -1,5 +1,5 @@
 //
-// FAURLConnectionTaskSendProgressEvent.h
+// FAHTTPURLResponseFilter.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,16 +24,20 @@
 
 
 
-#import "FAEvent.h"
+#import "FACustomURLResponseFilter.h"
+#import "FAHTTPError.h"
 
 
 
-@interface FAURLConnectionTaskSendProgressEvent : FAEvent
+@interface FAHTTPURLResponseFilter : FACustomURLResponseFilter
 
-@property (nonatomic, readonly) NSInteger bytesSent;
-@property (nonatomic, readonly) NSInteger totalBytesSent;
-@property (nonatomic, readonly) NSInteger totalBytesExpectedToSend;
+@property (nonatomic) long long maximumContentLength;
+@property (nonatomic, copy) NSIndexSet *acceptableStatusCodes;
+@property (nonatomic, copy) NSSet *acceptableContentTypes;
+@property (nonatomic, copy) NSSet *acceptableTextEncodingNames;
 
-- (id)initWithSource:(id)source bytesSent:(NSInteger)bytesSent totalBytesSent:(NSInteger)totalBytesSent totalBytesExpectedToSend:(NSInteger)totalBytesExpectedToSend;
+- (void)errorCode:(NSInteger)errorCode addHTTPFilterBlock:(BOOL (^)(NSHTTPURLResponse *))filterBlock;
+
+- (BOOL)isHTTPResponse:(NSHTTPURLResponse *)response allowedByHTTPFilterBlock:(BOOL (^)(NSHTTPURLResponse *))filterBlock withErrorCode:(NSInteger)errorCode error:(NSError **)error;
 
 @end

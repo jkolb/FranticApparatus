@@ -1,5 +1,5 @@
 //
-// FAURLResponseValidator.h
+// FAURLResponseFilter.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -28,12 +28,12 @@
 
 
 
-extern NSString * const FAResponseKey;
+extern NSString * const FAErrorResponseKey;
 
 
 
-@protocol FAURLResponseValidator <NSObject>
+@protocol FAURLResponseFilter <NSObject>
 
-- (BOOL)isValidResponse:(NSURLResponse *)response withError:(NSError **)error;
+- (BOOL)shouldAllowResponse:(NSURLResponse *)response withError:(NSError **)error;
 
 @end

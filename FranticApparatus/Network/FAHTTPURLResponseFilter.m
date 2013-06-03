@@ -1,5 +1,5 @@
 //
-// FAHTTPURLResponseValidator.m
+// FAHTTPURLResponseFilter.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,11 +24,11 @@
 
 
 
-#import "FAHTTPURLResponseValidator.h"
+#import "FAHTTPURLResponseFilter.h"
 
 
 
-@implementation FAHTTPURLResponseValidator
+@implementation FAHTTPURLResponseFilter
 
 - (id)init {
     return [self initWithErrorDomain:FAHTTPErrorDomain];
@@ -43,22 +43,22 @@
     return self;
 }
 
-- (BOOL)isValidResponse:(NSURLResponse *)response withError:(NSError **)error {
-    if (![self isResponse:response validForValidator:[self responseIsHTTPValidator] errorCode:FAHTTPErrorNotHTTPResponse withError:error]) return NO;
+- (BOOL)shouldAllowResponse:(NSURLResponse *)response withError:(NSError **)error {
+    if (![self isResponse:response allowedByFilterBlock:[self responseIsHTTPValidator] withErrorCode:FAHTTPErrorNotHTTPResponse error:error]) return NO;
     NSHTTPURLResponse *HTTPResponse = (NSHTTPURLResponse *)response;
-    if (![self isHTTPResponse:HTTPResponse validForHTTPValidator:[self maximumContentLengthValidator] errorCode:FAHTTPErrorMaximumContentLengthExceeded withError:error]) return NO;
-    if (![self isHTTPResponse:HTTPResponse validForHTTPValidator:[self acceptableStatusCodeValidator] errorCode:FAHTTPErrorUnacceptableStatusCode withError:error]) return NO;
-    if (![self isHTTPResponse:HTTPResponse validForHTTPValidator:[self acceptableContentTypeValidator] errorCode:FAHTTPErrorUnacceptableContentType withError:error]) return NO;
-    if (![self isHTTPResponse:HTTPResponse validForHTTPValidator:[self acceptableTextEncodingNameValidator] errorCode:FAHTTPErrorUnacceptableTextEncodingName withError:error]) return NO;
-    return [super isValidResponse:response withError:error];
+    if (![self isHTTPResponse:HTTPResponse allowedByHTTPFilterBlock:[self maximumContentLengthValidator] withErrorCode:FAHTTPErrorMaximumContentLengthExceeded error:error]) return NO;
+    if (![self isHTTPResponse:HTTPResponse allowedByHTTPFilterBlock:[self acceptableStatusCodeValidator] withErrorCode:FAHTTPErrorUnacceptableStatusCode error:error]) return NO;
+    if (![self isHTTPResponse:HTTPResponse allowedByHTTPFilterBlock:[self acceptableContentTypeValidator] withErrorCode:FAHTTPErrorUnacceptableContentType error:error]) return NO;
+    if (![self isHTTPResponse:HTTPResponse allowedByHTTPFilterBlock:[self acceptableTextEncodingNameValidator] withErrorCode:FAHTTPErrorUnacceptableTextEncodingName error:error]) return NO;
+    return [super shouldAllowResponse:response withError:error];
 }
 
-- (void)errorCode:(NSInteger)errorCode addHTTPValidator:(BOOL (^)(NSHTTPURLResponse *))validator {
-    [super errorCode:errorCode addValidator:(BOOL (^)(NSURLResponse *))validator];
+- (void)errorCode:(NSInteger)errorCode addHTTPFilterBlock:(BOOL (^)(NSHTTPURLResponse *))filterBlock {
+    [super errorCode:errorCode addFilterBlock:(BOOL (^)(NSURLResponse *))filterBlock];
 }
 
-- (BOOL)isHTTPResponse:(NSHTTPURLResponse *)response validForHTTPValidator:(BOOL (^)(NSHTTPURLResponse *))validator errorCode:(NSInteger)errorCode withError:(NSError **)error {
-    return [self isResponse:response validForValidator:(BOOL (^)(NSURLResponse *))validator errorCode:errorCode withError:error];
+- (BOOL)isHTTPResponse:(NSHTTPURLResponse *)response allowedByHTTPFilterBlock:(BOOL (^)(NSHTTPURLResponse *))filterBlock withErrorCode:(NSInteger)errorCode error:(NSError **)error {
+    return [self isResponse:response allowedByFilterBlock:(BOOL (^)(NSURLResponse *))filterBlock withErrorCode:errorCode error:error];
 }
 
 - (BOOL (^)(NSURLResponse *))responseIsHTTPValidator {

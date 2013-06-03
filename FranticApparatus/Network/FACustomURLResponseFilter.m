@@ -1,5 +1,5 @@
 //
-// FACustomURLResponseValidator.m
+// FACustomURLResponseFilter.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,20 +24,20 @@
 
 
 
-#import "FACustomURLResponseValidator.h"
+#import "FACustomURLResponseFilter.h"
 
 
 
-@interface FACustomURLResponseValidator ()
+@interface FACustomURLResponseFilter ()
 
 @property (nonatomic, copy) NSString *errorDomain;
-@property (nonatomic, strong) NSMutableDictionary *validatorsByErrorCode;
+@property (nonatomic, strong) NSMutableDictionary *filterBlocksByErrorCode;
 
 @end
 
 
 
-@implementation FACustomURLResponseValidator
+@implementation FACustomURLResponseFilter
 
 - (id)init {
     return [self initWithErrorDomain:nil];
@@ -50,40 +50,40 @@
     _errorDomain = errorDomain;
     if ([_errorDomain length] == 0) return nil;
     
-    _validatorsByErrorCode = [[NSMutableDictionary alloc] initWithCapacity:1];
-    if (_validatorsByErrorCode == nil) return nil;
+    _filterBlocksByErrorCode = [[NSMutableDictionary alloc] initWithCapacity:1];
+    if (_filterBlocksByErrorCode == nil) return nil;
     
     return self;
 }
 
-- (void)errorCode:(NSInteger)errorCode addValidator:(BOOL (^)(NSURLResponse *))validator {
+- (void)errorCode:(NSInteger)errorCode addFilterBlock:(BOOL (^)(NSURLResponse *))filterBlock {
     NSNumber *errorCodeKey = @(errorCode);
-    NSMutableArray *validators = [self.validatorsByErrorCode objectForKey:errorCodeKey];
+    NSMutableArray *validators = [self.filterBlocksByErrorCode objectForKey:errorCodeKey];
     
-    if (validator == nil) {
+    if (filterBlock == nil) {
         validators = [[NSMutableArray alloc] initWithCapacity:1];
-        [self.validatorsByErrorCode setObject:validators forKey:errorCodeKey];
+        [self.filterBlocksByErrorCode setObject:validators forKey:errorCodeKey];
     }
     
-    [validators addObject:validator];
+    [validators addObject:filterBlock];
 }
 
-- (BOOL)isValidResponse:(NSURLResponse *)response withError:(NSError **)error {
-    for (NSNumber *errorCode in self.validatorsByErrorCode) {
-        NSArray *validators = [self.validatorsByErrorCode objectForKey:errorCode];
+- (BOOL)shouldAllowResponse:(NSURLResponse *)response withError:(NSError **)error {
+    for (NSNumber *errorCode in self.filterBlocksByErrorCode) {
+        NSArray *validators = [self.filterBlocksByErrorCode objectForKey:errorCode];
         
         for (BOOL (^validator)(NSURLResponse *) in validators) {
-            if (![self isResponse:response validForValidator:validator errorCode:[errorCode integerValue] withError:error]) return NO;
+            if (![self isResponse:response allowedByFilterBlock:validator withErrorCode:[errorCode integerValue] error:error]) return NO;
         }
     }
     
     return YES;
 }
 
-- (BOOL)isResponse:(NSURLResponse *)response validForValidator:(BOOL (^)(NSURLResponse *))validator errorCode:(NSInteger)errorCode withError:(NSError **)error {
-    if (!validator(response)) {
+- (BOOL)isResponse:(NSURLResponse *)response allowedByFilterBlock:(BOOL (^)(NSURLResponse *))filterBlock withErrorCode:(NSInteger)errorCode error:(NSError **)error {
+    if (!filterBlock(response)) {
         if (error != NULL) {
-            *error = [NSError errorWithDomain:self.errorDomain code:errorCode userInfo:@{FAResponseKey: response}];
+            *error = [NSError errorWithDomain:self.errorDomain code:errorCode userInfo:@{FAErrorResponseKey: response}];
         }
         
         return NO;

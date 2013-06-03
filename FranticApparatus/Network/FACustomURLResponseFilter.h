@@ -1,5 +1,5 @@
 //
-// FAURLConnectionTaskReceiveProgressEvent.h
+// FACustomURLResponseFilter.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,17 +24,18 @@
 
 
 
-#import "FAEvent.h"
+#import <Foundation/Foundation.h>
+
+#import "FAURLResponseFilter.h"
 
 
 
-@interface FAURLConnectionTaskReceiveProgressEvent : FAEvent
+@interface FACustomURLResponseFilter : NSObject <FAURLResponseFilter>
 
-@property (nonatomic, readonly) long long bytesReceived;
-@property (nonatomic, readonly) long long totalBytesReceived;
-@property (nonatomic, readonly) long long expectedTotalBytes;
+- (id)initWithErrorDomain:(NSString *)errorDomain;
 
-- (id)initWithSource:(id)source bytesReceived:(long long)bytesReceived totalBytesReceived:(long long)totalBytesReceived expectedTotalBytes:(long long)expectedTotalBytes;
+- (void)errorCode:(NSInteger)errorCode addFilterBlock:(BOOL (^)(NSURLResponse *))filterBlock;
 
+- (BOOL)isResponse:(NSURLResponse *)response allowedByFilterBlock:(BOOL (^)(NSURLResponse *))validator withErrorCode:(NSInteger)errorCode error:(NSError **)error;
 
 @end

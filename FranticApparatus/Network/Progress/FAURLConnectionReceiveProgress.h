@@ -1,5 +1,5 @@
 //
-// FAHTTPURLResponseValidator.h
+// FAURLConnectionReceiveProgress.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,20 +24,18 @@
 
 
 
-#import "FACustomURLResponseValidator.h"
-#import "FAHTTPError.h"
+#import <Foundation/Foundation.h>
 
 
 
-@interface FAHTTPURLResponseValidator : FACustomURLResponseValidator
+@interface FAURLConnectionReceiveProgress : NSObject <NSCopying>
 
-@property (nonatomic) long long maximumContentLength;
-@property (nonatomic, copy) NSIndexSet *acceptableStatusCodes;
-@property (nonatomic, copy) NSSet *acceptableContentTypes;
-@property (nonatomic, copy) NSSet *acceptableTextEncodingNames;
+@property (nonatomic, readonly) long long bytesReceived;
+@property (nonatomic, readonly) long long totalBytesReceived;
+@property (nonatomic, readonly) long long expectedTotalBytes;
 
-- (void)errorCode:(NSInteger)errorCode addHTTPValidator:(BOOL (^)(NSHTTPURLResponse *))validator;
-
-- (BOOL)isHTTPResponse:(NSHTTPURLResponse *)response validForHTTPValidator:(BOOL (^)(NSHTTPURLResponse *))validator errorCode:(NSInteger)errorCode withError:(NSError **)error;
+- (id)initWithBytesReceived:(long long)bytesReceived
+         totalBytesReceived:(long long)totalBytesReceived
+         expectedTotalBytes:(long long)expectedTotalBytes;
 
 @end

@@ -36,7 +36,7 @@
 
 - (id)initWithTaskFactory:(FATaskFactory *)taskFactory maximumRetryCount:(NSUInteger)maximumRetryCount;
 
-@property (copy) BOOL (^shouldRetry)(id error);
+@property (copy) BOOL (^shouldRetry)(NSError *error);
 @property (copy) NSTimeInterval (^calculateDelayInterval)(NSUInteger retryCount);
 @property NSTimeInterval delayInterval;
 

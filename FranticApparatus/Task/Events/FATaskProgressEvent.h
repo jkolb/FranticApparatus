@@ -1,5 +1,5 @@
 //
-// FACustomURLResponseValidator.h
+// FATaskProgressEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,18 +24,16 @@
 
 
 
-#import <Foundation/Foundation.h>
-
-#import "FAURLResponseValidator.h"
+#import "FATaskEvent.h"
 
 
 
-@interface FACustomURLResponseValidator : NSObject <FAURLResponseValidator>
+@interface FATaskProgressEvent : FATaskEvent
 
-- (id)initWithErrorDomain:(NSString *)errorDomain;
+@property (nonatomic, copy, readonly) id progress;
 
-- (void)errorCode:(NSInteger)errorCode addValidator:(BOOL (^)(NSURLResponse *))validator;
++ (instancetype)eventWithSource:(id)source progress:(id <NSCopying>)progress;
 
-- (BOOL)isResponse:(NSURLResponse *)response validForValidator:(BOOL (^)(NSURLResponse *))validator errorCode:(NSInteger)errorCode withError:(NSError **)error;
+- (id)initWithSource:(id)source progress:(id <NSCopying>)progress;
 
 @end
