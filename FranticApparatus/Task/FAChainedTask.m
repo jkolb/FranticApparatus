@@ -68,18 +68,26 @@
 - (void)startTaskAtIndex:(NSUInteger)index withLastResult:(id)lastResult {
     FATaskFactory *factory = [self.factories objectAtIndex:index];
     id <FATask> task = [factory taskWithLastResult:lastResult];
-    [task addHandler:[FATaskResultEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
-        [blockTask handleTaskResultEvent:event forIndex:index];
-    }]];
-    [task addHandler:[FATaskErrorEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
-        [blockTask handleTaskErrorEvent:event forIndex:index];
-    }]];
-    [task addHandler:[FATaskCancelEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
-        [blockTask handleTaskCancelEvent:event forIndex:index];
-    }]];
-    [task addHandler:[FATaskFinishEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
-        [blockTask handleTaskFinishEvent:event forIndex:index];
-    }]];
+    [task addHandler:[FATaskResultEvent
+                      handlerWithTask:self
+                      block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
+                          [blockTask handleTaskResultEvent:event forIndex:index];
+                      }]];
+    [task addHandler:[FATaskErrorEvent
+                      handlerWithTask:self
+                      block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
+                          [blockTask handleTaskErrorEvent:event forIndex:index];
+                      }]];
+    [task addHandler:[FATaskCancelEvent
+                      handlerWithTask:self
+                      block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
+                          [blockTask handleTaskCancelEvent:event forIndex:index];
+                      }]];
+    [task addHandler:[FATaskFinishEvent
+                      handlerWithTask:self
+                      block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
+                          [blockTask handleTaskFinishEvent:event forIndex:index];
+                      }]];
     self.currentTask = task;
     [task start];
 }

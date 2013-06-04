@@ -57,18 +57,26 @@
         if (![object isKindOfClass:[FATaskFactory class]]) return nil;
         FATaskFactory *factory = object;
         id <FATask> task = [factory taskWithLastResult:nil];
-        [task addHandler:[FATaskResultEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
-            [blockTask handleTaskResultEvent:event forKey:key];
-        }]];
-        [task addHandler:[FATaskErrorEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
-            [blockTask handleTaskErrorEvent:event forKey:key];
-        }]];
-        [task addHandler:[FATaskCancelEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
-            [blockTask handleTaskCancelEvent:event forKey:key];
-        }]];
-        [task addHandler:[FATaskFinishEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
-            [blockTask handleTaskFinishEvent:event forKey:key];
-        }]];
+        [task addHandler:[FATaskResultEvent
+                          handlerWithTask:self
+                          block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
+                              [blockTask handleTaskResultEvent:event forKey:key];
+                          }]];
+        [task addHandler:[FATaskErrorEvent
+                          handlerWithTask:self
+                          block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
+                              [blockTask handleTaskErrorEvent:event forKey:key];
+                          }]];
+        [task addHandler:[FATaskCancelEvent
+                          handlerWithTask:self
+                          block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
+                              [blockTask handleTaskCancelEvent:event forKey:key];
+                          }]];
+        [task addHandler:[FATaskFinishEvent
+                          handlerWithTask:self
+                          block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
+                              [blockTask handleTaskFinishEvent:event forKey:key];
+                          }]];
         [_tasks setObject:task forKey:key];
     }
     _results = [[NSMutableDictionary alloc] initWithCapacity:[_tasks count]];

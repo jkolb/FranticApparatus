@@ -74,18 +74,26 @@
 
 - (void)try {
     id <FATask> task = [self.taskFactory taskWithLastResult:nil];
-    [task addHandler:[FATaskResultEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
-        [blockTask handleTaskResultEvent:event];
-    }]];
-    [task addHandler:[FATaskErrorEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
-        [blockTask handleTaskErrorEvent:event];
-    }]];
-    [task addHandler:[FATaskCancelEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
-        [blockTask handleTaskCancelEvent:event];
-    }]];
-    [task addHandler:[FATaskFinishEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
-        [blockTask handleTaskFinishEvent:event];
-    }]];
+    [task addHandler:[FATaskResultEvent
+                      handlerWithTask:self
+                      block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
+                          [blockTask handleTaskResultEvent:event];
+                      }]];
+    [task addHandler:[FATaskErrorEvent
+                      handlerWithTask:self
+                      block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
+                          [blockTask handleTaskErrorEvent:event];
+                      }]];
+    [task addHandler:[FATaskCancelEvent
+                      handlerWithTask:self
+                      block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
+                          [blockTask handleTaskCancelEvent:event];
+                      }]];
+    [task addHandler:[FATaskFinishEvent
+                      handlerWithTask:self
+                      block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
+                          [blockTask handleTaskFinishEvent:event];
+                      }]];
     self.task = task;
     [self.task start];
 }
