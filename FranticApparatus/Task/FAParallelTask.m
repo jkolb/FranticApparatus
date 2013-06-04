@@ -46,17 +46,17 @@
 
 @implementation FAParallelTask
 
-- (id)initWithDictionary:(NSDictionary *)dictionary {
+- (id)initWithFactories:(NSDictionary *)factories {
     self = [super init];
     if (self == nil) return nil;
-    _tasks = [[NSMutableDictionary alloc] initWithCapacity:[dictionary count]];
+    _tasks = [[NSMutableDictionary alloc] initWithCapacity:[factories count]];
     if (_tasks == nil) return nil;
     
-    for (id key in dictionary) {
-        id object = [dictionary objectForKey:key];
+    for (id key in factories) {
+        id object = [factories objectForKey:key];
         if (![object isKindOfClass:[FATaskFactory class]]) return nil;
-        FATaskFactory *taskFactory = object;
-        id <FATask> task = [taskFactory task];
+        FATaskFactory *factory = object;
+        id <FATask> task = [factory taskWithLastResult:nil];
         [task addHandler:[FATaskResultEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
             [blockTask handleTaskResultEvent:event forKey:key];
         }]];

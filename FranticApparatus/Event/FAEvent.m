@@ -46,16 +46,16 @@
     return self;
 }
 
-+ (FAEventHandler *)handlerWithBlock:(void (^)(id event))block {
-    return [FAEventHandler eventHandlerWithEventClass:self block:block];
++ (FAEventHandler *)handlerWithBlock:(FAEventHandlerBlock)block {
+    return [FAEventHandler handlerWithEventClass:self block:block];
 }
 
-+ (FAEventHandler *)handlerWithContext:(id)context block:(void (^)(id context, id event))block {
-    return [FAEventHandler eventHandlerWithEventClass:self context:context block:block];
++ (FAEventHandler *)handlerWithContext:(id)context block:(FAEventHandlerContextBlock)block {
+    return [FAEventHandler handlerWithEventClass:self context:context block:block];
 }
 
 + (FAEventHandler *)handlerWithTarget:(id)target action:(SEL)action {
-    return [FAEventHandler eventHandlerWithEventClass:self target:target action:action];
+    return [FAEventHandler handlerWithEventClass:self target:target action:action];
 }
 
 

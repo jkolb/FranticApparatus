@@ -35,7 +35,7 @@
 
 @interface FAChainedTask ()
 
-@property (nonatomic, copy, readonly) NSArray *taskFactories;
+@property (nonatomic, copy, readonly) NSArray *factories;
 @property (nonatomic, strong) id <FATask> currentTask;
 @property (nonatomic, strong) id lastResult;
 @property (nonatomic, strong) NSError *lastError;
@@ -47,15 +47,15 @@
 @implementation FAChainedTask
 
 - (id)init {
-    return [self initWithArray:[[NSArray alloc] init]];
+    return [self initWithFactories:[[NSArray alloc] init]];
 }
 
-- (id)initWithArray:(NSArray *)array {
+- (id)initWithFactories:(NSArray *)array {
     self = [super init];
     if (self == nil) return nil;
-    _taskFactories = array;
-    if (_taskFactories == nil) return nil;
-    for (id object in _taskFactories) {
+    _factories = array;
+    if (_factories == nil) return nil;
+    for (id object in _factories) {
         if (![object isKindOfClass:[FATaskFactory class]]) return nil;
     }
     return self;
@@ -66,8 +66,8 @@
 }
 
 - (void)startTaskAtIndex:(NSUInteger)index withLastResult:(id)lastResult {
-    FATaskFactory *taskFactory = [self.taskFactories objectAtIndex:index];
-    id <FATask> task = [taskFactory taskWithLastResult:lastResult];
+    FATaskFactory *factory = [self.factories objectAtIndex:index];
+    id <FATask> task = [factory taskWithLastResult:lastResult];
     [task addHandler:[FATaskResultEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
         [blockTask handleTaskResultEvent:event forIndex:index];
     }]];
@@ -119,7 +119,7 @@
         if (blockTask.lastError == nil) {
             NSUInteger nextIndex = index + 1;
             
-            if (nextIndex < [blockTask.taskFactories count]) {
+            if (nextIndex < [blockTask.factories count]) {
                 [blockTask startTaskAtIndex:nextIndex withLastResult:blockTask.lastResult];
             } else {
                 [blockTask finish];

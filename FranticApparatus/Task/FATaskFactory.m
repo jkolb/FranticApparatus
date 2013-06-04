@@ -28,9 +28,14 @@
 
 
 
+NS_INLINE FATaskFactoryBlock FATaskFactoryContextBlockMake(id context, FATaskFactoryContextBlock contextBlock);
+NS_INLINE FATaskFactoryBlock FATaskFactoryTargetActionBlockMake(id target, SEL action);
+
+
+
 @interface FATaskFactory ()
 
-@property (nonatomic, copy) id <FATask> (^chainBlock)(id lastResult);
+@property (nonatomic, copy) id <FATask> (^block)(id lastResult);
 
 @end
 
@@ -38,34 +43,29 @@
 
 @implementation FATaskFactory
 
-+ (instancetype)taskFactoryWithTask:(id <FATask>)task {
-    return [[self alloc] initWithChainBlock:^id <FATask> (id lastResult) {
-        return task;
-    }];
++ (instancetype)factoryWithBlock:(FATaskFactoryBlock)block {
+    return [[self alloc] initWithBlock:block];
 }
 
-+ (instancetype)taskFactoryWithBlock:(id <FATask> (^)())block {
-    return [[self alloc] initWithChainBlock:^id <FATask> (id lastResult) {
-        if (block == nil) return nil;
-        return block();
-    }];
++ (instancetype)factoryWithContext:(id)context block:(FATaskFactoryContextBlock)block {
+    return [[self alloc] initWithBlock:FATaskFactoryContextBlockMake(context, block)];
 }
 
-+ (instancetype)taskFactoryWithChainBlock:(id <FATask> (^)(id lastResult))chainBlock {
-    return [[self alloc] initWithChainBlock:chainBlock];
++ (instancetype)factoryWithTarget:(id)target action:(SEL)action {
+    return [[self alloc] initWithBlock:FATaskFactoryTargetActionBlockMake(target, action)];
 }
 
 - (id)init {
-    return [self initWithChainBlock:^id <FATask> (id lastResult) {
+    return [self initWithBlock:^id <FATask> (id lastResult) {
         return nil;
     }];
 }
 
-- (id)initWithChainBlock:(id <FATask> (^)(id lastResult))chainBlock {
+- (id)initWithBlock:(FATaskFactoryBlock)block {
     self = [super init];
     if (self == nil) return nil;
-    _chainBlock = chainBlock;
-    if (_chainBlock == nil) return nil;
+    _block = block;
+    if (_block == nil) return nil;
     return self;
 }
 
@@ -74,7 +74,7 @@
 }
 
 - (id <FATask>)taskWithLastResult:(id)lastResult {
-    id <FATask> task = self.chainBlock(lastResult);
+    id <FATask> task = self.block(lastResult);
     if (task == nil) {
         @throw [NSException exceptionWithName:NSInternalInconsistencyException
                                        reason:@"chainBlock generated nil task"
@@ -92,3 +92,24 @@
 }
 
 @end
+
+
+
+NS_INLINE FATaskFactoryBlock FATaskFactoryContextBlockMake(id context, FATaskFactoryContextBlock contextBlock) {
+    __typeof__(context) __weak weakContext = context;
+    return ^id <FATask> (id lastResult) {
+        __typeof__(context) blockContext = weakContext;
+        if (blockContext == nil) return nil;
+        if (contextBlock == nil) return nil;
+        return contextBlock(blockContext, lastResult);
+    };
+}
+
+NS_INLINE FATaskFactoryBlock FATaskFactoryTargetActionBlockMake(id target, SEL action) {
+    return FATaskFactoryContextBlockMake(target, ^id<FATask>(id blockTarget, id lastResult) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+        return [blockTarget performSelector:action withObject:lastResult];
+#pragma clang diagnostic pop
+    });
+}

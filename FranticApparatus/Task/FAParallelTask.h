@@ -30,6 +30,6 @@
 
 @interface FAParallelTask : FAAbstractTask
 
-- (id)initWithDictionary:(NSDictionary *)dictionary;
+- (id)initWithFactories:(NSDictionary *)factories;
 
 @end

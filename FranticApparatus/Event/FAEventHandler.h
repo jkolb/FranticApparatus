@@ -29,18 +29,22 @@
 
 
 @class FAEvent;
-
 @protocol FAEventDispatcher;
+
+
+
+typedef void (^FAEventHandlerBlock)(id event);
+typedef void (^FAEventHandlerContextBlock)(id blockContext, id event);
 
 
 
 @interface FAEventHandler : NSObject <NSCopying>
 
-+ (instancetype)eventHandlerWithEventClass:(Class)eventClass block:(void (^)(id event))block;
-+ (instancetype)eventHandlerWithEventClass:(Class)eventClass context:(id)context block:(void (^)(id context, id event))block;
-+ (instancetype)eventHandlerWithEventClass:(Class)eventClass target:(id)target action:(SEL)action;
++ (instancetype)handlerWithEventClass:(Class)eventClass block:(FAEventHandlerBlock)block;
++ (instancetype)handlerWithEventClass:(Class)eventClass context:(id)context block:(FAEventHandlerContextBlock)block;
++ (instancetype)handlerWithEventClass:(Class)eventClass target:(id)target action:(SEL)action;
 
-- (id)initWithEventClass:(Class)eventClass block:(void (^)(id event))block;
+- (id)initWithEventClass:(Class)eventClass block:(FAEventHandlerBlock)block;
 
 - (BOOL)canHandleEvent:(FAEvent *)event;
 

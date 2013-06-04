@@ -43,7 +43,7 @@
 - (id)init {
     self = [super init];
     if (self == nil) return nil;
-    _handlers = [[NSMutableArray alloc] initWithCapacity:5];
+    _handlers = [[NSMutableArray alloc] initWithCapacity:4];
     if (_handlers == nil) return nil;
     return self;
 }

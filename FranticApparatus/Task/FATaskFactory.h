@@ -32,15 +32,19 @@
 
 
 
+typedef id <FATask> (^FATaskFactoryBlock)(id lastResult);
+typedef id <FATask> (^FATaskFactoryContextBlock)(id blockContext, id lastResult);
+
+
+
 @interface FATaskFactory : NSObject <NSCopying>
 
-+ (instancetype)taskFactoryWithTask:(id <FATask>)task;
-+ (instancetype)taskFactoryWithBlock:(id <FATask> (^)())block;
-+ (instancetype)taskFactoryWithChainBlock:(id <FATask> (^)(id lastResult))chainBlock;
++ (instancetype)factoryWithBlock:(FATaskFactoryBlock)block;
++ (instancetype)factoryWithContext:(id)context block:(FATaskFactoryContextBlock)block;
++ (instancetype)factoryWithTarget:(id)target action:(SEL)action;
 
-- (id)initWithChainBlock:(id <FATask> (^)(id lastResult))chainBlock;
+- (id)initWithBlock:(FATaskFactoryBlock)block;
 
-- (id <FATask>)task;
 - (id <FATask>)taskWithLastResult:(id)lastResult;
 
 @end

@@ -26,9 +26,9 @@
 
 #import <Foundation/Foundation.h>
 
+#import "FAEventHandler.h"
 
 
-@class FAEventHandler;
 
 @protocol FAEventDispatcher;
 
@@ -42,8 +42,8 @@
 
 - (id)initWithSource:(id)source;
 
-+ (FAEventHandler *)handlerWithBlock:(void (^)(id event))block;
-+ (FAEventHandler *)handlerWithContext:(id)context block:(void (^)(id context, id event))block;
++ (FAEventHandler *)handlerWithBlock:(FAEventHandlerBlock)block;
++ (FAEventHandler *)handlerWithContext:(id)context block:(FAEventHandlerContextBlock)block;
 + (FAEventHandler *)handlerWithTarget:(id)target action:(SEL)action;
 
 @end

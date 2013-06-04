@@ -73,7 +73,7 @@
 }
 
 - (void)try {
-    id <FATask> task = [self.taskFactory task];
+    id <FATask> task = [self.taskFactory taskWithLastResult:nil];
     [task addHandler:[FATaskResultEvent handlerWithTask:self block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
         [blockTask handleTaskResultEvent:event];
     }]];

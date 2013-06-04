@@ -30,6 +30,6 @@
 
 @interface FAChainedTask : FAAbstractTask
 
-- (id)initWithArray:(NSArray *)array;
+- (id)initWithFactories:(NSArray *)factories;
 
 @end

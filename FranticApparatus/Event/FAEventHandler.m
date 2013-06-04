@@ -30,6 +30,11 @@
 
 
 
+NS_INLINE FAEventHandlerBlock FAEventHandlerContextBlockMake(id context, FAEventHandlerContextBlock contextBlock);
+NS_INLINE FAEventHandlerBlock FAEventHandlerTargetActionBlockMake(id target, SEL action);
+
+
+
 @interface FAEventHandler ()
 
 @property (nonatomic, strong, readonly) Class eventClass;
@@ -41,28 +46,26 @@
 
 @implementation FAEventHandler
 
-+ (instancetype)eventHandlerWithEventClass:(Class)eventClass block:(void (^)(id event))block {
-    return [[self alloc] initWithEventClass:eventClass block:block];
++ (instancetype)handlerWithEventClass:(Class)eventClass block:(FAEventHandlerBlock)block {
+    return [[self alloc] initWithEventClass:eventClass
+                                      block:block];
 }
 
-+ (instancetype)eventHandlerWithEventClass:(Class)eventClass context:(id)context block:(void (^)(id context, id event))block {
-    return [[self alloc] initWithEventClass:eventClass block:[self blockForContext:context block:block]];
++ (instancetype)handlerWithEventClass:(Class)eventClass context:(id)context block:(FAEventHandlerContextBlock)block {
+    return [[self alloc] initWithEventClass:eventClass
+                                      block:FAEventHandlerContextBlockMake(context, block)];
 }
 
-+ (instancetype)eventHandlerWithEventClass:(Class)eventClass target:(id)target action:(SEL)action {
-    return [[self alloc] initWithEventClass:eventClass block:[self blockForContext:target block:^(id context, id event) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-        [context performSelector:action withObject:event];
-#pragma clang diagnostic pop
-    }]];
++ (instancetype)handlerWithEventClass:(Class)eventClass target:(id)target action:(SEL)action {
+    return [[self alloc] initWithEventClass:eventClass
+                                      block:FAEventHandlerTargetActionBlockMake(target, action)];
 }
 
 - (id)init {
     return [self initWithEventClass:nil block:nil];
 }
 
-- (id)initWithEventClass:(Class)eventClass block:(void (^)(id event))block {
+- (id)initWithEventClass:(Class)eventClass block:(FAEventHandlerBlock)block {
     self = [super init];
     if (self == nil) return nil;
     _eventClass = eventClass;
@@ -79,15 +82,6 @@
 - (void)handleEvent:(FAEvent *)event {
     NSAssert([self canHandleEvent:event], @"Unable to handle %@ with %@ handler", [event class], self.eventClass);
     self.block(event);
-}
-
-+ (void (^)(id))blockForContext:(id)context block:(void (^)(id context, id event))block {
-    id __weak weakContext = context;
-    return ^(id event) {
-        id blockContext = weakContext;
-        if (blockContext == nil) return;
-        block(blockContext, event);
-    };
 }
 
 - (instancetype)onMainQueue {
@@ -112,3 +106,23 @@
 }
 
 @end
+
+
+
+NS_INLINE FAEventHandlerBlock FAEventHandlerContextBlockMake(id context, FAEventHandlerContextBlock contextBlock) {
+    id __weak weakContext = context;
+    return ^(id event) {
+        id blockContext = weakContext;
+        if (blockContext == nil) return;
+        contextBlock(blockContext, event);
+    };
+}
+
+NS_INLINE FAEventHandlerBlock FAEventHandlerTargetActionBlockMake(id target, SEL action) {
+    return FAEventHandlerContextBlockMake(target, ^(id blockContext, id event) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+        [blockContext performSelector:action withObject:event];
+#pragma clang diagnostic pop
+    });
+}
