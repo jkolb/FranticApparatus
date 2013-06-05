@@ -42,6 +42,7 @@
     self = [super initWithSource:source];
     if (self == nil) return nil;
     _error = error;
+    if (_error == nil) return nil;
     return nil;
 }
 
