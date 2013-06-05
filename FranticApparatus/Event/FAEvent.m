@@ -40,6 +40,9 @@
 }
 
 - (id)initWithSource:(id)source {
+    if (source == nil) @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                                      reason:@"source parameter is nil"
+                                                    userInfo:nil];
     self = [super init];
     if (self == nil) return nil;
     _source = source;

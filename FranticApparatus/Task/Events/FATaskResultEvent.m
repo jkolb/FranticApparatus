@@ -35,14 +35,16 @@
 }
 
 - (id)initWithSource:(id)source {
-    return [self initWithSource:source result:nil];
+    return [self initWithSource:source result:[NSNull null]];
 }
 
 - (id)initWithSource:(id)source result:(id <NSCopying>)result {
+    if (result == nil) @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                                      reason:@"result parameter is nil"
+                                                    userInfo:nil];
     self = [super initWithSource:source];
     if (self == nil) return nil;
     _result = result;
-    if (_result == nil) return nil;
     return self;
 }
 
