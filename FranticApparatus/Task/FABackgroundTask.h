@@ -36,9 +36,7 @@ typedef NS_ENUM(NSInteger, FABackgroundTaskPriority) {
     FABackgroundTaskPriorityLowest  = 4,
 };
 
-
-
-@class FATaskResultEvent;
+typedef id (^FABackgroundTaskBlock)(id <FATask> blockTask, NSError **error);
 
 
 
@@ -46,8 +44,6 @@ typedef NS_ENUM(NSInteger, FABackgroundTaskPriority) {
 
 @property (nonatomic) FABackgroundTaskPriority priority;
 
-@property (copy) id (^execute)(id <FATask> blockTask, NSError **error);
-
-- (id)executeWithError:(NSError **)error;
+- (id)initWithBlock:(FABackgroundTaskBlock)block;
 
 @end
