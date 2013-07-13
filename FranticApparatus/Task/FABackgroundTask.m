@@ -73,7 +73,6 @@ const FABackgroundTaskPriority FABackgroundTaskPriorityHigh = DISPATCH_QUEUE_PRI
     dispatch_async(dispatch_get_global_queue(self.priority, 0), ^{
         FATypeOfSelf blockSelf = weakSelf;
         if (blockSelf == nil) return;
-        if ([blockSelf isCancelled]) return;
         [blockSelf executeInBackground];
     });
 }
