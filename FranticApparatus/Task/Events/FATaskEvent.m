@@ -31,7 +31,7 @@
 
 @implementation FATaskEvent
 
-+ (FAEventHandler *)handlerWithTask:(id <FATask>)task block:(void (^)(id <FATask> blockTask, id event))block {
++ (FAEventHandler *)handlerWithTask:(id <FATask>)task block:(FATaskEventBlock)block {
     return [self handlerWithContext:task block:^(id <FATask> blockTask, id event) {
         if ([blockTask isCancelled]) return;
         block(blockTask, event);

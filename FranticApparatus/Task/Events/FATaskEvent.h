@@ -32,8 +32,12 @@
 
 
 
+typedef void (^FATaskEventBlock)(id <FATask> blockTask, id event);
+
+
+
 @interface FATaskEvent : FAEvent
 
-+ (FAEventHandler *)handlerWithTask:(id <FATask>)task block:(void (^)(id <FATask> blockTask, id event))block;
++ (FAEventHandler *)handlerWithTask:(id <FATask>)task block:(FATaskEventBlock)block;
 
 @end

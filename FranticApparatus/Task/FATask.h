@@ -39,4 +39,6 @@
 
 - (void)finish;
 
+- (NSString *)taskDescription;
+
 @end

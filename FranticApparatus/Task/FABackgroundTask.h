@@ -28,26 +28,24 @@
 
 
 
-typedef NS_ENUM(NSInteger, FABackgroundTaskPriority) {
-    FABackgroundTaskPriorityDefault = 0,
-    FABackgroundTaskPriorityHigh    = 1,
-    FABackgroundTaskPriorityMedium  = 2,
-    FABackgroundTaskPriorityLow     = 3,
-    FABackgroundTaskPriorityLowest  = 4,
-};
+typedef NSInteger FABackgroundTaskPriority;
+
+typedef id (^FABackgroundTaskBlock)(id <FATask> blockTask, NSError **error);
 
 
 
-@class FATaskResultEvent;
+extern const FABackgroundTaskPriority FABackgroundTaskPriorityDefault;
+extern const FABackgroundTaskPriority FABackgroundTaskPriorityLowest;
+extern const FABackgroundTaskPriority FABackgroundTaskPriorityLow;
+extern const FABackgroundTaskPriority FABackgroundTaskPriorityMedium;
+extern const FABackgroundTaskPriority FABackgroundTaskPriorityHigh;
 
 
 
 @interface FABackgroundTask : FAAbstractTask
 
-@property (nonatomic) FABackgroundTaskPriority priority;
+- (id)initWithBlock:(FABackgroundTaskBlock)block;
 
-@property (copy) id (^execute)(id <FATask> blockTask, NSError **error);
-
-- (id)executeWithError:(NSError **)error;
+- (id)initWithPriority:(FABackgroundTaskPriority)priority block:(FABackgroundTaskBlock)block;
 
 @end

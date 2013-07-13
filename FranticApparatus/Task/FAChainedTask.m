@@ -27,7 +27,6 @@
 #import "FAChainedTask.h"
 #import "FATaskResultEvent.h"
 #import "FATaskErrorEvent.h"
-#import "FATaskCancelEvent.h"
 #import "FATaskFinishEvent.h"
 #import "FATaskFactory.h"
 
@@ -35,10 +34,10 @@
 
 @interface FAChainedTask ()
 
-@property (nonatomic, copy, readonly) NSArray *factories;
-@property (nonatomic, strong) id <FATask> currentTask;
-@property (nonatomic, strong) id lastResult;
-@property (nonatomic, strong) NSError *lastError;
+@property (copy, readonly) NSArray *factories;
+@property (strong) id <FATask> currentTask;
+@property (strong) id lastResult;
+@property (strong) NSError *lastError;
 
 @end
 
@@ -47,13 +46,13 @@
 @implementation FAChainedTask
 
 - (id)init {
-    return [self initWithFactories:[[NSArray alloc] init]];
+    return [self initWithFactories:@[]];
 }
 
-- (id)initWithFactories:(NSArray *)array {
+- (id)initWithFactories:(NSArray *)factories {
     self = [super init];
     if (self == nil) return nil;
-    _factories = array;
+    _factories = [factories copy];
     if (_factories == nil) return nil;
     for (id object in _factories) {
         if (![object isKindOfClass:[FATaskFactory class]]) return nil;
@@ -62,32 +61,35 @@
 }
 
 - (void)didStart {
-    [self startTaskAtIndex:0 withLastResult:nil];
+    [self startTaskAtIndex:0];
 }
 
-- (void)startTaskAtIndex:(NSUInteger)index withLastResult:(id)lastResult {
-    FATaskFactory *factory = [self.factories objectAtIndex:index];
-    id <FATask> task = [factory taskWithLastResult:lastResult];
-    [task addHandler:[FATaskResultEvent
-                      handlerWithTask:self
-                      block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
-                          [blockTask handleTaskResultEvent:event forIndex:index];
-                      }]];
-    [task addHandler:[FATaskErrorEvent
-                      handlerWithTask:self
-                      block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
-                          [blockTask handleTaskErrorEvent:event forIndex:index];
-                      }]];
-    [task addHandler:[FATaskCancelEvent
-                      handlerWithTask:self
-                      block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
-                          [blockTask handleTaskCancelEvent:event forIndex:index];
-                      }]];
-    [task addHandler:[FATaskFinishEvent
-                      handlerWithTask:self
-                      block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
-                          [blockTask handleTaskFinishEvent:event forIndex:index];
-                      }]];
+- (void)startTaskAtIndex:(NSUInteger)index {
+    if (index >= [self.factories count] || self.lastError != nil) {
+        [self finish];
+        return;
+    }
+    
+    FATaskFactory *factory = self.factories[index];
+    id <FATask> task = [factory taskWithLastResult:self.lastResult];
+    
+    if (task == nil) {
+        // Unable to create task from factory
+        self.lastError = [NSError errorWithDomain:@"" code:0 userInfo:nil];
+        [self finish];
+        return;
+    }
+    
+    [self onResultEventFromTask:task execute:^(FATypeOfSelf blockTask, FATaskResultEvent *event) {
+        blockTask.lastResult = event.result;
+    }];
+    [self onErrorEventFromTask:task execute:^(FATypeOfSelf blockTask, FATaskErrorEvent *event) {
+        blockTask.lastError = event.error;
+    }];
+    [self onFinishEventFromTask:task execute:^(FATypeOfSelf blockTask, FATaskFinishEvent *event) {
+        [blockTask startTaskAtIndex:index + 1];
+    }];
+
     self.currentTask = task;
     [task start];
 }
@@ -97,46 +99,7 @@
 }
 
 - (void)willFinish {
-    if (self.lastError == nil) {
-        [self dispatchEvent:[FATaskResultEvent eventWithSource:self result:self.lastResult]];
-    } else {
-        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:self.lastError]];
-    }
-}
-
-- (void)handleTaskResultEvent:(FATaskResultEvent *)event forIndex:(NSUInteger)index {
-    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
-        blockTask.lastResult = event.result;
-    }];
-}
-
-- (void)handleTaskErrorEvent:(FATaskErrorEvent *)event forIndex:(NSUInteger)index {
-    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
-        blockTask.lastError = event.error;
-    }];
-}
-
-- (void)handleTaskCancelEvent:(FATaskCancelEvent *)event forIndex:(NSUInteger)index {
-    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
-        [blockTask cancel];
-    }];
-}
-
-- (void)handleTaskFinishEvent:(FATaskFinishEvent *)event forIndex:(NSUInteger)index {
-    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
-        if (blockTask.lastError == nil) {
-            NSUInteger nextIndex = index + 1;
-            
-            if (nextIndex < [blockTask.factories count]) {
-                [blockTask startTaskAtIndex:nextIndex withLastResult:blockTask.lastResult];
-            } else {
-                [blockTask finish];
-            }
-        } else {
-            [blockTask finish];
-        }
-
-    }];
+    [self willFinishWithResult:self.lastResult error:self.lastError];
 }
 
 @end

@@ -36,7 +36,6 @@
 #import "FAParallelTask.h"
 #import "FAChainedTask.h"
 #import "FARetryTask.h"
-#import "FANullTask.h"
 
 // Task Utility
 #import "FATaskFactory.h"
@@ -44,7 +43,6 @@
 // Task Events
 #import "FATaskEvent.h"
 #import "FATaskStartEvent.h"
-#import "FATaskCancelEvent.h"
 #import "FATaskFinishEvent.h"
 #import "FATaskResultEvent.h"
 #import "FATaskErrorEvent.h"

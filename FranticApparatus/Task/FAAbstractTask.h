@@ -27,7 +27,12 @@
 #import <Foundation/Foundation.h>
 
 #import "FATask.h"
+#import "FATaskEvent.h"
 #import "FAEventDispatcher.h"
+
+
+
+#define FATypeOfSelf  __typeof__(self)
 
 
 
@@ -37,11 +42,18 @@
 - (void)didStart;
 
 - (void)willCancel;
-- (void)didCancel;
-
 - (void)willFinish;
-- (void)didFinish;
 
-- (void)synchronizeWithBlock:(void (^)(id blockTask))block;
+- (void)synchronizeWithBlock:(void (^)(id <FATask> blockTask))block;
+
+- (void)willFinishWithResult:(id)result error:(NSError *)error;
+
+- (void)onResultEventFromTask:(id <FATask>)task execute:(FATaskEventBlock)block;
+- (void)onErrorEventFromTask:(id <FATask>)task execute:(FATaskEventBlock)block;
+- (void)onFinishEventFromTask:(id <FATask>)task execute:(FATaskEventBlock)block;
+
+- (void)onEvent:(Class)event fromTask:(id <FATask>)task execute:(FATaskEventBlock)block;
+
+@property (copy) NSString *taskDescription;
 
 @end

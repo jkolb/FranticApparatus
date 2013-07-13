@@ -35,7 +35,7 @@ NS_INLINE FATaskFactoryBlock FATaskFactoryTargetActionBlockMake(id target, SEL a
 
 @interface FATaskFactory ()
 
-@property (nonatomic, copy) id <FATask> (^block)(id lastResult);
+@property (nonatomic, copy) FATaskFactoryBlock block;
 
 @end
 
@@ -64,23 +64,13 @@ NS_INLINE FATaskFactoryBlock FATaskFactoryTargetActionBlockMake(id target, SEL a
 - (id)initWithBlock:(FATaskFactoryBlock)block {
     self = [super init];
     if (self == nil) return nil;
-    _block = block;
+    _block = [block copy];
     if (_block == nil) return nil;
     return self;
 }
 
-- (id <FATask>)task {
-    return [self taskWithLastResult:nil];
-}
-
 - (id <FATask>)taskWithLastResult:(id)lastResult {
-    id <FATask> task = self.block(lastResult);
-    if (task == nil) {
-        @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                       reason:@"chainBlock generated nil task"
-                                     userInfo:nil];
-    }
-    return task;
+    return self.block(lastResult);
 }
 
 

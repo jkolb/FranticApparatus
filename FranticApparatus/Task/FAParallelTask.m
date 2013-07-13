@@ -27,7 +27,6 @@
 #import "FAParallelTask.h"
 #import "FATaskResultEvent.h"
 #import "FATaskErrorEvent.h"
-#import "FATaskCancelEvent.h"
 #import "FATaskFinishEvent.h"
 #import "FATaskFactory.h"
 #import "FAEventHandler.h"
@@ -36,6 +35,7 @@
 
 @interface FAParallelTask ()
 
+@property (copy) NSDictionary *factories;
 @property (nonatomic, strong, readonly) NSMutableDictionary *tasks;
 @property (nonatomic, strong) NSMutableDictionary *results;
 @property (nonatomic, strong) NSError *error;
@@ -46,37 +46,39 @@
 
 @implementation FAParallelTask
 
+- (id)init {
+    return [self initWithFactories:@{}];
+}
+
 - (id)initWithFactories:(NSDictionary *)factories {
     self = [super init];
     if (self == nil) return nil;
+    _factories = [factories copy];
+    if (_factories == nil) return nil;
     _tasks = [[NSMutableDictionary alloc] initWithCapacity:[factories count]];
     if (_tasks == nil) return nil;
     
     for (id key in factories) {
-        id object = [factories objectForKey:key];
+        id object = factories[key];
         if (![object isKindOfClass:[FATaskFactory class]]) return nil;
         FATaskFactory *factory = object;
         id <FATask> task = [factory taskWithLastResult:nil];
-        [task addHandler:[FATaskResultEvent
-                          handlerWithTask:self
-                          block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
-                              [blockTask handleTaskResultEvent:event forKey:key];
-                          }]];
-        [task addHandler:[FATaskErrorEvent
-                          handlerWithTask:self
-                          block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
-                              [blockTask handleTaskErrorEvent:event forKey:key];
-                          }]];
-        [task addHandler:[FATaskCancelEvent
-                          handlerWithTask:self
-                          block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
-                              [blockTask handleTaskCancelEvent:event forKey:key];
-                          }]];
-        [task addHandler:[FATaskFinishEvent
-                          handlerWithTask:self
-                          block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
-                              [blockTask handleTaskFinishEvent:event forKey:key];
-                          }]];
+        
+        if (task == nil) return nil;
+        
+        [self onResultEventFromTask:task execute:^(FATypeOfSelf blockTask, FATaskResultEvent *event) {
+            blockTask.results[key] = event.result;
+        }];
+        [self onErrorEventFromTask:task execute:^(FATypeOfSelf blockTask, FATaskErrorEvent *event) {
+            blockTask.error = event.error;
+        }];
+        [self onFinishEventFromTask:task execute:^(FATypeOfSelf blockTask, FATaskFinishEvent *event) {
+            [blockTask.tasks removeObjectForKey:key];
+            if ([blockTask.tasks count] == 0 || blockTask.error != nil) {
+                [blockTask finish];
+            }
+        }];
+
         [_tasks setObject:task forKey:key];
     }
     _results = [[NSMutableDictionary alloc] initWithCapacity:[_tasks count]];
@@ -84,9 +86,31 @@
     return self;
 }
 
+- (void)willStart {
+    for (id key in self.factories) {
+        FATaskFactory *factory = self.factories[key];
+        id <FATask> task = [factory taskWithLastResult:nil];
+        
+        [self onResultEventFromTask:task execute:^(FATypeOfSelf blockTask, FATaskResultEvent *event) {
+            blockTask.results[key] = event.result;
+        }];
+        [self onErrorEventFromTask:task execute:^(FATypeOfSelf blockTask, FATaskErrorEvent *event) {
+            blockTask.error = event.error;
+        }];
+        [self onFinishEventFromTask:task execute:^(FATypeOfSelf blockTask, FATaskFinishEvent *event) {
+            [blockTask.tasks removeObjectForKey:key];
+            if ([blockTask.tasks count] == 0 || blockTask.error != nil) {
+                [blockTask finish];
+            }
+        }];
+        
+        self.tasks[key] = task;
+    }
+}
+
 - (void)didStart {
-    for (id <FATask> task in [self.tasks allValues]) [task start];
     if ([self.tasks count] == 0) [self finish];
+    for (id <FATask> task in [self.tasks allValues]) [task start];
 }
 
 - (void)willCancel {
@@ -99,45 +123,11 @@
 
 - (void)willFinish {
     [self cancelOutstandingTasks];
-    
-    if (self.error == nil) {
-        [self dispatchEvent:[FATaskResultEvent eventWithSource:self result:self.results]];
-    } else {
-        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:self.error]];
-    }
+    [self willFinishWithResult:self.results error:self.error];
 }
 
 - (BOOL)shouldFailOnError:(NSError *)error forKey:(id)key {
     return YES;
-}
-
-- (void)handleTaskResultEvent:(FATaskResultEvent *)event forKey:(id)key {
-    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
-        [blockTask.results setObject:event.result forKey:key];
-    }];
-}
-
-- (void)handleTaskErrorEvent:(FATaskErrorEvent *)event forKey:(id)key {
-    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
-        if ([blockTask shouldFailOnError:event.error forKey:key]) {
-            blockTask.error = event.error;
-        }
-    }];
-}
-
-- (void)handleTaskCancelEvent:(FATaskCancelEvent *)event forKey:(id)key {
-    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
-        [blockTask.tasks removeObjectForKey:key];
-    }];
-}
-
-- (void)handleTaskFinishEvent:(FATaskFinishEvent *)event forKey:(id)key {
-    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
-        [blockTask.tasks removeObjectForKey:key];
-        if ([blockTask.tasks count] == 0 || blockTask.error != nil) {
-            [blockTask finish];
-        }
-    }];
 }
 
 @end

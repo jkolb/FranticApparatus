@@ -30,7 +30,6 @@
 #import "FATaskErrorEvent.h"
 #import "FATaskRestartEvent.h"
 #import "FATaskDelayEvent.h"
-#import "FATaskCancelEvent.h"
 #import "FATaskFinishEvent.h"
 
 
@@ -76,22 +75,17 @@
     id <FATask> task = [self.taskFactory taskWithLastResult:nil];
     [task addHandler:[FATaskResultEvent
                       handlerWithTask:self
-                      block:^(__typeof__(self) blockTask, FATaskResultEvent *event) {
+                      block:^(FATypeOfSelf blockTask, FATaskResultEvent *event) {
                           [blockTask handleTaskResultEvent:event];
                       }]];
     [task addHandler:[FATaskErrorEvent
                       handlerWithTask:self
-                      block:^(__typeof__(self) blockTask, FATaskErrorEvent *event) {
+                      block:^(FATypeOfSelf blockTask, FATaskErrorEvent *event) {
                           [blockTask handleTaskErrorEvent:event];
-                      }]];
-    [task addHandler:[FATaskCancelEvent
-                      handlerWithTask:self
-                      block:^(__typeof__(self) blockTask, FATaskCancelEvent *event) {
-                          [blockTask handleTaskCancelEvent:event];
                       }]];
     [task addHandler:[FATaskFinishEvent
                       handlerWithTask:self
-                      block:^(__typeof__(self) blockTask, FATaskFinishEvent *event) {
+                      block:^(FATypeOfSelf blockTask, FATaskFinishEvent *event) {
                           [blockTask handleTaskFinishEvent:event];
                       }]];
     self.task = task;
@@ -132,9 +126,9 @@
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     self.delayTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
     dispatch_source_set_timer(self.delayTimer, dispatch_time(DISPATCH_TIME_NOW, delayInterval * NSEC_PER_SEC), DISPATCH_TIME_FOREVER, 0);
-    __typeof__(self) __weak weakSelf = self;
+    FATypeOfSelf __weak weakSelf = self;
     dispatch_source_set_event_handler(self.delayTimer, ^{
-        __typeof__(self) blockSelf = weakSelf;
+        FATypeOfSelf blockSelf = weakSelf;
         if (blockSelf == nil || [blockSelf isCancelled]) return;
         [blockSelf cancelTimer];
         [blockSelf retry];
@@ -143,7 +137,6 @@
 }
 
 - (BOOL)shouldRetryAfterError:(NSError *)error {
-    if ([[error domain] isEqualToString:@"FARetryTaskErrorDomain"] && [error code] == -1) return NO;
     if (self.shouldRetry == nil) return YES;
     return self.shouldRetry(error);
 }
@@ -166,26 +159,19 @@
 }
 
 - (void)handleTaskResultEvent:(FATaskResultEvent *)event {
-    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+    [self synchronizeWithBlock:^(FATypeOfSelf blockTask) {
         blockTask.result = event.result;
     }];
 }
 
 - (void)handleTaskErrorEvent:(FATaskErrorEvent *)event {
-    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+    [self synchronizeWithBlock:^(FATypeOfSelf blockTask) {
         blockTask.error = event.error;
     }];
 }
 
-- (void)handleTaskCancelEvent:(FATaskCancelEvent *)event {
-    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
-        blockTask.error = [NSError errorWithDomain:@"FARetryTaskErrorDomain" code:-1 userInfo:nil];
-        [blockTask tryFailed];
-    }];
-}
-
 - (void)handleTaskFinishEvent:(FATaskFinishEvent *)event {
-    [self synchronizeWithBlock:^(__typeof__(self) blockTask) {
+    [self synchronizeWithBlock:^(FATypeOfSelf blockTask) {
         if (blockTask.error == nil) {
             [blockTask finish];
         } else {
@@ -195,11 +181,7 @@
 }
 
 - (void)willFinish {
-    if (self.result == nil) {
-        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:self.error]];
-    } else {
-        [self dispatchEvent:[FATaskResultEvent eventWithSource:self result:self.result]];
-    }
+    [self willFinishWithResult:self.result error:self.error];
 }
 
 @end

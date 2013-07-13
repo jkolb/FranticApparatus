@@ -25,15 +25,23 @@
 
 
 #import "FABackgroundTask.h"
-#import "FATaskResultEvent.h"
-#import "FATaskErrorEvent.h"
+
+
+
+const FABackgroundTaskPriority FABackgroundTaskPriorityDefault = DISPATCH_QUEUE_PRIORITY_DEFAULT;
+const FABackgroundTaskPriority FABackgroundTaskPriorityLowest = DISPATCH_QUEUE_PRIORITY_BACKGROUND;
+const FABackgroundTaskPriority FABackgroundTaskPriorityLow = DISPATCH_QUEUE_PRIORITY_LOW;
+const FABackgroundTaskPriority FABackgroundTaskPriorityMedium = DISPATCH_QUEUE_PRIORITY_DEFAULT;
+const FABackgroundTaskPriority FABackgroundTaskPriorityHigh = DISPATCH_QUEUE_PRIORITY_HIGH;
 
 
 
 @interface FABackgroundTask ()
 
-@property (nonatomic, strong) id result;
-@property (nonatomic, strong) NSError *error;
+@property FABackgroundTaskPriority priority;
+@property (copy) FABackgroundTaskBlock block;
+@property (strong) id result;
+@property (strong) NSError *error;
 
 @end
 
@@ -41,28 +49,29 @@
 
 @implementation FABackgroundTask
 
-- (dispatch_queue_t)backgroundQueue {
-    switch (self.priority) {
-        case FABackgroundTaskPriorityHigh:
-            return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
-            
-        case FABackgroundTaskPriorityLow:
-            return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
-            
-        case FABackgroundTaskPriorityLowest:
-            return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-            
-        case FABackgroundTaskPriorityDefault:
-        case FABackgroundTaskPriorityMedium:
-        default:
-            return dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    }
+- (id)init {
+    return [self initWithBlock:^id(id <FATask> blockTask, NSError **error) {
+        return @(YES);
+    }];
+}
+
+- (id)initWithBlock:(FABackgroundTaskBlock)block {
+    return [self initWithPriority:FABackgroundTaskPriorityDefault block:block];
+}
+
+- (id)initWithPriority:(FABackgroundTaskPriority)priority block:(FABackgroundTaskBlock)block {
+    self = [super init];
+    if (self == nil) return nil;
+    _priority = priority;
+    _block = [block copy];
+    if (_block == nil) return nil;
+    return self;
 }
 
 - (void)didStart {
-    __typeof__(self) __weak weakSelf = self;
-    dispatch_async([self backgroundQueue], ^{
-        __typeof__(self) blockSelf = weakSelf;
+    FATypeOfSelf __weak weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(self.priority, 0), ^{
+        FATypeOfSelf blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if ([blockSelf isCancelled]) return;
         [blockSelf executeInBackground];
@@ -71,29 +80,13 @@
 
 - (void)executeInBackground {
     NSError *error = nil;
-    id result = nil;
-    
-    if (self.execute == nil) {
-        result = [self executeWithError:&error];
-    } else {
-        result = self.execute(self, &error);
-    }
-    
-    self.result = result;
+    self.result = self.block(self, &error);
     self.error = error;
     [self finish];
 }
 
-- (id)executeWithError:(NSError **)error {
-    return @(YES);
-}
-
 - (void)willFinish {
-    if (self.result == nil) {
-        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:self.error]];
-    } else {
-        [self dispatchEvent:[FATaskResultEvent eventWithSource:self result:self.result]];
-    }
+    [self willFinishWithResult:self.result error:self.error];
 }
 
 @end
