@@ -95,7 +95,7 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
 }
 
 - (void)onCompleteWithContext:(id)context executeOnMainQueue:(FATaskCompleteBlock)block {
-    [self addHandler:[[FATaskCompleteEvent handlerWithContext:self block:^(id blockContext, id event) {
+    [self addHandler:[[FATaskCompleteEvent handlerWithContext:context block:^(id blockContext, id event) {
         block(blockContext, event);
     }] onMainQueue]];
 }
