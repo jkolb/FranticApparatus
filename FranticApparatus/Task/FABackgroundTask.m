@@ -40,8 +40,6 @@ const FABackgroundTaskPriority FABackgroundTaskPriorityHigh = DISPATCH_QUEUE_PRI
 
 @property FABackgroundTaskPriority priority;
 @property (copy) FABackgroundTaskBlock block;
-@property (strong) id result;
-@property (strong) NSError *error;
 
 @end
 
@@ -79,13 +77,8 @@ const FABackgroundTaskPriority FABackgroundTaskPriorityHigh = DISPATCH_QUEUE_PRI
 
 - (void)executeInBackground {
     NSError *error = nil;
-    self.result = self.block(self, &error);
-    self.error = error;
-    [self finish];
-}
-
-- (void)willFinish {
-    [self willFinishWithResult:self.result error:self.error];
+    id result = self.block(self, &error);
+    [self completeWithResult:result error:error];
 }
 
 @end

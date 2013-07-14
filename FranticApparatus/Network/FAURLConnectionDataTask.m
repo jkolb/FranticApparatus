@@ -49,12 +49,10 @@
     [self.data appendData:data];
 }
 
-- (id)result {
-    return [[FAURLConnectionDataResult alloc] initWithResponse:self.response data:self.data];
-}
-
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    [self finish];
+    FAURLConnectionDataResult *result = [[FAURLConnectionDataResult alloc] initWithResponse:self.response
+                                                                                       data:self.data];
+    [self completeWithResult:result error:nil];
 }
 
 - (NSMutableData *)dataForResponse:(NSURLResponse *)response {

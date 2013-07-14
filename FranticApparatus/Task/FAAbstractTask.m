@@ -26,9 +26,7 @@
 
 #import "FAAbstractTask.h"
 #import "FATaskStartEvent.h"
-#import "FATaskResultEvent.h"
-#import "FATaskErrorEvent.h"
-#import "FATaskFinishEvent.h"
+#import "FATaskCompleteEvent.h"
 #import "FAEvent.h"
 
 
@@ -41,7 +39,7 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
 
 @property (strong, readonly) dispatch_queue_t synchronizationQueue;
 @property BOOL cancelled;
-@property BOOL finished;
+@property BOOL completed;
 
 @end
 
@@ -85,15 +83,15 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
 - (void)willCancel {
 }
 
-- (void)finish {
-    [self synchronizeWithBlock:^(FATypeOfSelf blockTask) {
-        [blockTask willFinish];
-        blockTask.finished = YES;
-        [blockTask dispatchEvent:[FATaskFinishEvent eventWithSource:blockTask]];
-    }];
+- (void)willComplete {
 }
 
-- (void)willFinish {
+- (void)completeWithResult:(id)result error:(NSError *)error {
+    [self synchronizeWithBlock:^(FATypeOfSelf blockTask) {
+        [blockTask willComplete];
+        blockTask.completed = YES;
+        [blockTask dispatchEvent:[FATaskCompleteEvent eventWithSource:blockTask result:result error:error]];
+    }];
 }
 
 - (NSString *)description {
@@ -107,33 +105,13 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
         FATypeOfSelf blockSelf = weakSelf;
         if (blockSelf == nil) return;
         if (blockSelf.cancelled) return;
-        if (blockSelf.finished) return;
+        if (blockSelf.completed) return;
         block(blockSelf);
     });
 }
 
-- (void)willFinishWithResult:(id)result error:(NSError *)error {
-    if (result == nil) {
-        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:error]];
-    } else {
-        [self dispatchEvent:[FATaskResultEvent eventWithSource:self result:result]];
-    }
-}
-
-- (void)onResultEventFromTask:(id <FATask>)task execute:(FATaskEventBlock)block {
-    [self onEvent:[FATaskResultEvent class] fromTask:task execute:block];
-}
-
-- (void)onErrorEventFromTask:(id <FATask>)task execute:(FATaskEventBlock)block {
-    [self onEvent:[FATaskErrorEvent class] fromTask:task execute:block];
-}
-
-- (void)onFinishEventFromTask:(id <FATask>)task execute:(FATaskEventBlock)block {
-    [self onEvent:[FATaskFinishEvent class] fromTask:task execute:block];
-}
-
-- (void)onEvent:(Class)eventClass fromTask:(id <FATask>)task execute:(FATaskEventBlock)block {
-    [task addHandler:[eventClass handlerWithTask:self block:^(FATypeOfSelf blockTask, id event) {
+- (void)onCompleteTask:(id <FATask>)task execute:(FATaskEventBlock)block {
+    [task addHandler:[FATaskCompleteEvent handlerWithTask:self block:^(FATypeOfSelf blockTask, id event) {
         [blockTask synchronizeWithBlock:^(FATypeOfSelf blockTask) {
             block(blockTask, event);
         }];

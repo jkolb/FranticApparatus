@@ -41,6 +41,4 @@
 
 - (void)handleResponse:(NSURLResponse *)response;
 
-- (id)result;
-
 @end

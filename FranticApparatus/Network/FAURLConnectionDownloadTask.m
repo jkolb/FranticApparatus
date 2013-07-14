@@ -45,7 +45,6 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
 @property (nonatomic, strong) NSURLResponse *response;
 @property (nonatomic, readwrite) long long bytesReceived;
 @property (nonatomic, readwrite) long long totalBytesReceived;
-@property (nonatomic, strong) NSError *error;
 
 @end
 
@@ -91,8 +90,7 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
     
     if (!success) {
         [connection cancel];
-        self.error = error;
-        [self finish];
+        [self completeWithResult:nil error:error];
     }
 }
 
@@ -142,18 +140,12 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
     return dataOffset;
 }
 
-- (id)result {
-    return [[FAURLConnectionDownloadResult alloc] initWithResponse:self.response downloadPath:self.downloadPath];
-}
-
 - (void)willCancel {
-    [super cancel];
     [self cleanup];
 }
 
-- (void)willFinish {
+- (void)willComplete {
     [self cleanup];
-    [super willFinish];
 }
 
 - (void)cleanup {
@@ -168,13 +160,13 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
         BOOL success = [self writeAsMuchDataAsPossibleToOutputStreamAndReportProgressWithError:&error];
         
         if (!success) {
-            self.error = error;
-            [self finish];
+            [self completeWithResult:nil error:error];
             return;
         }
     }
     
-    [self finish];
+    id result = [[FAURLConnectionDownloadResult alloc] initWithResponse:self.response downloadPath:self.downloadPath];
+    [self completeWithResult:result error:nil];
 }
 
 @end

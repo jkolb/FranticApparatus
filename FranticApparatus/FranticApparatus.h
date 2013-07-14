@@ -43,9 +43,7 @@
 // Task Events
 #import "FATaskEvent.h"
 #import "FATaskStartEvent.h"
-#import "FATaskFinishEvent.h"
-#import "FATaskResultEvent.h"
-#import "FATaskErrorEvent.h"
+#import "FATaskCompleteEvent.h"
 #import "FATaskRestartEvent.h"
 #import "FATaskDelayEvent.h"
 #import "FATaskProgressEvent.h"

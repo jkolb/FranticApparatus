@@ -1,5 +1,5 @@
 //
-// FATaskResultEvent.m
+// FATaskCompleteEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,25 +24,25 @@
 
 
 
-#import "FATaskResultEvent.h"
+#import "FATaskCompleteEvent.h"
 
 
 
-@implementation FATaskResultEvent
+@implementation FATaskCompleteEvent
 
-+ (instancetype)eventWithSource:(id)source result:(id <NSCopying>)result {
-    return [[self alloc] initWithSource:source result:result];
++ (instancetype)eventWithSource:(id)source result:(id <NSCopying>)result error:(NSError *)error {
+    return [[self alloc] initWithSource:source result:result error:error];
 }
 
 - (id)initWithSource:(id)source {
-    return [self initWithSource:source result:[NSNull null]];
+    return [self initWithSource:source result:@(YES) error:nil];
 }
 
-- (id)initWithSource:(id)source result:(id <NSCopying>)result {
-    NSParameterAssert(result != nil);
+- (id)initWithSource:(id)source result:(id <NSCopying>)result error:(NSError *)error {
     self = [super initWithSource:source];
     if (self == nil) return nil;
-    _result = result;
+    _result = [(id)result copy];
+    _error = [error copy];
     return self;
 }
 

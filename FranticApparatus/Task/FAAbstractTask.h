@@ -42,17 +42,11 @@
 - (void)didStart;
 
 - (void)willCancel;
-- (void)willFinish;
+- (void)willComplete;
 
 - (void)synchronizeWithBlock:(void (^)(id <FATask> blockTask))block;
 
-- (void)willFinishWithResult:(id)result error:(NSError *)error;
-
-- (void)onResultEventFromTask:(id <FATask>)task execute:(FATaskEventBlock)block;
-- (void)onErrorEventFromTask:(id <FATask>)task execute:(FATaskEventBlock)block;
-- (void)onFinishEventFromTask:(id <FATask>)task execute:(FATaskEventBlock)block;
-
-- (void)onEvent:(Class)event fromTask:(id <FATask>)task execute:(FATaskEventBlock)block;
+- (void)onCompleteTask:(id <FATask>)task execute:(FATaskEventBlock)block;
 
 @property (copy) NSString *taskDescription;
 

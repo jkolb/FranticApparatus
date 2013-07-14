@@ -37,7 +37,7 @@
 - (BOOL)isCancelled;
 - (void)cancel;
 
-- (void)finish;
+- (void)completeWithResult:(id)result error:(NSError *)error;
 
 - (NSString *)taskDescription;
 

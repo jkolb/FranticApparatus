@@ -25,9 +25,7 @@
 
 
 #import "FAChainedTask.h"
-#import "FATaskResultEvent.h"
-#import "FATaskErrorEvent.h"
-#import "FATaskFinishEvent.h"
+#import "FATaskCompleteEvent.h"
 #import "FATaskFactory.h"
 
 
@@ -66,7 +64,7 @@
 
 - (void)startTaskAtIndex:(NSUInteger)index {
     if (index >= [self.factories count] || self.lastError != nil) {
-        [self finish];
+        [self completeWithResult:self.lastResult error:self.lastError];
         return;
     }
     
@@ -74,19 +72,13 @@
     id <FATask> task = [factory taskWithLastResult:self.lastResult];
     
     if (task == nil) {
-        // Unable to create task from factory
-        self.lastError = [NSError errorWithDomain:@"" code:0 userInfo:nil];
-        [self finish];
+        [self completeWithResult:nil error:nil];
         return;
     }
     
-    [self onResultEventFromTask:task execute:^(FATypeOfSelf blockTask, FATaskResultEvent *event) {
+    [self onCompleteTask:task execute:^(FATypeOfSelf blockTask, FATaskCompleteEvent *event) {
         blockTask.lastResult = event.result;
-    }];
-    [self onErrorEventFromTask:task execute:^(FATypeOfSelf blockTask, FATaskErrorEvent *event) {
         blockTask.lastError = event.error;
-    }];
-    [self onFinishEventFromTask:task execute:^(FATypeOfSelf blockTask, FATaskFinishEvent *event) {
         [blockTask startTaskAtIndex:index + 1];
     }];
 
@@ -98,8 +90,8 @@
     [self.currentTask cancel];
 }
 
-- (void)willFinish {
-    [self willFinishWithResult:self.lastResult error:self.lastError];
+- (void)willComplete {
+    self.currentTask = nil;
 }
 
 @end

@@ -25,8 +25,6 @@
 
 
 #import "FAURLConnectionTask.h"
-#import "FATaskResultEvent.h"
-#import "FATaskErrorEvent.h"
 #import "FAURLResponseFilter.h"
 
 
@@ -35,7 +33,6 @@
 
 @property (nonatomic, copy) NSURLRequest *request;
 @property (nonatomic, strong) NSURLConnection *connection;
-@property (nonatomic, strong) NSError *error;
 
 @end
 
@@ -60,10 +57,6 @@
     [self.connection start];
 }
 
-- (id)result {
-    return nil;
-}
-
 - (void)willCancel {
     [self.connection cancel];
 }
@@ -83,22 +76,12 @@
         [self handleResponse:response];
     } else {
         [connection cancel];
-        self.error = error;
-        [self finish];
+        [self completeWithResult:nil error:error];
     }
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    self.error = error;
-    [self finish];
-}
-
-- (void)willFinish {
-    if (self.error == nil) {
-        [self dispatchEvent:[FATaskResultEvent eventWithSource:self result:[self result]]];
-    } else {
-        [self dispatchEvent:[FATaskErrorEvent eventWithSource:self error:self.error]];
-    }
+    [self completeWithResult:nil error:error];
 }
 
 @end

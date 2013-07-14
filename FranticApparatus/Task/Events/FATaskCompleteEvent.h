@@ -1,5 +1,5 @@
 //
-// FATaskErrorEvent.m
+// FATaskCompleteEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,26 +24,17 @@
 
 
 
-#import "FATaskErrorEvent.h"
+#import "FATaskEvent.h"
 
 
 
-@implementation FATaskErrorEvent
+@interface FATaskCompleteEvent : FATaskEvent
 
-+ (instancetype)eventWithSource:(id)source error:(NSError *)error {
-    return [[self alloc] initWithSource:source error:error];
-}
+@property (nonatomic, copy, readonly) id result;
+@property (nonatomic, copy, readonly) NSError *error;
 
-- (id)initWithSource:(id)source {
-    return [self initWithSource:source error:nil];
-}
++ (instancetype)eventWithSource:(id)source result:(id <NSCopying>)result error:(NSError *)error;
 
-- (id)initWithSource:(id)source error:(NSError *)error {
-    NSParameterAssert(error != nil);
-    self = [super initWithSource:source];
-    if (self == nil) return nil;
-    _error = error;
-    return self;
-}
+- (id)initWithSource:(id)source result:(id <NSCopying>)result error:(NSError *)error;
 
 @end
