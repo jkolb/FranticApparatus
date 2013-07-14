@@ -36,7 +36,7 @@
 
 @interface FAEvent : NSObject <NSCopying>
 
-@property (nonatomic, weak, readonly) id source;
+@property (weak, readonly) id source;
 
 + (instancetype)eventWithSource:(id)source;
 

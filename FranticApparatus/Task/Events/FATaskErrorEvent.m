@@ -39,9 +39,7 @@
 }
 
 - (id)initWithSource:(id)source error:(NSError *)error {
-    if (error == nil) @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                                     reason:@"error parameter is nil"
-                                                   userInfo:nil];
+    NSParameterAssert(error != nil);
     self = [super initWithSource:source];
     if (self == nil) return nil;
     _error = error;

@@ -66,11 +66,9 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
 }
 
 - (void)willStart {
-    
 }
 
 - (void)didStart {
-    
 }
 
 - (BOOL)isCancelled {
@@ -85,7 +83,6 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
 }
 
 - (void)willCancel {
-    
 }
 
 - (void)finish {
@@ -97,7 +94,6 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
 }
 
 - (void)willFinish {
-    
 }
 
 - (NSString *)description {

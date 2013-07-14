@@ -39,9 +39,7 @@
 }
 
 - (id)initWithSource:(id)source progress:(id <NSCopying>)progress {
-    if (progress == nil) @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                                        reason:@"progress parameter is nil"
-                                                      userInfo:nil];
+    NSParameterAssert(progress != nil);
     self = [super initWithSource:source];
     if (self == nil) return nil;
     _progress = progress;

@@ -39,9 +39,7 @@
 }
 
 - (id)initWithSource:(id)source result:(id <NSCopying>)result {
-    if (result == nil) @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                                      reason:@"result parameter is nil"
-                                                    userInfo:nil];
+    NSParameterAssert(result != nil);
     self = [super initWithSource:source];
     if (self == nil) return nil;
     _result = result;

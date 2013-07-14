@@ -62,7 +62,7 @@ NS_INLINE FAEventHandlerBlock FAEventHandlerTargetActionBlockMake(id target, SEL
 }
 
 - (id)init {
-    return [self initWithEventClass:nil block:nil];
+    return [self initWithEventClass:[FAEvent class] block:^(id event) {}];
 }
 
 - (id)initWithEventClass:(Class)eventClass block:(FAEventHandlerBlock)block {

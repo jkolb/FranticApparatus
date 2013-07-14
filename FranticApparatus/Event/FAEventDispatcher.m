@@ -33,6 +33,7 @@
 @interface FAEventDispatcher ()
 
 @property (nonatomic, strong) NSMutableArray *handlers;
+@property (strong) NSLock *handlerLock;
 
 @end
 
@@ -45,26 +46,36 @@
     if (self == nil) return nil;
     _handlers = [[NSMutableArray alloc] initWithCapacity:4];
     if (_handlers == nil) return nil;
+    _handlerLock = [[NSLock alloc] init];
+    if (_handlerLock == nil) return nil;
     return self;
 }
 
 - (void)addHandler:(FAEventHandler *)handler {
+    [self.handlerLock lock];
     [self.handlers addObject:handler];
+    [self.handlerLock unlock];
 }
 
 - (void)removeHandler:(FAEventHandler *)handler {
+    [self.handlerLock lock];
     [self.handlers removeObjectIdenticalTo:handler];
+    [self.handlerLock unlock];
 }
 
 - (void)removeAllHandlers {
+    [self.handlerLock lock];
     [self.handlers removeAllObjects];
+    [self.handlerLock unlock];
 }
 
 - (void)dispatchEvent:(FAEvent *)event {
+    [self.handlerLock lock];
     for (FAEventHandler *handler in self.handlers) {
         if (![handler canHandleEvent:event]) continue;
         [handler handleEvent:event];
     }
+    [self.handlerLock unlock];
 }
 
 @end
