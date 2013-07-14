@@ -30,6 +30,14 @@
 
 
 
+@class FATaskCompleteEvent;
+
+
+
+typedef void (^FATaskCompleteBlock)(id blockContext, FATaskCompleteEvent *event);
+
+
+
 @protocol FATask <FAEventDispatcher>
 
 - (void)start;
@@ -40,5 +48,7 @@
 - (void)completeWithResult:(id)result error:(NSError *)error;
 
 - (NSString *)taskDescription;
+
+- (void)onCompleteWithContext:(id)context executeOnMainQueue:(FATaskCompleteBlock)block;
 
 @end
