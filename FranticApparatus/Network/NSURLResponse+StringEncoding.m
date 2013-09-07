@@ -30,7 +30,7 @@
 
 @implementation NSURLResponse (StringEncoding)
 
-- (NSStringEncoding)stringEncoding {
+- (NSStringEncoding)FA_stringEncoding {
     NSString *textEncodingName = [self textEncodingName];
     if (textEncodingName == nil) return NSUTF8StringEncoding;
     return CFStringConvertEncodingToNSStringEncoding(CFStringConvertIANACharSetNameToEncoding((__bridge CFStringRef)(textEncodingName)));

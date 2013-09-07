@@ -28,7 +28,7 @@
 
 
 
-extern NSString * const FAHTTPErrorDomain;
+FOUNDATION_EXPORT NSString * const FAHTTPErrorDomain;
 
 
 

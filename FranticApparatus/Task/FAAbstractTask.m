@@ -29,6 +29,8 @@
 #import "FATaskCompleteEvent.h"
 #import "FAEvent.h"
 
+#import "NSError+FATask.h"
+
 
 
 static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task";
@@ -37,7 +39,6 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
 
 @interface FAAbstractTask ()
 
-@property (strong, readonly) dispatch_queue_t synchronizationQueue;
 @property BOOL cancelled;
 @property BOOL completed;
 
@@ -54,6 +55,19 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
     if (_synchronizationQueue == nil) return nil;
     return self;
 }
+
+
+
+#pragma mark - NSObject overrides
+
+- (NSString *)description {
+    if ([self.taskDescription length] == 0) return [super description];
+    return self.taskDescription;
+}
+
+
+
+#pragma mark - Public methods
 
 - (void)start {
     [self synchronizeWithBlock:^(FATypeOfSelf blockTask) {
@@ -77,13 +91,11 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
     [self synchronizeWithBlock:^(FATypeOfSelf blockTask) {
         [blockTask willCancel];
         blockTask.cancelled = YES;
+        [blockTask dispatchEvent:[FATaskCompleteEvent eventWithSource:blockTask result:nil error:[NSError FA_cancelError]]];
     }];
 }
 
 - (void)willCancel {
-}
-
-- (void)willComplete {
 }
 
 - (void)completeWithResult:(id)result error:(NSError *)error {
@@ -94,18 +106,22 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
     }];
 }
 
-- (void)onCompleteWithContext:(id)context executeOnMainQueue:(FATaskCompleteBlock)block {
-    [self addHandler:[[FATaskCompleteEvent handlerWithContext:context block:^(id blockContext, id event) {
-        block(blockContext, event);
-    }] onMainQueue]];
+- (void)willComplete {
 }
 
-- (NSString *)description {
-    if ([self.taskDescription length] == 0) return [super description];
-    return self.taskDescription;
+- (void)addCompletionBlock:(FATaskCompleteBlock)block {
+    [self addHandler:[[FATaskCompleteEvent handlerWithBlock:block] onMainQueue]];
 }
 
-- (void)synchronizeWithBlock:(void (^)(id <FATask> blockTask))block {
+- (void)addContext:(id)context completionBlock:(FATaskCompleteContextBlock)block {
+    [self addHandler:[[FATaskCompleteEvent handlerWithContext:context block:block] onMainQueue]];
+}
+
+- (void)addCompletionTarget:(id)target action:(SEL)action {
+    [self addHandler:[[FATaskCompleteEvent handlerWithTarget:target action:action] onMainQueue]];
+}
+
+- (void)synchronizeWithBlock:(FATaskSynchronizeBlock)block {
     FATypeOfSelf __weak weakSelf = self;
     dispatch_async(self.synchronizationQueue, ^{
         FATypeOfSelf blockSelf = weakSelf;
@@ -116,9 +132,9 @@ static const char * FATaskSynchronizationQueueLabel = "net.franticapparatus.task
     });
 }
 
-- (void)onCompleteTask:(id <FATask>)task execute:(FATaskEventBlock)block {
-    [task addHandler:[FATaskCompleteEvent handlerWithTask:self block:^(FATypeOfSelf blockTask, id event) {
-        [blockTask synchronizeWithBlock:^(FATypeOfSelf blockTask) {
+- (void)onCompleteTask:(id <FATask>)task synchronizeWithBlock:(FATaskCompleteSynchronizeBlock)block {
+    [task addHandler:[FATaskCompleteEvent handlerWithContext:self block:^(FATypeOfSelf blockContext, FATaskCompleteEvent *event) {
+        [blockContext synchronizeWithBlock:^(id <FATask> blockTask) {
             block(blockTask, event);
         }];
     }]];

@@ -32,10 +32,10 @@
 
 @interface FAChainedTask ()
 
-@property (copy, readonly) NSArray *factories;
-@property (strong) id <FATask> currentTask;
-@property (strong) id lastResult;
-@property (strong) NSError *lastError;
+@property (nonatomic, strong) NSMutableArray *preStartFactories;
+@property (nonatomic, strong) NSLock *startLock;
+@property (nonatomic, copy) NSArray *factories;
+@property (nonatomic, strong) id <FATask> currentTask;
 
 @end
 
@@ -50,40 +50,77 @@
 - (id)initWithFactories:(NSArray *)factories {
     self = [super init];
     if (self == nil) return nil;
-    _factories = [factories copy];
-    if (_factories == nil) return nil;
-    for (id object in _factories) {
+    _preStartFactories = [[NSMutableArray alloc] initWithArray:factories];
+    if (_preStartFactories == nil) return nil;
+    for (id object in _preStartFactories) {
         if (![object isKindOfClass:[FATaskFactory class]]) return nil;
     }
+    _startLock = [[NSLock alloc] init];
+    if (_startLock == nil) return nil;
     return self;
 }
 
-- (void)didStart {
-    [self startTaskAtIndex:0];
+- (void)addTaskBlock:(FATaskFactoryBlock)block {
+    [self.startLock lock];
+    NSAssert(self.preStartFactories != nil, @"Already started");
+    [self.preStartFactories addObject:[FATaskFactory factoryWithBlock:block]];
+    [self.startLock unlock];
 }
 
-- (void)startTaskAtIndex:(NSUInteger)index {
-    if (index >= [self.factories count] || self.lastError != nil) {
-        [self completeWithResult:self.lastResult error:self.lastError];
-        return;
+- (void)addContext:(id)context taskBlock:(FATaskFactoryContextBlock)block {
+    [self.startLock lock];
+    NSAssert(self.preStartFactories != nil, @"Already started");
+    [self.preStartFactories addObject:[FATaskFactory factoryWithContext:context block:block]];
+    [self.startLock unlock];
+}
+
+- (void)addTaskTarget:(id)target action:(SEL)action {
+    [self.startLock lock];
+    NSAssert(self.preStartFactories != nil, @"Already started");
+    [self.preStartFactories addObject:[FATaskFactory factoryWithTarget:target action:action]];
+    [self.startLock unlock];
+}
+
+- (void)willStart {
+    [self.startLock lock];
+    NSAssert(self.preStartFactories != nil, @"Already started");
+    self.factories = self.preStartFactories;
+    self.preStartFactories = nil;
+    [self.startLock unlock];
+}
+
+- (void)didStart {
+    if ([self.factories count] > 0) {
+        [self startTaskAtIndex:0 withLastResult:nil];
+    } else {
+        [self completeWithResult:[NSNull null] error:nil];
     }
-    
+}
+
+- (void)startTaskAtIndex:(NSUInteger)index withLastResult:(id)lastResult {
     FATaskFactory *factory = self.factories[index];
-    id <FATask> task = [factory taskWithLastResult:self.lastResult];
+    self.currentTask = [factory taskWithLastResult:lastResult];
     
-    if (task == nil) {
-        [self completeWithResult:nil error:nil];
+    if (self.currentTask == nil) {
+        [self completeWithResult:[NSNull null] error:nil];
         return;
     }
     
-    [self onCompleteTask:task execute:^(FATypeOfSelf blockTask, FATaskCompleteEvent *event) {
-        blockTask.lastResult = event.result;
-        blockTask.lastError = event.error;
-        [blockTask startTaskAtIndex:index + 1];
+    [self onCompleteTask:self.currentTask synchronizeWithBlock:^(FATypeOfSelf blockTask, FATaskCompleteEvent *event) {
+        if (event.error != nil) {
+            [blockTask completeWithResult:nil error:event.error];
+        } else {
+            NSUInteger nextIndex = index + 1;
+            
+            if (nextIndex >= [blockTask.factories count]) {
+                [blockTask completeWithResult:event.result error:nil];
+            } else {
+                [blockTask startTaskAtIndex:nextIndex withLastResult:lastResult];
+            }
+        }
     }];
 
-    self.currentTask = task;
-    [task start];
+    [self.currentTask start];
 }
 
 - (void)willCancel {

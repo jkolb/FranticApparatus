@@ -1,5 +1,5 @@
 //
-// FAURLConnectionTask.h
+// NSError+FATask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,21 +24,21 @@
 
 
 
-#import "FAAbstractTask.h"
+#import <Foundation/Foundation.h>
 
 
 
-@protocol FAURLResponseFilter;
+FOUNDATION_EXPORT NSString * const FATaskErrorDomain;
+
+FOUNDATION_EXPORT const NSInteger FATaskErrorCodeCancel;
 
 
 
-@interface FAURLConnectionTask : FAAbstractTask
+@interface NSError (FATask)
 
-@property (weak) NSOperationQueue *queue;
-@property (strong) id <FAURLResponseFilter> responseFilter;
++ (NSError *)FA_cancelError;
++ (NSError *)FA_cancelErrorWithUserInfo:(NSDictionary *)userInfo;
 
-- (id)initWithRequest:(NSURLRequest *)request;
-
-- (void)handleResponse:(NSURLResponse *)response;
+- (BOOL)FA_isCancelError;
 
 @end

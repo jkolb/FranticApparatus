@@ -50,8 +50,7 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    FAURLConnectionDataResult *result = [[FAURLConnectionDataResult alloc] initWithResponse:self.response
-                                                                                       data:self.data];
+    FAURLConnectionDataResult *result = [[FAURLConnectionDataResult alloc] initWithResponse:self.response data:self.data];
     [self completeWithResult:result error:nil];
 }
 

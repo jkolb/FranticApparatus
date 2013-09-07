@@ -26,6 +26,8 @@
 
 #import "FATaskCompleteEvent.h"
 
+#import "NSError+FATask.h"
+
 
 
 @implementation FATaskCompleteEvent
@@ -35,15 +37,24 @@
 }
 
 - (id)initWithSource:(id)source {
-    return [self initWithSource:source result:@(YES) error:nil];
+    return [self initWithSource:source result:[NSNull null] error:nil];
 }
 
 - (id)initWithSource:(id)source result:(id <NSCopying>)result error:(NSError *)error {
+    NSAssert(result != nil || error != nil, @"result and error must not both be nil");
     self = [super initWithSource:source];
     if (self == nil) return nil;
     _result = [(id)result copy];
     _error = [error copy];
     return self;
+}
+
+- (BOOL)hasError {
+    return self.error != nil;
+}
+
+- (BOOL)hasCancelError {
+    return [self.error FA_isCancelError];
 }
 
 @end

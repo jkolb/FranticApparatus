@@ -44,7 +44,7 @@
 - (id)init {
     self = [super init];
     if (self == nil) return nil;
-    _handlers = [[NSMutableArray alloc] initWithCapacity:4];
+    _handlers = [[NSMutableArray alloc] initWithCapacity:1];
     if (_handlers == nil) return nil;
     _handlerLock = [[NSLock alloc] init];
     if (_handlerLock == nil) return nil;

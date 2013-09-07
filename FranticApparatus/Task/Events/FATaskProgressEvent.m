@@ -35,14 +35,14 @@
 }
 
 - (id)initWithSource:(id)source {
-    return [self initWithSource:source progress:nil];
+    return [self initWithSource:source progress:[NSNull null]];
 }
 
 - (id)initWithSource:(id)source progress:(id <NSCopying>)progress {
     NSParameterAssert(progress != nil);
     self = [super initWithSource:source];
     if (self == nil) return nil;
-    _progress = progress;
+    _progress = [(id)progress copy];
     return self;
 }
 

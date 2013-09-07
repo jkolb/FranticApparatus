@@ -25,19 +25,31 @@
 
 
 #import "FAAbstractTask.h"
+#import "FATaskFactory.h"
 
 
 
-@class FATaskFactory;
+@protocol FARetryTaskConfiguration <NSObject>
+
+- (NSUInteger)maximumRetryCount;
+- (NSTimeInterval)delayIntervalForRetryCount:(NSUInteger)retryCount;
+- (BOOL)shouldRetryAfterError:(NSError *)error;
+
+@end
 
 
 
 @interface FARetryTask : FAAbstractTask
 
-- (id)initWithTaskFactory:(FATaskFactory *)taskFactory maximumRetryCount:(NSUInteger)maximumRetryCount;
+@property (weak) id <FARetryTaskConfiguration> configuration;
 
-@property (copy) BOOL (^shouldRetry)(NSError *error);
-@property (copy) NSTimeInterval (^calculateDelayInterval)(NSUInteger retryCount);
-@property NSTimeInterval delayInterval;
+- (id)initWithTaskBlock:(FATaskFactoryBlock)block;
+- (id)initWithContext:(id)context taskBlock:(FATaskFactoryContextBlock)block;
+- (id)initWithTaskTarget:(id)target action:(SEL)action;
+- (id)initWithTaskFactory:(FATaskFactory *)taskFactory;
+
+- (void)setTaskBlock:(FATaskFactoryBlock)block;
+- (void)setContext:(id)context taskBlock:(FATaskFactoryContextBlock)block;
+- (void)setTaskTarget:(id)target action:(SEL)action;
 
 @end

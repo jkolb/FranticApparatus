@@ -25,11 +25,18 @@
 
 
 #import "FAAbstractTask.h"
+#import "FATaskFactory.h"
 
 
 
 @interface FAParallelTask : FAAbstractTask
 
+@property BOOL allowPartialFailure;
+
 - (id)initWithFactories:(NSDictionary *)factories;
+
+- (void)setKey:(id <NSCopying>)key forTaskBlock:(FATaskFactoryBlock)block;
+- (void)setKey:(id <NSCopying>)key forContext:(id)context taskBlock:(FATaskFactoryContextBlock)block;
+- (void)setKey:(id <NSCopying>)key forTaskTarget:(id)target action:(SEL)action;
 
 @end

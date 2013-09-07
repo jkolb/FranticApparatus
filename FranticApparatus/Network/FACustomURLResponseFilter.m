@@ -83,7 +83,7 @@
 - (BOOL)isResponse:(NSURLResponse *)response allowedByFilterBlock:(BOOL (^)(NSURLResponse *))filterBlock withErrorCode:(NSInteger)errorCode error:(NSError **)error {
     if (!filterBlock(response)) {
         if (error != NULL) {
-            *error = [NSError errorWithDomain:self.errorDomain code:errorCode userInfo:@{FAErrorResponseKey: response}];
+            *error = [NSError errorWithDomain:self.errorDomain code:errorCode userInfo:@{FAErrorFilteredResponseKey: response}];
         }
         
         return NO;

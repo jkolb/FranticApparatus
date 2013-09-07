@@ -28,7 +28,7 @@
 
 
 
-extern NSString * const FAErrorResponseKey;
+FOUNDATION_EXPORT NSString * const FAErrorFilteredResponseKey;
 
 
 

@@ -16,6 +16,7 @@
 		E51F2BD3175A832700A1F33B /* FAURLConnectionDataResult.m in Sources */ = {isa = PBXBuildFile; fileRef = E51F2BD2175A832700A1F33B /* FAURLConnectionDataResult.m */; };
 		E51F2BD6175A99BD00A1F33B /* FATaskEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E51F2BD5175A99BC00A1F33B /* FATaskEvent.m */; };
 		E522239B1751C3C500FB59CB /* FAEventDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E522239A1751C3C500FB59CB /* FAEventDispatcher.m */; };
+		E536B36E17DBBE7D00ABD5AE /* NSError+FATask.m in Sources */ = {isa = PBXBuildFile; fileRef = E536B36D17DBBE7C00ABD5AE /* NSError+FATask.m */; };
 		E54342161747D74A00F7E66B /* FAEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E54342131747D74A00F7E66B /* FAEvent.m */; };
 		E543421B1747D80000F7E66B /* FATaskStartEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E543421A1747D80000F7E66B /* FATaskStartEvent.m */; };
 		E54342211747DCA900F7E66B /* FATaskCompleteEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E54342201747DCA900F7E66B /* FATaskCompleteEvent.m */; };
@@ -135,6 +136,8 @@
 		E51F2BD4175A99BC00A1F33B /* FATaskEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FATaskEvent.h; sourceTree = "<group>"; };
 		E51F2BD5175A99BC00A1F33B /* FATaskEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FATaskEvent.m; sourceTree = "<group>"; };
 		E522239A1751C3C500FB59CB /* FAEventDispatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAEventDispatcher.m; sourceTree = "<group>"; };
+		E536B36C17DBBE7C00ABD5AE /* NSError+FATask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSError+FATask.h"; sourceTree = "<group>"; };
+		E536B36D17DBBE7C00ABD5AE /* NSError+FATask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSError+FATask.m"; sourceTree = "<group>"; };
 		E54342121747D74A00F7E66B /* FAEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAEvent.h; sourceTree = "<group>"; };
 		E54342131747D74A00F7E66B /* FAEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FAEvent.m; sourceTree = "<group>"; };
 		E54342141747D74A00F7E66B /* FAEventDispatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FAEventDispatcher.h; sourceTree = "<group>"; };
@@ -341,6 +344,8 @@
 			children = (
 				E54342181747D7EF00F7E66B /* Events */,
 				E553445E16D17B4A007BF606 /* FATask.h */,
+				E536B36C17DBBE7C00ABD5AE /* NSError+FATask.h */,
+				E536B36D17DBBE7C00ABD5AE /* NSError+FATask.m */,
 				E553445216D17B4A007BF606 /* FAAbstractTask.h */,
 				E553445316D17B4A007BF606 /* FAAbstractTask.m */,
 				E553445816D17B4A007BF606 /* FABackgroundTask.h */,
@@ -508,6 +513,7 @@
 				E5C11B7F175BFBF400D93572 /* FAURLConnectionDownloadResult.m in Sources */,
 				E54E266D175C4759007DB0A5 /* FAURLConnectionReceiveProgress.m in Sources */,
 				E54E2670175C4823007DB0A5 /* FATaskProgressEvent.m in Sources */,
+				E536B36E17DBBE7D00ABD5AE /* NSError+FATask.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

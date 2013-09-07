@@ -43,17 +43,14 @@
 - (id)initWithRequest:(NSURLRequest *)request {
     self = [super init];
     if (self == nil) return nil;
-    _request = request;
+    _request = [request copy];
     if (_request == nil) return nil;
     return self;
 }
 
 - (void)didStart {
-    self.connection = [[NSURLConnection alloc] initWithRequest:self.request
-                                                      delegate:self
-                                              startImmediately:NO];
-    NSOperationQueue *queue = self.queue;
-    if (queue != nil) [self.connection setDelegateQueue:queue];
+    self.connection = [[NSURLConnection alloc] initWithRequest:self.request delegate:self startImmediately:NO];
+    if (self.queue != nil) [self.connection setDelegateQueue:self.queue];
     [self.connection start];
 }
 
@@ -67,9 +64,10 @@
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
     NSError *error = nil;
     BOOL allowResponse = YES;
+    id <FAURLResponseFilter> responseFilter = self.responseFilter;
     
-    if (self.responseFilter != nil) {
-        allowResponse = [self.responseFilter shouldAllowResponse:response withError:&error];
+    if (responseFilter != nil) {
+        allowResponse = [responseFilter shouldAllowResponse:response withError:&error];
     }
     
     if (allowResponse) {

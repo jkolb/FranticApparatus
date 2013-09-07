@@ -33,8 +33,9 @@
 
 @interface FAParallelTask ()
 
-@property (copy) NSDictionary *factories;
-@property (nonatomic, strong, readonly) NSMutableDictionary *tasks;
+@property (nonatomic, strong) NSMutableDictionary *factories;
+@property (nonatomic, strong) NSLock *startLock;
+@property (nonatomic, strong) NSMutableDictionary *tasks;
 @property (nonatomic, strong) NSMutableDictionary *results;
 
 @end
@@ -50,39 +51,82 @@
 - (id)initWithFactories:(NSDictionary *)factories {
     self = [super init];
     if (self == nil) return nil;
-    _factories = [factories copy];
+    _factories = [[NSMutableDictionary alloc] initWithDictionary:factories];
     if (_factories == nil) return nil;
-    for (id key in factories) {
-        id object = factories[key];
+    for (id key in _factories) {
+        id object = _factories[key];
         if (![object isKindOfClass:[FATaskFactory class]]) return nil;
     }
-    _tasks = [[NSMutableDictionary alloc] initWithCapacity:[factories count]];
-    if (_tasks == nil) return nil;
-    _results = [[NSMutableDictionary alloc] initWithCapacity:[factories count]];
-    if (_results == nil) return nil;
+    _startLock = [[NSLock alloc] init];
+    if (_startLock == nil) return nil;
     return self;
 }
 
+- (void)setKey:(id<NSCopying>)key forTaskBlock:(FATaskFactoryBlock)block {
+    [self.startLock lock];
+    NSAssert(self.factories != nil, @"Already started");
+    self.factories[key] = [FATaskFactory factoryWithBlock:block];
+    [self.startLock unlock];
+}
+
+- (void)setKey:(id <NSCopying>)key forContext:(id)context taskBlock:(FATaskFactoryContextBlock)block {
+    [self.startLock lock];
+    NSAssert(self.factories != nil, @"Already started");
+    self.factories[key] = [FATaskFactory factoryWithContext:context block:block];
+    [self.startLock unlock];
+}
+
+- (void)setKey:(id <NSCopying>)key forTaskTarget:(id)target action:(SEL)action {
+    [self.startLock lock];
+    NSAssert(self.factories != nil, @"Already started");
+    self.factories[key] = [FATaskFactory factoryWithTarget:target action:action];
+    [self.startLock unlock];
+}
+
 - (void)willStart {
+    [self.startLock lock];
+    NSAssert(self.factories != nil, @"Already started");
+    self.tasks = [[NSMutableDictionary alloc] initWithCapacity:[self.factories count]];
+    self.results = [[NSMutableDictionary alloc] initWithCapacity:[self.factories count]];
+    
     for (id key in self.factories) {
         FATaskFactory *factory = self.factories[key];
         id <FATask> task = [factory taskWithLastResult:nil];
         
-        [self onCompleteTask:task execute:^(FATypeOfSelf blockTask, FATaskCompleteEvent *event) {
-            blockTask.results[key] = event.result;
-            [blockTask.tasks removeObjectForKey:key];
-            if ([blockTask.tasks count] == 0 || event.error != nil) {
-                [blockTask completeWithResult:blockTask.results error:event.error];
+        [self onCompleteTask:task synchronizeWithBlock:^(FATypeOfSelf blockTask, FATaskCompleteEvent *event) {
+            if (event.error) {
+                if (blockTask.allowPartialFailure) {
+                    [blockTask taskForKey:key completedWithResult:event.error];
+                } else {
+                    [blockTask completeWithResult:nil error:event.error];
+                }
+            } else {
+                [blockTask taskForKey:key completedWithResult:event.result];
             }
         }];
         
         self.tasks[key] = task;
     }
+    
+    self.factories = nil;
+    [self.startLock unlock];
+}
+
+- (void)taskForKey:(id)key completedWithResult:(id)result {
+    self.results[key] = result;
+    [self.tasks removeObjectForKey:key];
+    
+    if ([self.tasks count] == 0) {
+        [self completeWithResult:self.results error:nil];
+    }
 }
 
 - (void)didStart {
-    if ([self.tasks count] == 0) [self completeWithResult:nil error:nil];
-    for (id <FATask> task in [self.tasks allValues]) [task start];
+    if ([self.tasks count] > 0) {
+        for (id <FATask> task in [self.tasks allValues]) [task start];
+    } else {
+        [self completeWithResult:[NSNull null] error:nil];
+    }
 }
 
 - (void)willCancel {
@@ -90,6 +134,7 @@
 }
 
 - (void)willComplete {
+    // If a task fails need to cancel any tasks that are still executing.
     [self cancelOutstandingTasks];
 }
 

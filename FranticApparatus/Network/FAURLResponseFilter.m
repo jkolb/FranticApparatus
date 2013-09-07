@@ -28,4 +28,4 @@
 
 
 
-NSString * const FAErrorResponseKey = @"response";
+NSString * const FAErrorFilteredResponseKey = @"response";

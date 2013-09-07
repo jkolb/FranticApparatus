@@ -34,8 +34,9 @@
 
 @interface FARetryTask ()
 
-@property (nonatomic, copy, readonly) FATaskFactory *taskFactory;
-@property (nonatomic, readonly) NSUInteger maximumRetryCount;
+@property (nonatomic, strong) FATaskFactory *preStartTaskFactory;
+@property (nonatomic, strong) NSLock *startLock;
+@property (nonatomic, strong) FATaskFactory *taskFactory;
 @property (nonatomic) NSUInteger retryCount;
 @property (nonatomic, strong) id <FATask> task;
 @property (nonatomic, strong) dispatch_source_t delayTimer;
@@ -48,15 +49,27 @@
 @implementation FARetryTask
 
 - (id)init {
-    return [self initWithTaskFactory:[[FATaskFactory alloc] init] maximumRetryCount:0];
+    return [self initWithTaskFactory:[[FATaskFactory alloc] init]];
 }
 
-- (id)initWithTaskFactory:(FATaskFactory *)taskFactory maximumRetryCount:(NSUInteger)maximumRetryCount {
+- (id)initWithTaskBlock:(FATaskFactoryBlock)block {
+    return [self initWithTaskFactory:[FATaskFactory factoryWithBlock:block]];
+}
+
+- (id)initWithContext:(id)context taskBlock:(FATaskFactoryContextBlock)block {
+    return [self initWithTaskFactory:[FATaskFactory factoryWithContext:context block:block]];
+}
+
+- (id)initWithTaskTarget:(id)target action:(SEL)action {
+    return [self initWithTaskFactory:[FATaskFactory factoryWithTarget:target action:action]];
+}
+
+- (id)initWithTaskFactory:(FATaskFactory *)taskFactory {
     self = [super init];
     if (self == nil) return nil;
-    _taskFactory = taskFactory;
-    if (_taskFactory == nil) return nil;
-    _maximumRetryCount = maximumRetryCount;
+    _preStartTaskFactory = taskFactory;
+    _startLock = [[NSLock alloc] init];
+    if (_startLock == nil) return nil;
     return self;
 }
 
@@ -64,14 +77,47 @@
     if (_delayTimer != nil) dispatch_source_cancel(_delayTimer);
 }
 
+- (void)setTaskBlock:(FATaskFactoryBlock)block {
+    [self.startLock lock];
+    NSAssert(self.preStartTaskFactory != nil, @"Already started");
+    self.preStartTaskFactory = [FATaskFactory factoryWithBlock:block];
+    [self.startLock unlock];
+}
+
+- (void)setContext:(id)context taskBlock:(FATaskFactoryContextBlock)block {
+    [self.startLock lock];
+    NSAssert(self.preStartTaskFactory != nil, @"Already started");
+    self.preStartTaskFactory = [FATaskFactory factoryWithContext:context block:block];
+    [self.startLock unlock];
+}
+
+- (void)setTaskTarget:(id)target action:(SEL)action {
+    [self.startLock lock];
+    NSAssert(self.preStartTaskFactory != nil, @"Already started");
+    self.preStartTaskFactory = [FATaskFactory factoryWithTarget:target action:action];
+    [self.startLock unlock];
+}
+
+- (void)willStart {
+    [self.startLock lock];
+    NSAssert(self.preStartTaskFactory != nil, @"Already started");
+    self.taskFactory = self.preStartTaskFactory;
+    self.preStartTaskFactory = nil;
+    [self.startLock unlock];
+}
+
 - (void)didStart {
-    [self try];
+    if (self.taskFactory == nil) {
+        [self completeWithResult:[NSNull null] error:nil];
+    } else {
+        [self try];
+    }
 }
 
 - (void)try {
     id <FATask> task = [self.taskFactory taskWithLastResult:nil];
     
-    [self onCompleteTask:task execute:^(FATypeOfSelf blockTask, FATaskCompleteEvent *event) {
+    [self onCompleteTask:task synchronizeWithBlock:^(FATypeOfSelf blockTask, FATaskCompleteEvent *event) {
         if (event.error) {
             blockTask.error = event.error;
             [blockTask tryFailed];
@@ -85,20 +131,16 @@
 }
 
 - (void)tryFailed {
-    BOOL exceededMaximumRetryCount = self.retryCount == NSUIntegerMax || (self.retryCount == self.maximumRetryCount && self.maximumRetryCount > 0);
-    BOOL shouldNotRetry = [self shouldRetryAfterError:self.error] == NO;
+    NSUInteger maximumRetryCount = [self.configuration maximumRetryCount];
+    if (maximumRetryCount == 0) maximumRetryCount = NSUIntegerMax;
+    BOOL exceededMaximumRetryCount = self.retryCount >= maximumRetryCount;
+    BOOL shouldNotRetry = ![self shouldRetryAfterError:self.error];
     
     if (exceededMaximumRetryCount || shouldNotRetry) {
         [self completeWithResult:nil error:self.error];
     } else {
         [self delayBeforeRetry];
     }
-}
-
-- (void)retry {
-    ++self.retryCount;
-    [self dispatchEvent:[FATaskRestartEvent eventWithSource:self]];
-    [self try];
 }
 
 - (void)delayBeforeRetry {
@@ -114,9 +156,7 @@
 
 - (void)retryAfterDelayInterval:(NSTimeInterval)delayInterval {
     [self cancelTimer];
-    
-    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    self.delayTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
+    self.delayTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, self.synchronizationQueue);
     dispatch_source_set_timer(self.delayTimer, dispatch_time(DISPATCH_TIME_NOW, delayInterval * NSEC_PER_SEC), DISPATCH_TIME_FOREVER, 0);
     FATypeOfSelf __weak weakSelf = self;
     dispatch_source_set_event_handler(self.delayTimer, ^{
@@ -128,15 +168,18 @@
     dispatch_resume(self.delayTimer);
 }
 
+- (void)retry {
+    ++self.retryCount;
+    [self dispatchEvent:[FATaskRestartEvent eventWithSource:self]];
+    [self try];
+}
+
 - (BOOL)shouldRetryAfterError:(NSError *)error {
-    if (self.shouldRetry == nil) return YES;
-    return self.shouldRetry(error);
+    return [self.configuration shouldRetryAfterError:error];
 }
 
 - (NSTimeInterval)nextDelayInterval {
-    if (self.delayInterval > 0) return self.delayInterval;
-    if (self.calculateDelayInterval == nil) return 5.0;
-    return self.calculateDelayInterval(self.retryCount);
+    return [self.configuration delayIntervalForRetryCount:self.retryCount];
 }
 
 - (void)cancelTimer {

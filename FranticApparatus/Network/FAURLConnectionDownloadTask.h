@@ -28,7 +28,7 @@
 
 
 
-extern NSString * const FAURLDownloadErrorDomain;
+FOUNDATION_EXPORT NSString * const FAURLDownloadErrorDomain;
 
 
 

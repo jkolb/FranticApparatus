@@ -49,7 +49,7 @@ const FABackgroundTaskPriority FABackgroundTaskPriorityHigh = DISPATCH_QUEUE_PRI
 
 - (id)init {
     return [self initWithBlock:^id(id <FATask> blockTask, NSError **error) {
-        return @(YES);
+        return [NSNull null];
     }];
 }
 

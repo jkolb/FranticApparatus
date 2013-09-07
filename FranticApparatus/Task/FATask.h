@@ -34,7 +34,8 @@
 
 
 
-typedef void (^FATaskCompleteBlock)(id blockContext, FATaskCompleteEvent *event);
+typedef void (^FATaskCompleteBlock)(FATaskCompleteEvent *event);
+typedef void (^FATaskCompleteContextBlock)(id blockContext, FATaskCompleteEvent *event);
 
 
 
@@ -45,10 +46,8 @@ typedef void (^FATaskCompleteBlock)(id blockContext, FATaskCompleteEvent *event)
 - (BOOL)isCancelled;
 - (void)cancel;
 
-- (void)completeWithResult:(id)result error:(NSError *)error;
-
-- (NSString *)taskDescription;
-
-- (void)onCompleteWithContext:(id)context executeOnMainQueue:(FATaskCompleteBlock)block;
+- (void)addCompletionBlock:(FATaskCompleteBlock)block;
+- (void)addContext:(id)context completionBlock:(FATaskCompleteContextBlock)block;
+- (void)addCompletionTarget:(id)target action:(SEL)action;
 
 @end

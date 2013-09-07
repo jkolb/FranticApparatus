@@ -28,16 +28,6 @@
 
 
 
-@protocol FATask;
-
-
-
-typedef void (^FATaskEventBlock)(id <FATask> blockTask, id event);
-
-
-
 @interface FATaskEvent : FAEvent
-
-+ (FAEventHandler *)handlerWithTask:(id <FATask>)task block:(FATaskEventBlock)block;
 
 @end

@@ -37,4 +37,7 @@
 
 - (id)initWithSource:(id)source result:(id <NSCopying>)result error:(NSError *)error;
 
+- (BOOL)hasError;
+- (BOOL)hasCancelError;
+
 @end

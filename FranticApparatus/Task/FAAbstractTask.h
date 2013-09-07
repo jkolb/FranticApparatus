@@ -36,18 +36,34 @@
 
 
 
+@class FATaskCompleteEvent;
+
+
+
+typedef void (^FATaskSynchronizeBlock)(id <FATask> blockTask);
+typedef void (^FATaskCompleteSynchronizeBlock)(id <FATask> blockTask, FATaskCompleteEvent *event);
+
+
+
 @interface FAAbstractTask : FAEventDispatcher <FATask>
+
+@property (copy) NSString *taskDescription;
 
 - (void)willStart;
 - (void)didStart;
 
 - (void)willCancel;
+
+- (void)completeWithResult:(id)result error:(NSError *)error;
 - (void)willComplete;
 
-- (void)synchronizeWithBlock:(void (^)(id <FATask> blockTask))block;
 
-- (void)onCompleteTask:(id <FATask>)task execute:(FATaskEventBlock)block;
 
-@property (copy) NSString *taskDescription;
+#pragma mark - Task synchronization
+
+@property (nonatomic, strong, readonly) dispatch_queue_t synchronizationQueue;
+
+- (void)synchronizeWithBlock:(FATaskSynchronizeBlock)block;
+- (void)onCompleteTask:(id <FATask>)task synchronizeWithBlock:(FATaskCompleteSynchronizeBlock)block;
 
 @end

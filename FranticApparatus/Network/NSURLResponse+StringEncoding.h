@@ -30,6 +30,6 @@
 
 @interface NSURLResponse (StringEncoding)
 
-- (NSStringEncoding)stringEncoding;
+- (NSStringEncoding)FA_stringEncoding;
 
 @end
