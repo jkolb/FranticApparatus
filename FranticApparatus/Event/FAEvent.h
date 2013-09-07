@@ -30,10 +30,6 @@
 
 
 
-@protocol FAEventDispatcher;
-
-
-
 @interface FAEvent : NSObject <NSCopying>
 
 @property (weak, readonly) id source;
