@@ -115,7 +115,7 @@
             if (nextIndex >= [blockTask.factories count]) {
                 [blockTask completeWithResult:event.result error:nil];
             } else {
-                [blockTask startTaskAtIndex:nextIndex withLastResult:lastResult];
+                [blockTask startTaskAtIndex:nextIndex withLastResult:event.result];
             }
         }
     }];
