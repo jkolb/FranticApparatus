@@ -30,12 +30,12 @@
 
 
 
-@class FATaskCompleteEvent;
+@class FATaskFinishEvent;
 
 
 
-typedef void (^FATaskCompleteBlock)(FATaskCompleteEvent *event);
-typedef void (^FATaskCompleteContextBlock)(id blockContext, FATaskCompleteEvent *event);
+typedef void (^FATaskFinishBlock)(FATaskFinishEvent *event);
+typedef void (^FATaskFinishContextBlock)(id blockContext, FATaskFinishEvent *event);
 
 
 
@@ -46,8 +46,8 @@ typedef void (^FATaskCompleteContextBlock)(id blockContext, FATaskCompleteEvent 
 - (BOOL)isCancelled;
 - (void)cancel;
 
-- (void)addCompletionBlock:(FATaskCompleteBlock)block;
-- (void)addContext:(id)context completionBlock:(FATaskCompleteContextBlock)block;
-- (void)addCompletionTarget:(id)target action:(SEL)action;
+- (void)addFinishBlock:(FATaskFinishBlock)block;
+- (void)addFinishContext:(id)context block:(FATaskFinishContextBlock)block;
+- (void)addFinishTarget:(id)target action:(SEL)action;
 
 @end

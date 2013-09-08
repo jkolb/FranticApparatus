@@ -25,7 +25,7 @@
 
 
 #import "FAChainedTask.h"
-#import "FATaskCompleteEvent.h"
+#import "FATaskFinishEvent.h"
 #import "FATaskFactory.h"
 
 
@@ -67,7 +67,7 @@
     [self.startLock unlock];
 }
 
-- (void)addContext:(id)context taskBlock:(FATaskFactoryContextBlock)block {
+- (void)addTaskContext:(id)context block:(FATaskFactoryContextBlock)block {
     [self.startLock lock];
     NSAssert(self.preStartFactories != nil, @"Already started");
     [self.preStartFactories addObject:[FATaskFactory factoryWithContext:context block:block]];
@@ -106,7 +106,9 @@
         return;
     }
     
-    [self onCompleteTask:self.currentTask synchronizeWithBlock:^(FATypeOfSelf blockTask, FATaskCompleteEvent *event) {
+    [self onStartSubtask:self.currentTask synchronizeWithBlock:nil];
+    [self passThroughProgressEventsFromSubtask:self.currentTask];
+    [self onFinishSubtask:self.currentTask synchronizeWithBlock:^(FATypeOfSelf blockTask, FATaskFinishEvent *event) {
         if (event.error != nil) {
             [blockTask completeWithResult:nil error:event.error];
         } else {

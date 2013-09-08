@@ -30,20 +30,8 @@
 
 @implementation FATaskProgressEvent
 
-+ (instancetype)eventWithSource:(id)source progress:(id <NSCopying>)progress {
-    return [[self alloc] initWithSource:source progress:progress];
-}
-
-- (id)initWithSource:(id)source {
-    return [self initWithSource:source progress:[NSNull null]];
-}
-
-- (id)initWithSource:(id)source progress:(id <NSCopying>)progress {
-    NSParameterAssert(progress != nil);
-    self = [super initWithSource:source];
-    if (self == nil) return nil;
-    _progress = [(id)progress copy];
-    return self;
+- (id)passThroughToSource:(id <FATask>)source {
+    return [[[self class] alloc] initWithSource:source];
 }
 
 @end

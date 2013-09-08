@@ -24,17 +24,17 @@
 
 
 
-#import "FAAbstractTask.h"
+#import "FABatchTask.h"
 #import "FATaskFactory.h"
 
 
 
-@interface FAChainedTask : FAAbstractTask
+@interface FAChainedTask : FABatchTask
 
 - (id)initWithFactories:(NSArray *)factories;
 
 - (void)addTaskBlock:(FATaskFactoryBlock)block;
-- (void)addContext:(id)context taskBlock:(FATaskFactoryContextBlock)block;
+- (void)addTaskContext:(id)context block:(FATaskFactoryContextBlock)block;
 - (void)addTaskTarget:(id)target action:(SEL)action;
 
 @end

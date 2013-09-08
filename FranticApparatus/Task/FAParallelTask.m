@@ -25,7 +25,7 @@
 
 
 #import "FAParallelTask.h"
-#import "FATaskCompleteEvent.h"
+#import "FATaskFinishEvent.h"
 #import "FATaskFactory.h"
 #import "FAEventHandler.h"
 
@@ -69,7 +69,7 @@
     [self.startLock unlock];
 }
 
-- (void)setKey:(id <NSCopying>)key forContext:(id)context taskBlock:(FATaskFactoryContextBlock)block {
+- (void)setKey:(id <NSCopying>)key forTaskContext:(id)context block:(FATaskFactoryContextBlock)block {
     [self.startLock lock];
     NSAssert(self.factories != nil, @"Already started");
     self.factories[key] = [FATaskFactory factoryWithContext:context block:block];
@@ -93,7 +93,9 @@
         FATaskFactory *factory = self.factories[key];
         id <FATask> task = [factory taskWithLastResult:nil];
         
-        [self onCompleteTask:task synchronizeWithBlock:^(FATypeOfSelf blockTask, FATaskCompleteEvent *event) {
+        [self onStartSubtask:task synchronizeWithBlock:nil];
+        [self passThroughProgressEventsFromSubtask:task];
+        [self onFinishSubtask:task synchronizeWithBlock:^(FATypeOfSelf blockTask, FATaskFinishEvent *event) {
             if (event.error) {
                 if (blockTask.allowPartialFailure) {
                     [blockTask taskForKey:key completedWithResult:event.error];
@@ -104,7 +106,7 @@
                 [blockTask taskForKey:key completedWithResult:event.result];
             }
         }];
-        
+
         self.tasks[key] = task;
     }
     

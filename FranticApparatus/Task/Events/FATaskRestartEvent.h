@@ -24,10 +24,10 @@
 
 
 
-#import "FATaskEvent.h"
+#import "FATaskProgressEvent.h"
 
 
 
-@interface FATaskRestartEvent : FATaskEvent
+@interface FATaskRestartEvent : FATaskProgressEvent
 
 @end

@@ -1,5 +1,5 @@
 //
-// FAURLConnectionReceiveProgress.h
+// FAURLConnectionDownloadProgressEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,18 +24,38 @@
 
 
 
-#import <Foundation/Foundation.h>
+#import "FAURLConnectionDownloadProgressEvent.h"
 
 
 
-@interface FAURLConnectionReceiveProgress : NSObject <NSCopying>
+@implementation FAURLConnectionDownloadProgressEvent
 
-@property (nonatomic, readonly) long long bytesReceived;
-@property (nonatomic, readonly) long long totalBytesReceived;
-@property (nonatomic, readonly) long long expectedTotalBytes;
++ (instancetype)eventWithSource:(id <FATask>)source
+                  bytesReceived:(long long)bytesReceived
+             totalBytesReceived:(long long)totalBytesReceived
+             expectedTotalBytes:(long long)expectedTotalBytes
+{
+    return [[self alloc] initWithSource:source
+                          bytesReceived:bytesReceived
+                     totalBytesReceived:totalBytesReceived
+                     expectedTotalBytes:expectedTotalBytes];
+}
 
-- (id)initWithBytesReceived:(long long)bytesReceived
-         totalBytesReceived:(long long)totalBytesReceived
-         expectedTotalBytes:(long long)expectedTotalBytes;
+- (id)initWithSource:(id)source {
+    return [self initWithSource:source bytesReceived:0 totalBytesReceived:0 expectedTotalBytes:0];
+}
+
+- (id)initWithSource:(id)source
+       bytesReceived:(long long)bytesReceived
+  totalBytesReceived:(long long)totalBytesReceived
+  expectedTotalBytes:(long long)expectedTotalBytes
+{
+    self = [super initWithSource:source];
+    if (self == nil) return nil;
+    _bytesReceived = bytesReceived;
+    _totalBytesReceived = totalBytesReceived;
+    _expectedTotalBytes = expectedTotalBytes;
+    return self;
+}
 
 @end

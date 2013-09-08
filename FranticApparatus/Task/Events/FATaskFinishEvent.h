@@ -1,5 +1,5 @@
 //
-// FAURLConnectionReceiveProgress.m
+// FATaskFinishEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,34 +24,20 @@
 
 
 
-#import "FAURLConnectionReceiveProgress.h"
+#import "FATaskEvent.h"
 
 
 
-@implementation FAURLConnectionReceiveProgress
+@interface FATaskFinishEvent : FATaskEvent
 
-- (id)init {
-    return [self initWithBytesReceived:0 totalBytesReceived:0 expectedTotalBytes:0];
-}
+@property (nonatomic, copy, readonly) id result;
+@property (nonatomic, copy, readonly) NSError *error;
 
-- (id)initWithBytesReceived:(long long)bytesReceived
-         totalBytesReceived:(long long)totalBytesReceived
-         expectedTotalBytes:(long long)expectedTotalBytes
-{
-    self = [super init];
-    if (self == nil) return nil;
-    _bytesReceived = bytesReceived;
-    _totalBytesReceived = totalBytesReceived;
-    _expectedTotalBytes = expectedTotalBytes;
-    return self;
-}
++ (instancetype)eventWithSource:(id)source result:(id <NSCopying>)result error:(NSError *)error;
 
+- (id)initWithSource:(id)source result:(id <NSCopying>)result error:(NSError *)error;
 
-
-#pragma mark - NSCopying
-
-- (id)copyWithZone:(NSZone *)zone {
-    return self;
-}
+- (BOOL)hasError;
+- (BOOL)hasCancelError;
 
 @end

@@ -1,5 +1,5 @@
 //
-// FATaskCompleteEvent.m
+// FATaskFinishEvent.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,13 +24,13 @@
 
 
 
-#import "FATaskCompleteEvent.h"
+#import "FATaskFinishEvent.h"
 
 #import "NSError+FATask.h"
 
 
 
-@implementation FATaskCompleteEvent
+@implementation FATaskFinishEvent
 
 + (instancetype)eventWithSource:(id)source result:(id <NSCopying>)result error:(NSError *)error {
     return [[self alloc] initWithSource:source result:result error:error];

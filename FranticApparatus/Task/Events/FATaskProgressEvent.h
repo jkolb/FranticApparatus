@@ -28,12 +28,12 @@
 
 
 
+@protocol FATask;
+
+
+
 @interface FATaskProgressEvent : FATaskEvent
 
-@property (nonatomic, copy, readonly) id progress;
-
-+ (instancetype)eventWithSource:(id)source progress:(id <NSCopying>)progress;
-
-- (id)initWithSource:(id)source progress:(id <NSCopying>)progress;
+- (id)passThroughToSource:(id <FATask>)source;
 
 @end

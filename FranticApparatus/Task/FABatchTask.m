@@ -1,5 +1,5 @@
 //
-// FranticApparatus.h
+// FABatchTask.m
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,50 +24,37 @@
 
 
 
-// Event
-#import "FAEvent.h"
-#import "FAEventHandler.h"
-#import "FAEventDispatcher.h"
-
-// Task
-#import "FATask.h"
-#import "FAAbstractTask.h"
 #import "FABatchTask.h"
-#import "FABackgroundTask.h"
-#import "FAParallelTask.h"
-#import "FAChainedTask.h"
-#import "FARetryTask.h"
-
-// Task Utility
-#import "FATaskFactory.h"
-#import "NSError+FATask.h"
-
-// Task Events
-#import "FATaskEvent.h"
 #import "FATaskStartEvent.h"
 #import "FATaskProgressEvent.h"
 #import "FATaskFinishEvent.h"
-#import "FATaskRestartEvent.h"
-#import "FATaskDelayEvent.h"
 
-// Network Task
-#import "FAURLConnectionTask.h"
-#import "FAURLConnectionDataTask.h"
-#import "FAURLConnectionDownloadTask.h"
 
-// Network Utility
-#import "FAHTTPError.h"
-#import "NSURLResponse+StringEncoding.h"
 
-// Network Filter
-#import "FAURLResponseFilter.h"
-#import "FACustomURLResponseFilter.h"
-#import "FAHTTPURLResponseFilter.h"
+@implementation FABatchTask
 
-// Network Progress
-#import "FAURLConnectionDownloadProgressEvent.h"
+- (void)onStartSubtask:(id <FATask>)subtask synchronizeWithBlock:(FATaskStartSynchronizeBlock)block {
+    [subtask addHandler:[FATaskStartEvent handlerWithContext:self block:^(FATypeOfSelf blockContext, FATaskStartEvent *event) {
+        [blockContext synchronizeWithBlock:^(FABatchTask *blockTask) {
+            if (block) block(blockTask, event);
+        }];
+    }]];
+}
 
-// Network Results
-#import "FAURLConnectionResult.h"
-#import "FAURLConnectionDataResult.h"
-#import "FAURLConnectionDownloadResult.h"
+- (void)onFinishSubtask:(id <FATask>)subtask synchronizeWithBlock:(FATaskFinishSynchronizeBlock)block {
+    [subtask addHandler:[FATaskFinishEvent handlerWithContext:self block:^(FATypeOfSelf blockContext, FATaskFinishEvent *event) {
+        [blockContext synchronizeWithBlock:^(FABatchTask *blockTask) {
+            if (block) block(blockTask, event);
+        }];
+    }]];
+}
+
+- (void)passThroughProgressEventsFromSubtask:(id <FATask>)subtask {
+    [subtask addHandler:[FATaskProgressEvent handlerWithContext:self block:^(FATypeOfSelf blockContext, FATaskProgressEvent *event) {
+        [blockContext synchronizeWithBlock:^(id <FATask> blockTask) {
+            [blockTask dispatchEvent:[event passThroughToSource:blockTask]];
+        }];
+    }]];
+}
+
+@end

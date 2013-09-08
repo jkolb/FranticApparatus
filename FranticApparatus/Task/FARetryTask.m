@@ -28,7 +28,7 @@
 #import "FATaskFactory.h"
 #import "FATaskRestartEvent.h"
 #import "FATaskDelayEvent.h"
-#import "FATaskCompleteEvent.h"
+#import "FATaskFinishEvent.h"
 
 
 
@@ -37,7 +37,8 @@
 @property (nonatomic, strong) FATaskFactory *preStartTaskFactory;
 @property (nonatomic, strong) NSLock *startLock;
 @property (nonatomic, strong) FATaskFactory *taskFactory;
-@property (nonatomic) NSUInteger retryCount;
+@property (nonatomic) NSUInteger tryCount;
+@property (nonatomic, readonly) NSUInteger retryCount;
 @property (nonatomic, strong) id <FATask> task;
 @property (nonatomic, strong) dispatch_source_t delayTimer;
 @property (nonatomic, strong) NSError *error;
@@ -56,7 +57,7 @@
     return [self initWithTaskFactory:[FATaskFactory factoryWithBlock:block]];
 }
 
-- (id)initWithContext:(id)context taskBlock:(FATaskFactoryContextBlock)block {
+- (id)initWithTaskContext:(id)context block:(FATaskFactoryContextBlock)block {
     return [self initWithTaskFactory:[FATaskFactory factoryWithContext:context block:block]];
 }
 
@@ -77,6 +78,10 @@
     if (_delayTimer != nil) dispatch_source_cancel(_delayTimer);
 }
 
+- (NSUInteger)retryCount {
+    return self.tryCount - 1;
+}
+
 - (void)setTaskBlock:(FATaskFactoryBlock)block {
     [self.startLock lock];
     NSAssert(self.preStartTaskFactory != nil, @"Already started");
@@ -84,7 +89,7 @@
     [self.startLock unlock];
 }
 
-- (void)setContext:(id)context taskBlock:(FATaskFactoryContextBlock)block {
+- (void)setTaskContext:(id)context block:(FATaskFactoryContextBlock)block {
     [self.startLock lock];
     NSAssert(self.preStartTaskFactory != nil, @"Already started");
     self.preStartTaskFactory = [FATaskFactory factoryWithContext:context block:block];
@@ -115,9 +120,17 @@
 }
 
 - (void)try {
-    id <FATask> task = [self.taskFactory taskWithLastResult:nil];
+    self.task = [self.taskFactory taskWithLastResult:nil];
     
-    [self onCompleteTask:task synchronizeWithBlock:^(FATypeOfSelf blockTask, FATaskCompleteEvent *event) {
+    [self onStartSubtask:self.task synchronizeWithBlock:^(FATypeOfSelf blockTask, FATaskStartEvent *event) {
+        if (blockTask.tryCount > 0) {
+            [blockTask dispatchEvent:[FATaskRestartEvent eventWithSource:blockTask]];
+        }
+        
+        ++blockTask.tryCount;
+    }];
+    [self passThroughProgressEventsFromSubtask:self.task];
+    [self onFinishSubtask:self.task synchronizeWithBlock:^(FATypeOfSelf blockTask, FATaskFinishEvent *event) {
         if (event.error) {
             blockTask.error = event.error;
             [blockTask tryFailed];
@@ -126,7 +139,6 @@
         }
     }];
 
-    self.task = task;
     [self.task start];
 }
 
@@ -147,7 +159,7 @@
     NSTimeInterval delayInterval = [self nextDelayInterval];
     
     if (delayInterval <= 0) {
-        [self retry];
+        [self try];
     } else {
         [self dispatchEvent:[FATaskDelayEvent eventWithSource:self]];
         [self retryAfterDelayInterval:delayInterval];
@@ -163,15 +175,9 @@
         FATypeOfSelf blockSelf = weakSelf;
         if (blockSelf == nil || [blockSelf isCancelled]) return;
         [blockSelf cancelTimer];
-        [blockSelf retry];
+        [blockSelf try];
     });
     dispatch_resume(self.delayTimer);
-}
-
-- (void)retry {
-    ++self.retryCount;
-    [self dispatchEvent:[FATaskRestartEvent eventWithSource:self]];
-    [self try];
 }
 
 - (BOOL)shouldRetryAfterError:(NSError *)error {
@@ -179,7 +185,7 @@
 }
 
 - (NSTimeInterval)nextDelayInterval {
-    return [self.configuration delayIntervalForRetryCount:self.retryCount];
+    return [self.configuration delayIntervalForRetryCount:self.tryCount - 1];
 }
 
 - (void)cancelTimer {

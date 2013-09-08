@@ -1,5 +1,5 @@
 //
-// FranticApparatus.h
+// FABatchTask.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,50 +24,24 @@
 
 
 
-// Event
-#import "FAEvent.h"
-#import "FAEventHandler.h"
-#import "FAEventDispatcher.h"
-
-// Task
-#import "FATask.h"
 #import "FAAbstractTask.h"
-#import "FABatchTask.h"
-#import "FABackgroundTask.h"
-#import "FAParallelTask.h"
-#import "FAChainedTask.h"
-#import "FARetryTask.h"
 
-// Task Utility
-#import "FATaskFactory.h"
-#import "NSError+FATask.h"
 
-// Task Events
-#import "FATaskEvent.h"
-#import "FATaskStartEvent.h"
-#import "FATaskProgressEvent.h"
-#import "FATaskFinishEvent.h"
-#import "FATaskRestartEvent.h"
-#import "FATaskDelayEvent.h"
 
-// Network Task
-#import "FAURLConnectionTask.h"
-#import "FAURLConnectionDataTask.h"
-#import "FAURLConnectionDownloadTask.h"
+@class FATaskStartEvent;
+@class FATaskFinishEvent;
 
-// Network Utility
-#import "FAHTTPError.h"
-#import "NSURLResponse+StringEncoding.h"
 
-// Network Filter
-#import "FAURLResponseFilter.h"
-#import "FACustomURLResponseFilter.h"
-#import "FAHTTPURLResponseFilter.h"
 
-// Network Progress
-#import "FAURLConnectionDownloadProgressEvent.h"
+typedef void (^FATaskStartSynchronizeBlock)(id <FATask> blockTask, FATaskStartEvent *event);
+typedef void (^FATaskFinishSynchronizeBlock)(id <FATask> blockTask, FATaskFinishEvent *event);
 
-// Network Results
-#import "FAURLConnectionResult.h"
-#import "FAURLConnectionDataResult.h"
-#import "FAURLConnectionDownloadResult.h"
+
+
+@interface FABatchTask : FAAbstractTask
+
+- (void)onStartSubtask:(id <FATask>)subtask synchronizeWithBlock:(FATaskStartSynchronizeBlock)block;
+- (void)onFinishSubtask:(id <FATask>)subtask synchronizeWithBlock:(FATaskFinishSynchronizeBlock)block;
+- (void)passThroughProgressEventsFromSubtask:(id <FATask>)subtask;
+
+@end

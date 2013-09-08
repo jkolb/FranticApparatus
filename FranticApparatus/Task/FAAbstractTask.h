@@ -24,11 +24,7 @@
 
 
 
-#import <Foundation/Foundation.h>
-
 #import "FATask.h"
-#import "FATaskEvent.h"
-#import "FAEventDispatcher.h"
 
 
 
@@ -36,12 +32,7 @@
 
 
 
-@class FATaskCompleteEvent;
-
-
-
 typedef void (^FATaskSynchronizeBlock)(id <FATask> blockTask);
-typedef void (^FATaskCompleteSynchronizeBlock)(id <FATask> blockTask, FATaskCompleteEvent *event);
 
 
 
@@ -64,6 +55,5 @@ typedef void (^FATaskCompleteSynchronizeBlock)(id <FATask> blockTask, FATaskComp
 @property (nonatomic, strong, readonly) dispatch_queue_t synchronizationQueue;
 
 - (void)synchronizeWithBlock:(FATaskSynchronizeBlock)block;
-- (void)onCompleteTask:(id <FATask>)task synchronizeWithBlock:(FATaskCompleteSynchronizeBlock)block;
 
 @end

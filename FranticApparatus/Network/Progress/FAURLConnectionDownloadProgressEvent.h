@@ -1,5 +1,5 @@
 //
-// FATaskCompleteEvent.h
+// FAURLConnectionDownloadProgressEvent.h
 //
 // Copyright (c) 2013 Justin Kolb - http://franticapparatus.net
 //
@@ -24,20 +24,24 @@
 
 
 
-#import "FATaskEvent.h"
+#import "FATaskProgressEvent.h"
 
 
 
-@interface FATaskCompleteEvent : FATaskEvent
+@interface FAURLConnectionDownloadProgressEvent : FATaskProgressEvent;
 
-@property (nonatomic, copy, readonly) id result;
-@property (nonatomic, copy, readonly) NSError *error;
+@property (nonatomic, readonly) long long bytesReceived;
+@property (nonatomic, readonly) long long totalBytesReceived;
+@property (nonatomic, readonly) long long expectedTotalBytes;
 
-+ (instancetype)eventWithSource:(id)source result:(id <NSCopying>)result error:(NSError *)error;
++ (instancetype)eventWithSource:(id <FATask>)source
+                  bytesReceived:(long long)bytesReceived
+             totalBytesReceived:(long long)totalBytesReceived
+             expectedTotalBytes:(long long)expectedTotalBytes;
 
-- (id)initWithSource:(id)source result:(id <NSCopying>)result error:(NSError *)error;
-
-- (BOOL)hasError;
-- (BOOL)hasCancelError;
+- (id)initWithSource:(id)source
+       bytesReceived:(long long)bytesReceived
+  totalBytesReceived:(long long)totalBytesReceived
+  expectedTotalBytes:(long long)expectedTotalBytes;
 
 @end
