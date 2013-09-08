@@ -39,6 +39,7 @@
 
 // Task Utility
 #import "FATaskFactory.h"
+#import "NSError+FATask.h"
 
 // Task Events
 #import "FATaskEvent.h"

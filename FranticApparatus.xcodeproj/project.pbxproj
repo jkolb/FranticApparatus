@@ -17,6 +17,7 @@
 		E51F2BD6175A99BD00A1F33B /* FATaskEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E51F2BD5175A99BC00A1F33B /* FATaskEvent.m */; };
 		E522239B1751C3C500FB59CB /* FAEventDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E522239A1751C3C500FB59CB /* FAEventDispatcher.m */; };
 		E536B36E17DBBE7D00ABD5AE /* NSError+FATask.m in Sources */ = {isa = PBXBuildFile; fileRef = E536B36D17DBBE7C00ABD5AE /* NSError+FATask.m */; };
+		E536B37217DC16FC00ABD5AE /* NSError+FATask.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E536B36C17DBBE7C00ABD5AE /* NSError+FATask.h */; };
 		E54342161747D74A00F7E66B /* FAEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E54342131747D74A00F7E66B /* FAEvent.m */; };
 		E543421B1747D80000F7E66B /* FATaskStartEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E543421A1747D80000F7E66B /* FATaskStartEvent.m */; };
 		E54342211747DCA900F7E66B /* FATaskCompleteEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E54342201747DCA900F7E66B /* FATaskCompleteEvent.m */; };
@@ -90,6 +91,7 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
+				E536B37217DC16FC00ABD5AE /* NSError+FATask.h in CopyFiles */,
 				E54E2671175C4A06007DB0A5 /* FAURLConnectionReceiveProgress.h in CopyFiles */,
 				E54E2672175C4A06007DB0A5 /* FATaskProgressEvent.h in CopyFiles */,
 				E54E2664175C42A2007DB0A5 /* FAURLConnectionResult.h in CopyFiles */,
