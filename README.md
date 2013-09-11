@@ -9,7 +9,7 @@ How to make an asynchronous network request:
 	NSOperationQueue *queue = [[NSOperationQueue alloc] init];
 	FAURLConnectionDataTask *task = [[FAURLConnectionDataTask alloc] initWithRequest:request];
 	task.queue = queue;
-	[task addCompletionBlock:^(FATaskCompleteEvent *event) {
+	[task addFinishBlock:^(FATaskFinishEvent *event) {
 		if ([event hasError]) {
 			NSLog(@"Error: %@", event.error);
 		} else {
@@ -25,7 +25,7 @@ How to parse the JSON response data of an asynchronous network request on a back
 	NSURL *URL = [[NSURL alloc] initWithString:@"http://www.reddit.com/r/all.json"];
 	NSURLRequest *request = [[NSURLRequest alloc] initWithURL:URL];
 	NSOperationQueue *queue = [[NSOperationQueue alloc] init];
-	FAChainedBatchTask *chainedTask = [[FAChainedBatchTask alloc] init];
+	FAChainedTask *chainedTask = [[FAChainedTask alloc] init];
 	[chainedTask addTaskBlock:^id<FATask>(id lastResult) {
 		FAURLConnectionDataTask *task = [[FAURLConnectionDataTask alloc] initWithRequest:request];
 		task.queue = queue;
@@ -37,7 +37,7 @@ How to parse the JSON response data of an asynchronous network request on a back
     	    return [NSJSONSerialization JSONObjectWithData:dataResult.data options:0 error:error];
 	    }];
     }];
-	[chainedTask addCompletionBlock:^(FATaskCompleteEvent *event) {
+	[chainedTask addFinishBlock:^(FATaskFinishEvent *event) {
 		if ([event hasError]) {
 			NSLog(@"Error: %@", event.error);
 		} else {
@@ -57,7 +57,7 @@ How to retry a network request if it fails:
         task.queue = queue;
         return task;
     }];
-	[retryTask addCompletionBlock:^(FATaskCompleteEvent *event) {
+	[retryTask addFinishBlock:^(FATaskFinishEvent *event) {
 		if ([event hasError]) {
 			NSLog(@"Error: %@", event.error);
 		} else {
@@ -87,7 +87,7 @@ How to make two network tasks in parallel and wait for both responses:
         task.queue = queue;
         return task;
     }];
-	[parallelTask addCompletionBlock:^(FATaskCompleteEvent *event) {
+	[parallelTask addFinishBlock:^(FATaskFinishEvent *event) {
 		NSLog(@"Results: %@", event.result);
     }];
     [parallelTask start];
