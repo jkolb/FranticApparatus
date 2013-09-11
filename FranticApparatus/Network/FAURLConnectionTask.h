@@ -34,7 +34,7 @@
 
 @interface FAURLConnectionTask : FAAbstractTask
 
-@property (weak) NSOperationQueue *queue;
+@property (strong) NSOperationQueue *queue;
 @property (strong) id <FAURLResponseFilter> responseFilter;
 
 - (id)initWithRequest:(NSURLRequest *)request;

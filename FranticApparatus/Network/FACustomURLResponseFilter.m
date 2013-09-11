@@ -60,7 +60,7 @@
     NSNumber *errorCodeKey = @(errorCode);
     NSMutableArray *validators = [self.filterBlocksByErrorCode objectForKey:errorCodeKey];
     
-    if (filterBlock == nil) {
+    if (validators == nil) {
         validators = [[NSMutableArray alloc] initWithCapacity:1];
         [self.filterBlocksByErrorCode setObject:validators forKey:errorCodeKey];
     }
