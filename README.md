@@ -9,7 +9,9 @@ How to make an asynchronous network request:
 	NSOperationQueue *queue = [[NSOperationQueue alloc] init];
 	FAURLConnectionDataTask *task = [[FAURLConnectionDataTask alloc] initWithRequest:request];
 	task.queue = queue;
-	[task addFinishBlock:^(FATaskFinishEvent *event) {
+	[task addFinishContext:self block:^(__typeof__(self) blockSelf, FATaskFinishEvent *event) {
+		blockSelf.task = nil;
+		
 		if ([event hasError]) {
 			NSLog(@"Error: %@", event.error);
 		} else {
@@ -18,6 +20,7 @@ How to make an asynchronous network request:
 			NSLog(@"Data: %@", dataResult.data);
 		}
     }];
+	self.task = task;
 	[task start];
 
 How to parse the JSON response data of an asynchronous network request on a background thread:
@@ -37,13 +40,16 @@ How to parse the JSON response data of an asynchronous network request on a back
     	    return [NSJSONSerialization JSONObjectWithData:dataResult.data options:0 error:error];
 	    }];
     }];
-	[chainedTask addFinishBlock:^(FATaskFinishEvent *event) {
+	[chainedTask addFinishContext:self block:^(__typeof__(self) blockSelf, FATaskFinishEvent *event) {
+		blockSelf.task = nil;
+		
 		if ([event hasError]) {
 			NSLog(@"Error: %@", event.error);
 		} else {
 			NSLog(@"Result: %@", event.result);
 		}
     }];
+	self.task = chainedTask;
 	[chainedTask start];
 
 How to retry a network request if it fails:
@@ -57,7 +63,9 @@ How to retry a network request if it fails:
         task.queue = queue;
         return task;
     }];
-	[retryTask addFinishBlock:^(FATaskFinishEvent *event) {
+	[retryTask addFinishContext:self block:^(__typeof__(self) blockSelf, FATaskFinishEvent *event) {
+		blockSelf.task = nil;
+		
 		if ([event hasError]) {
 			NSLog(@"Error: %@", event.error);
 		} else {
@@ -66,6 +74,7 @@ How to retry a network request if it fails:
 			NSLog(@"Data: %@", dataResult.data);
 		}
     }];
+	self.task = retryTask;
     [retryTask start];
 
 How to make two network tasks in parallel and wait for both responses:
@@ -76,7 +85,7 @@ How to make two network tasks in parallel and wait for both responses:
 	NSURLRequest *redditRequest = [[NSURLRequest alloc] initWithURL:redditURL];
 	NSOperationQueue *queue = [[NSOperationQueue alloc] init];
 	FAParallelTask *parallelTask = [[FAParallelTask alloc] init];
-	parallelTask.allowPartialFailue = YES;
+	parallelTask.allowPartialFailure = YES;
     [parallelTask setKey:@"google" forTaskBlock:^id<FATask>(id lastResult) {
         FAURLConnectionDataTask *task = [[FAURLConnectionDataTask alloc] initWithRequest:googleRequest];
         task.queue = queue;
@@ -87,9 +96,12 @@ How to make two network tasks in parallel and wait for both responses:
         task.queue = queue;
         return task;
     }];
-	[parallelTask addFinishBlock:^(FATaskFinishEvent *event) {
+	[parallelTask addFinishContext:self block:^(__typeof__(self) blockSelf, FATaskFinishEvent *event) {
+		blockSelf.task = nil;
+		
 		NSLog(@"Results: %@", event.result);
     }];
+	self.task = parallelTask;
     [parallelTask start];
 	
 ## Overview
