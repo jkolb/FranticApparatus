@@ -83,15 +83,19 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-    [self.buffer appendData:data];
+    NSData *blockData = [data copy];
     
-    NSError *error = nil;
-    BOOL success = [self writeAsMuchDataAsPossibleToOutputStreamAndReportProgressWithError:&error];
-    
-    if (!success) {
-        [connection cancel];
-        [self completeWithResult:nil error:error];
-    }
+    [self synchronizeWithBlock:^(FATypeOfSelf blockTask) {
+        [blockTask.buffer appendData:blockData];
+        
+        NSError *error = nil;
+        BOOL success = [blockTask writeAsMuchDataAsPossibleToOutputStreamAndReportProgressWithError:&error];
+        
+        if (!success) {
+            [connection cancel];
+            [blockTask completeWithResult:nil error:error];
+        }
+    }];
 }
 
 - (BOOL)writeAsMuchDataAsPossibleToOutputStreamAndReportProgressWithError:(NSError **)error {
@@ -155,18 +159,21 @@ static const NSUInteger kFAURLConnectionDownloadTaskDefaultBufferSize = 128;
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    while ([self.buffer length] > 0) {
-        NSError *error = nil;
-        BOOL success = [self writeAsMuchDataAsPossibleToOutputStreamAndReportProgressWithError:&error];
-        
-        if (!success) {
-            [self completeWithResult:nil error:error];
-            return;
+    [self synchronizeWithBlock:^(FATypeOfSelf blockTask) {
+        while ([blockTask.buffer length] > 0) {
+            NSError *error = nil;
+            BOOL success = [blockTask writeAsMuchDataAsPossibleToOutputStreamAndReportProgressWithError:&error];
+            
+            if (!success) {
+                [blockTask completeWithResult:nil error:error];
+                return;
+            }
         }
-    }
-    
-    id result = [[FAURLConnectionDownloadResult alloc] initWithResponse:self.response downloadPath:self.downloadPath];
-    [self completeWithResult:result error:nil];
+        
+        id result = [[FAURLConnectionDownloadResult alloc] initWithResponse:blockTask.response
+                                                               downloadPath:blockTask.downloadPath];
+        [blockTask completeWithResult:result error:nil];
+    }];
 }
 
 @end
