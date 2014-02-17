@@ -46,12 +46,20 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-    [self.data appendData:data];
+    NSData *blockData = [data copy];
+    
+    [self synchronizeWithBlock:^(FATypeOfSelf blockTask) {
+        [blockTask.data appendData:blockData];
+    }];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    FAURLConnectionDataResult *result = [[FAURLConnectionDataResult alloc] initWithResponse:self.response data:self.data];
-    [self completeWithResult:result error:nil];
+    [self synchronizeWithBlock:^(FATypeOfSelf blockTask) {
+        FAURLConnectionDataResult *result;
+        result = [[FAURLConnectionDataResult alloc] initWithResponse:blockTask.response
+                                                                data:blockTask.data];
+        [blockTask completeWithResult:result error:nil];
+    }];
 }
 
 - (NSMutableData *)dataForResponse:(NSURLResponse *)response {

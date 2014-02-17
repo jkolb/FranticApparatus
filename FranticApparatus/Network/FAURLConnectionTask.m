@@ -62,20 +62,24 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
-    NSError *error = nil;
-    BOOL allowResponse = YES;
-    id <FAURLResponseFilter> responseFilter = self.responseFilter;
+    NSURLResponse *blockResponse = [response copy];
     
-    if (responseFilter != nil) {
-        allowResponse = [responseFilter shouldAllowResponse:response withError:&error];
-    }
-    
-    if (allowResponse) {
-        [self handleResponse:response];
-    } else {
-        [connection cancel];
-        [self completeWithResult:nil error:error];
-    }
+    [self synchronizeWithBlock:^(FATypeOfSelf blockTask) {
+        NSError *error = nil;
+        BOOL allowResponse = YES;
+        id <FAURLResponseFilter> responseFilter = blockTask.responseFilter;
+        
+        if (responseFilter != nil) {
+            allowResponse = [responseFilter shouldAllowResponse:blockResponse withError:&error];
+        }
+        
+        if (allowResponse) {
+            [blockTask handleResponse:blockResponse];
+        } else {
+            [connection cancel];
+            [blockTask completeWithResult:nil error:error];
+        }
+    }];
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
