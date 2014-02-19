@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>6A4BC3DC-440E-47E4-BE97-67417AF3CF14</string>
+	<key>IDESourceControlProjectName</key>
+	<string>FranticApparatus</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>FB9FACD1-B767-4329-9F7D-F0ECC9856508</key>
+		<string>https://github.com/jkolb/FranticApparatus.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>FranticApparatus.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>FB9FACD1-B767-4329-9F7D-F0ECC9856508</key>
+		<string>..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/jkolb/FranticApparatus.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>FB9FACD1-B767-4329-9F7D-F0ECC9856508</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>FB9FACD1-B767-4329-9F7D-F0ECC9856508</string>
+			<key>IDESourceControlWCCName</key>
+			<string>FranticApparatus</string>
+		</dict>
+	</array>
+</dict>
+</plist>
