@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Workspace
    version = "1.0">
+   <Group
+      location = "group:FranticApparatus"
+      name = "FranticApparatus">
+      <FileRef
+         location = "group:FATask.h">
+      </FileRef>
+   </Group>
+   <FileRef
+      location = "group:Example/iOS/FranticApparatusExample_iOS/FranticApparatusExample_iOS.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Example/osx/FranticApparatusExample_OSX/FranticApparatusExample_OSX.xcodeproj">
+   </FileRef>
 </Workspace>
