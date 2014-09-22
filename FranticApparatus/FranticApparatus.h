@@ -1,6 +1,6 @@
 //
-// main.m
-// FranticApparatusExample_iOS
+// FranticApparatus.h
+// FranticApparatus
 //
 // Copyright (c) 2014 Justin Kolb - http://franticapparatus.net
 //
@@ -23,14 +23,14 @@
 // THE SOFTWARE.
 //
 
-
 #import <UIKit/UIKit.h>
 
-#import "FAAppDelegate.h"
+//! Project version number for FranticApparatus.
+FOUNDATION_EXPORT double FranticApparatusVersionNumber;
 
-int main(int argc, char * argv[])
-{
-    @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([FAAppDelegate class]));
-    }
-}
+//! Project version string for FranticApparatus.
+FOUNDATION_EXPORT const unsigned char FranticApparatusVersionString[];
+
+// In this header, you should import all the public headers of your framework using statements like #import <FranticApparatus/PublicHeader.h>
+
+
