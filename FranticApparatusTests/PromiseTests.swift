@@ -26,10 +26,6 @@
 import XCTest
 import FranticApparatus
 
-func dispatch_delay(when: Double, queue: dispatch_queue_t!, block: dispatch_block_t!) {
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(when * Double(NSEC_PER_SEC))), queue, block)
-}
-
 class FranticApparatusTests: XCTestCase {
 
     class ExpectedRejectionError : Error {
@@ -93,6 +89,8 @@ class FranticApparatusTests: XCTestCase {
     // 2.1.2.1 - must not transition to any other state
     
     func testFulfilledMustNotTranstionToAnyOtherState() {
+        let promiseFulfilled1 = self.expectationWithDescription("onFulfilled called once")
+        let promiseFulfilled2 = self.expectationWithDescription("onFulfilled called twice")
         let promise = Promise<Int>()
         var isFulfilled = false
         
@@ -100,39 +98,63 @@ class FranticApparatusTests: XCTestCase {
         
         let promiseA = promise.when { (value: Int) -> () in
             isFulfilled = true
+            promiseFulfilled1.fulfill()
         }
 
         promise.reject(ExpectedRejectionError())
         
-        let promiseB = promise.catch { (reason: Error) -> () in
-            isFulfilled = false
-        }
+        let promiseB = promise.then(
+            onFulfilled: { (value: Int) -> Result<Int> in
+                isFulfilled = true
+                promiseFulfilled2.fulfill()
+                return .Success(value)
+            },
+            onRejected: { (reason: Error) -> Result<Int> in
+                isFulfilled = false
+                promiseFulfilled2.fulfill()
+                return .Failure(reason)
+            }
+        )
 
-        XCTAssertTrue(isFulfilled, "When fulfilled, a promise must not transition to any other state")
+        self.waitForExpectationsWithTimeout(1.0, handler: { (error: NSError!) -> Void in
+            XCTAssertTrue(isFulfilled, "When fulfilled, a promise must not transition to any other state")
+        })
+
     }
     
     // 2.1.2.2 - must have a value, which must not change
     
     func testFulfilledMustHaveAValueWhichMustNotChange() {
+        let promiseFulfilled1 = self.expectationWithDescription("onFulfilled called once")
+        let promiseFulfilled2 = self.expectationWithDescription("onFulfilled called twice")
         let promise = Promise<Int>()
+        var fulfilledValue = 0
         
         promise.fulfill(1)
         
         let promiseA = promise.when { (value: Int) -> () in
-            XCTAssertEqual(value, 1, "When fulfilled, a promise must have a value, which must not change")
+            fulfilledValue = value
+            promiseFulfilled1.fulfill()
         }
         
         promise.fulfill(2)
-        
+
         let promiseB = promise.when { (value: Int) -> () in
-            XCTAssertEqual(value, 1, "When fulfilled, a promise must have a value, which must not change")
+            fulfilledValue = value
+            promiseFulfilled2.fulfill()
         }
+        
+        self.waitForExpectationsWithTimeout(1.0, handler: { (error: NSError!) -> Void in
+            XCTAssertEqual(fulfilledValue, 1, "When fulfilled, a promise must have a value, which must not change")
+        })
     }
     
     // 2.1.3 - When rejected, a promise
     // 2.1.3.1 - must not transition to any other state
     
     func testRejectedMustNotTransitionToAnyOtherState() {
+        let promiseRejected1 = self.expectationWithDescription("onRejected called once")
+        let promiseRejected2 = self.expectationWithDescription("onRejected called twice")
         let promise = Promise<Int>()
         var isRejected = false
         
@@ -140,33 +162,54 @@ class FranticApparatusTests: XCTestCase {
         
         let promiseA = promise.catch { (reason: Error) -> () in
             isRejected = true
+            promiseRejected1.fulfill()
         }
         
         promise.fulfill(1)
         
-        let promiseB = promise.when { (value: Int) -> () in
-            isRejected = false
-        }
+        let promiseB = promise.then(
+            onFulfilled: { (value: Int) -> Result<Int> in
+                isRejected = false
+                promiseRejected2.fulfill()
+                return .Success(value)
+            },
+            onRejected: { (reason: Error) -> Result<Int> in
+                isRejected = true
+                promiseRejected2.fulfill()
+                return .Failure(reason)
+            }
+        )
         
-        XCTAssertTrue(isRejected, "When rejected, a promise must not transtion to any other state")
+        self.waitForExpectationsWithTimeout(1.0, handler: { (error: NSError!) -> Void in
+            XCTAssertTrue(isRejected, "When rejected, a promise must not transtion to any other state")
+        })
     }
     
     // 2.1.3.2 - must have a reason, which must not change
     
     func testRejectedMustHaveAReasonWhichMustNotChange() {
+        let promiseRejected1 = self.expectationWithDescription("onRejected called once")
+        let promiseRejected2 = self.expectationWithDescription("onRejected called twice")
         let promise = Promise<Int>()
+        var rejectedReason: Error = Error()
         
         promise.reject(ExpectedRejectionError())
         
         let promiseA = promise.catch { (reason: Error) -> () in
-            XCTAssertTrue(reason is ExpectedRejectionError, "When rejected, a promise must have a reason, which must not change")
+            rejectedReason = reason
+            promiseRejected1.fulfill()
         }
         
         promise.reject(UnexpectedRejectionError())
         
         let promiseB = promise.catch { (reason: Error) -> () in
-            XCTAssertTrue(reason is ExpectedRejectionError, "When rejected, a promise must have a reason, which must not change")
+            rejectedReason = reason
+            promiseRejected2.fulfill()
         }
+        
+        self.waitForExpectationsWithTimeout(1.0, handler: { (error: NSError!) -> Void in
+            XCTAssertTrue(rejectedReason is ExpectedRejectionError, "When rejected, a promise must have a reason, which must not change")
+        })
     }
     
     // 2.2.1.1 - If onFulfilled is not a function, it must be ignored
@@ -187,9 +230,7 @@ class FranticApparatusTests: XCTestCase {
             expectation.fulfill()
         })
         
-        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            promise1.fulfill(1)
-        }
+        promise1.fulfill(1)
         
         self.waitForExpectationsWithTimeout(1.0) { (error: NSError!) -> () in
         }
@@ -205,9 +246,7 @@ class FranticApparatusTests: XCTestCase {
             expectation.fulfill()
         })
         
-        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            promise1.fulfill(1)
-        }
+        promise1.fulfill(1)
         
         self.waitForExpectationsWithTimeout(1.0) { (error: NSError!) -> () in
         }
@@ -252,9 +291,7 @@ class FranticApparatusTests: XCTestCase {
             }
         )
         
-        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            promise1.fulfill(1)
-        }
+        promise1.fulfill(1)
         
         self.waitForExpectationsWithTimeout(1.0, handler: { (error: NSError!) -> Void in
             XCTAssertEqual(fulfilledToken.count, 2, "then may be called multiple times on the same promise")
@@ -290,9 +327,7 @@ class FranticApparatusTests: XCTestCase {
             }
         )
         
-        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            promise1.fulfill(1)
-        }
+        promise1.fulfill(1)
         
         self.waitForExpectationsWithTimeout(1.0, handler: { (error: NSError!) -> Void in
             XCTAssertEqual(fulfilledToken[0], 1, "if/when promise is fulfilled, all respective onFulfilled callbacks must execute in the order of their originating calls to then")
@@ -329,9 +364,7 @@ class FranticApparatusTests: XCTestCase {
             }
         )
         
-        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            promise1.reject(ExpectedRejectionError())
-        }
+        promise1.reject(ExpectedRejectionError())
         
         self.waitForExpectationsWithTimeout(1.0, handler: { (error: NSError!) -> Void in
             XCTAssertEqual(rejectedToken[0], 1, "if/when promise is rejected, all respective onRejected callbacks must execute in the order of their originating calls to then")
@@ -381,13 +414,8 @@ class FranticApparatusTests: XCTestCase {
                 expectation.fulfill()
             })
 
-        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            deferred.fulfill("deferred")
-        }
-        
-        dispatch_delay(0.50, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            promise1.fulfill(1)
-        }
+        deferred.fulfill("deferred")
+        promise1.fulfill(1)
         
         self.waitForExpectationsWithTimeout(1.0) { (error: NSError!) -> () in
         }
@@ -408,14 +436,17 @@ class FranticApparatusTests: XCTestCase {
                 XCTAssertEqual(value, "deferred", "If either onFulfilled or onRejected returns a value x, run the Promise Resolution Procedure [[Resolve]](promise2, x).")
                 expectation.fulfill()
             })
-        
-        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            promise1.fulfill(1)
-        }
-        
-        dispatch_delay(0.50, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            deferred.fulfill("deferred")
-        }
+
+        promise1.fulfill(1)
+        deferred.fulfill("deferred")
+
+//        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+//            promise1.fulfill(1)
+//        }
+//        
+//        dispatch_delay(0.50, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+//            deferred.fulfill("deferred")
+//        }
         
         self.waitForExpectationsWithTimeout(1.0) { (error: NSError!) -> () in
         }
@@ -438,9 +469,7 @@ class FranticApparatusTests: XCTestCase {
                 expectation.fulfill()
             })
         
-        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            promise1.fulfill(1)
-        }
+        promise1.fulfill(1)
         
         self.waitForExpectationsWithTimeout(1.0) { (error: NSError!) -> () in
         }
@@ -461,9 +490,7 @@ class FranticApparatusTests: XCTestCase {
                 expectation.fulfill()
             })
         
-        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            promise1.reject(UnexpectedRejectionError())
-        }
+        promise1.reject(UnexpectedRejectionError())
         
         self.waitForExpectationsWithTimeout(1.0) { (error: NSError!) -> () in
         }
@@ -481,9 +508,7 @@ class FranticApparatusTests: XCTestCase {
             expectation.fulfill()
         }
         
-        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            promise1.fulfill(1)
-        }
+        promise1.fulfill(1)
 
         self.waitForExpectationsWithTimeout(1.0) { (error: NSError!) -> () in
         }
@@ -501,9 +526,7 @@ class FranticApparatusTests: XCTestCase {
             expectation.fulfill()
         }
         
-        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            promise1.reject(ExpectedRejectionError())
-        }
+        promise1.reject(ExpectedRejectionError())
         
         self.waitForExpectationsWithTimeout(1.0) { (error: NSError!) -> () in
         }
