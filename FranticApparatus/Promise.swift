@@ -48,49 +48,59 @@ class Error {
 }
 
 class Promise<T> {
-    var parent: (() -> Any)?
+    let queue: SerialTaskQueue
+    let parent: (() -> Any)?
     var state: State<T> = .Pending
     var deferred: Promise<T>! = nil
     var onFulfilled = Array<(T) -> ()>()
     var onRejected = Array<(Error) -> ()>()
     
-    init(parent: (() -> Any)? = nil) {
+    init(queue: SerialTaskQueue = GCDSerialTaskQueue(), parent: (() -> Any)? = nil) {
+        self.queue = queue
         self.parent = parent
     }
     
     func fulfill(value: T) {
-        switch state {
-        case .Pending:
-            state = .Fulfilled(value)
-            // 2.2.2.2 - it must not be called before promise is fulfilled
-            let callbacks = onFulfilled
-            dispatch_async(dispatch_get_main_queue(), {
-                for callback in callbacks {
-                    callback(value)
+        queue.dispatch { [weak self] in
+            if let blockSelf = self {
+                switch blockSelf.state {
+                case .Pending:
+                    blockSelf.state = .Fulfilled(value)
+                    // 2.2.2.2 - it must not be called before promise is fulfilled
+                    let callbacks = blockSelf.onFulfilled
+                    dispatch_async(dispatch_get_main_queue(), {
+                        for callback in callbacks {
+                            callback(value)
+                        }
+                    })
+                    blockSelf.onFulfilled.removeAll(keepCapacity: false)
+                    blockSelf.onRejected.removeAll(keepCapacity: false)
+                default:
+                    return
                 }
-            })
-            onFulfilled.removeAll(keepCapacity: false)
-            onRejected.removeAll(keepCapacity: false)
-        default:
-            return
+            }
         }
     }
     
     func reject(reason: Error) {
-        switch state {
-        case .Pending:
-            state = .Rejected(reason)
-            // 2.2.3.2 - it must not be called before promise is rejected
-            let callbacks = onRejected
-            dispatch_async(dispatch_get_main_queue(), {
-                for callback in callbacks {
-                    callback(reason)
+        queue.dispatch { [weak self] in
+            if let blockSelf = self {
+                switch blockSelf.state {
+                case .Pending:
+                    blockSelf.state = .Rejected(reason)
+                    // 2.2.3.2 - it must not be called before promise is rejected
+                    let callbacks = blockSelf.onRejected
+                    dispatch_async(dispatch_get_main_queue(), {
+                        for callback in callbacks {
+                            callback(reason)
+                        }
+                    })
+                    blockSelf.onFulfilled.removeAll(keepCapacity: false)
+                    blockSelf.onRejected.removeAll(keepCapacity: false)
+                default:
+                    return
                 }
-            })
-            onFulfilled.removeAll(keepCapacity: false)
-            onRejected.removeAll(keepCapacity: false)
-        default:
-            return
+            }
         }
     }
     
@@ -137,21 +147,25 @@ class Promise<T> {
     //    **** provide no callbacks at all (when both are optional) is not useful and is
     //    **** not supported.
     func then<R>(# onFulfilled: ((T) -> Result<R>), onRejected: ((Error) -> Result<R>)) -> Promise<R> {
-        var promise = Promise<R>({self})
-        
-        switch state {
-        case .Pending:
-            self.onFulfilled.append({ [unowned self, weak promise] in
-                self.resolve(promise, result: onFulfilled($0))
-            });
-            
-            self.onRejected.append({ [unowned self, weak promise] in
-                self.resolve(promise, result: onRejected($0))
-            });
-        case .Fulfilled(let value):
-            resolve(promise, result: onFulfilled(value()))
-        case .Rejected(let reason):
-            resolve(promise, result: onRejected(reason))
+        var promise = Promise<R>(queue: self.queue, parent: {self})
+
+        queue.dispatch { [weak self] in
+            if let blockSelf = self {
+                switch blockSelf.state {
+                case .Pending:
+                    blockSelf.onFulfilled.append({ [unowned blockSelf, weak promise] in
+                        blockSelf.resolve(promise, result: onFulfilled($0))
+                    });
+                    
+                    blockSelf.onRejected.append({ [unowned blockSelf, weak promise] in
+                        blockSelf.resolve(promise, result: onRejected($0))
+                    });
+                case .Fulfilled(let value):
+                    blockSelf.resolve(promise, result: onFulfilled(value()))
+                case .Rejected(let reason):
+                    blockSelf.resolve(promise, result: onRejected(reason))
+                }
+            }
         }
         
         return promise

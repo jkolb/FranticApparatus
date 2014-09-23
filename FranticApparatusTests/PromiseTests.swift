@@ -56,6 +56,7 @@ class FranticApparatusTests: XCTestCase {
     }
     
     func testWhenPendingIsFulfilledTransitionsToFulfilledState() {
+        let expectation = self.expectationWithDescription("onFulfilled called")
         let promise = Promise<Int>()
         var isFulfilled = false
         
@@ -63,12 +64,16 @@ class FranticApparatusTests: XCTestCase {
         
         let promiseA = promise.when { (value: Int) -> () in
             isFulfilled = true
+            expectation.fulfill()
         }
         
-        XCTAssertTrue(isFulfilled, "When pending, a promise may transition to the fulfilled state")
+        self.waitForExpectationsWithTimeout(1.0, handler: { (error: NSError!) -> Void in
+            XCTAssertTrue(isFulfilled, "When pending, a promise may transition to the fulfilled state")
+        })
     }
     
     func testWhenPendingIsRejectedTransitionsToRejectedState() {
+        let expectation = self.expectationWithDescription("onRejected called")
         let promise = Promise<Int>()
         var isRejected = false
         
@@ -76,9 +81,12 @@ class FranticApparatusTests: XCTestCase {
         
         let promiseA = promise.catch { (reason: Error) -> () in
             isRejected = true
+            expectation.fulfill()
         }
         
-        XCTAssertTrue(isRejected, "When pending, a promise may transition to the rejected state")
+        self.waitForExpectationsWithTimeout(1.0, handler: { (error: NSError!) -> Void in
+            XCTAssertTrue(isRejected, "When pending, a promise may transition to the rejected state")
+        })
     }
     
     // 2.1.2 - When fulfilled, a promise:

@@ -12,6 +12,8 @@
 		E55CA21719C676DC00E66980 /* FranticApparatus.h in Headers */ = {isa = PBXBuildFile; fileRef = E55CA21619C676DC00E66980 /* FranticApparatus.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E55CA21D19C676DC00E66980 /* FranticApparatus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55CA21119C676DC00E66980 /* FranticApparatus.framework */; };
 		E55CA22419C676DC00E66980 /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55CA22319C676DC00E66980 /* PromiseTests.swift */; };
+		E5D1CDFF19D1246C007817A2 /* SerialTaskQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5D1CDFE19D1246C007817A2 /* SerialTaskQueue.swift */; };
+		E5D1CE0019D12485007817A2 /* SerialTaskQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5D1CDFE19D1246C007817A2 /* SerialTaskQueue.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,6 +34,7 @@
 		E55CA21C19C676DC00E66980 /* FranticApparatusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FranticApparatusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E55CA22219C676DC00E66980 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E55CA22319C676DC00E66980 /* PromiseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
+		E5D1CDFE19D1246C007817A2 /* SerialTaskQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerialTaskQueue.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +79,7 @@
 			children = (
 				E55CA21619C676DC00E66980 /* FranticApparatus.h */,
 				E54661C919CDE777007488CA /* Promise.swift */,
+				E5D1CDFE19D1246C007817A2 /* SerialTaskQueue.swift */,
 				E55CA21419C676DC00E66980 /* Supporting Files */,
 			);
 			path = FranticApparatus;
@@ -213,6 +217,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E5D1CDFF19D1246C007817A2 /* SerialTaskQueue.swift in Sources */,
 				E54661CA19CDE777007488CA /* Promise.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -223,6 +228,7 @@
 			files = (
 				E55CA22419C676DC00E66980 /* PromiseTests.swift in Sources */,
 				E54661CB19CDE7D9007488CA /* Promise.swift in Sources */,
+				E5D1CE0019D12485007817A2 /* SerialTaskQueue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
