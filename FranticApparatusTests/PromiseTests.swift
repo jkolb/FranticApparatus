@@ -439,14 +439,6 @@ class FranticApparatusTests: XCTestCase {
 
         promise1.fulfill(1)
         deferred.fulfill("deferred")
-
-//        dispatch_delay(0.25, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-//            promise1.fulfill(1)
-//        }
-//        
-//        dispatch_delay(0.50, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-//            deferred.fulfill("deferred")
-//        }
         
         self.waitForExpectationsWithTimeout(1.0) { (error: NSError!) -> () in
         }
