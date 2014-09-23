@@ -1,6 +1,6 @@
 # [FranticApparatus 2.0](https://github.com/jkolb/FranticApparatus)
 
-#### FranticApparatus makes asynchronous Objective-C easy!
+#### A Promises/A+ implementation for Swift
 
 ## Contact
 
