@@ -139,6 +139,46 @@ class Promise<T> {
         }
     }
     
+    func dispatch<R>(queue: SerialTaskQueue, promise: Promise<R>, task: (blockSelf: Promise<T>, blockPromise: Promise<R>) -> ()) {
+        queue.dispatch { [weak self, weak promise] in
+            if let blockSelf = self {
+                if let blockPromise = promise {
+                    task(blockSelf: blockSelf, blockPromise: blockPromise)
+                }
+            }
+        }
+    }
+    
+    func handlePending<R>(thenQueue: SerialTaskQueue, promise: Promise<R>, onFulfilled: ((T) -> Result<R>), onRejected: ((Error) -> Result<R>)) {
+        self.onFulfilled.append({ [weak self, weak promise] (value: T) -> () in
+            if let blockSelf = self {
+                if let blockPromise = promise {
+                    blockSelf.dispatch(thenQueue, promise: blockPromise) { (blockSelf, blockPromise) -> () in
+                        let result = onFulfilled(value)
+                        
+                        blockSelf.dispatch(blockSelf.queue, promise: blockPromise) { (blockSelf, blockPromise) -> () in
+                            blockSelf.resolve(blockPromise, result: result)
+                        }
+                    }
+                }
+            }
+        });
+        
+        self.onRejected.append({ [weak self, weak promise] (reason: Error) -> () in
+            if let blockSelf = self {
+                if let blockPromise = promise {
+                    blockSelf.dispatch(thenQueue, promise: blockPromise) { (blockSelf, blockPromise) -> () in
+                        let result = onRejected(reason)
+                        
+                        blockSelf.dispatch(blockSelf.queue, promise: blockPromise) { (blockSelf, blockPromise) -> () in
+                            blockSelf.resolve(blockPromise, result: result)
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
     // 2.2 - The then Method
     // A promise must provide a then method to access its current or eventual value or reason.
     // A promise's then method accepts two arguments: promise.then(onFulfilled, onRejected)
@@ -148,18 +188,13 @@ class Promise<T> {
     //    **** not supported.
     func then<R>(# onFulfilled: ((T) -> Result<R>), onRejected: ((Error) -> Result<R>)) -> Promise<R> {
         var promise = Promise<R>(queue: self.queue, parent: {self})
-
+        let thenQueue = GCDSerialTaskQueue.main()
+        
         queue.dispatch { [weak self] in
             if let blockSelf = self {
                 switch blockSelf.state {
                 case .Pending:
-                    blockSelf.onFulfilled.append({ [unowned blockSelf, weak promise] in
-                        blockSelf.resolve(promise, result: onFulfilled($0))
-                    });
-                    
-                    blockSelf.onRejected.append({ [unowned blockSelf, weak promise] in
-                        blockSelf.resolve(promise, result: onRejected($0))
-                    });
+                    blockSelf.handlePending(thenQueue, promise: promise, onFulfilled: onFulfilled, onRejected: onRejected)
                 case .Fulfilled(let value):
                     blockSelf.resolve(promise, result: onFulfilled(value()))
                 case .Rejected(let reason):
