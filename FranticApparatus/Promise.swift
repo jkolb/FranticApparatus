@@ -104,34 +104,36 @@ class Promise<T> {
         }
     }
     
-    func resolve<R>(promise: Promise<R>?, result: Result<R>) {
+    func resolve<R>(promise: Promise<R>, result: Result<R>) {
         switch result {
         case .Success(let value):
-            promise?.fulfill(value())
+            promise.fulfill(value())
         case .Failure(let reason):
-            promise?.reject(reason)
+            promise.reject(reason)
         case .Deferred(let deferred):
             switch deferred.state {
             case .Fulfilled(let value):
-                promise?.fulfill(value())
+                promise.fulfill(value())
             case .Rejected(let reason):
-                promise?.reject(reason)
+                promise.reject(reason)
             case .Pending:
-                assert(promise? !== deferred, "A promise referencing itself causes an unbreakable retain cycle")
-                if promise != nil {
-                    assert(promise!.deferred == nil, "Not yet sure if this is possible")
-                }
-                promise?.deferred = deferred
+                assert(promise !== deferred, "A promise referencing itself causes an unbreakable retain cycle")
+                assert(promise.deferred == nil, "Not yet sure if this is possible")
+                promise.deferred = deferred
                 deferred.then(
                     // Is it possible for deferred to be set multiple times (losing the intial values)?
                     onFulfilled: { [weak promise] (value: R) -> Result<R> in
-                        promise?.fulfill(value)
-                        promise?.deferred = nil
+                        if let blockPromise = promise {
+                            blockPromise.fulfill(value)
+                            blockPromise.deferred = nil
+                        }
                         return .Success(value)
                     },
                     onRejected: { [weak promise] (reason: Error) -> Result<R> in
-                        promise?.reject(reason)
-                        promise?.deferred = nil
+                        if let blockPromise = promise {
+                            blockPromise.reject(reason)
+                            blockPromise.deferred = nil
+                        }
                         return .Failure(reason)
                     }
                 )
@@ -149,8 +151,8 @@ class Promise<T> {
         }
     }
     
-    func handlePending<R>(thenQueue: SerialTaskQueue, promise: Promise<R>, onFulfilled: ((T) -> Result<R>), onRejected: ((Error) -> Result<R>)) {
-        self.onFulfilled.append({ [weak self, weak promise] (value: T) -> () in
+    func fulfillHandler<R>(thenQueue: SerialTaskQueue, promise: Promise<R>, onFulfilled: ((T) -> Result<R>)) -> (T) -> () {
+        return { [weak self, weak promise] (value: T) -> () in
             if let blockSelf = self {
                 if let blockPromise = promise {
                     blockSelf.dispatch(thenQueue, promise: blockPromise) { (blockSelf, blockPromise) -> () in
@@ -162,9 +164,11 @@ class Promise<T> {
                     }
                 }
             }
-        });
-        
-        self.onRejected.append({ [weak self, weak promise] (reason: Error) -> () in
+        }
+    }
+    
+    func rejectHandler<R>(thenQueue: SerialTaskQueue, promise: Promise<R>, onRejected: ((Error) -> Result<R>)) -> (Error) -> () {
+        return { [weak self, weak promise] (reason: Error) -> () in
             if let blockSelf = self {
                 if let blockPromise = promise {
                     blockSelf.dispatch(thenQueue, promise: blockPromise) { (blockSelf, blockPromise) -> () in
@@ -176,7 +180,7 @@ class Promise<T> {
                     }
                 }
             }
-        });
+        }
     }
     
     // 2.2 - The then Method
@@ -189,16 +193,19 @@ class Promise<T> {
     func then<R>(# onFulfilled: ((T) -> Result<R>), onRejected: ((Error) -> Result<R>)) -> Promise<R> {
         var promise = Promise<R>(queue: self.queue, parent: {self})
         let thenQueue = GCDSerialTaskQueue.main()
+        let fulfillHandler = self.fulfillHandler(thenQueue, promise: promise, onFulfilled: onFulfilled)
+        let rejectHandler = self.rejectHandler(thenQueue, promise: promise, onRejected: onRejected)
         
         queue.dispatch { [weak self] in
             if let blockSelf = self {
                 switch blockSelf.state {
                 case .Pending:
-                    blockSelf.handlePending(thenQueue, promise: promise, onFulfilled: onFulfilled, onRejected: onRejected)
+                    blockSelf.onFulfilled.append(fulfillHandler);
+                    blockSelf.onRejected.append(rejectHandler);
                 case .Fulfilled(let value):
-                    blockSelf.resolve(promise, result: onFulfilled(value()))
+                    fulfillHandler(value())
                 case .Rejected(let reason):
-                    blockSelf.resolve(promise, result: onRejected(reason))
+                    rejectHandler(reason)
                 }
             }
         }
