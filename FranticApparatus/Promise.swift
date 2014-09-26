@@ -133,8 +133,8 @@ class Promise<T> {
     
     func synchronizeOn(queue: SerialTaskQueue, task: (Promise<T>) -> ()) {
         queue.dispatch { [weak self] in
-            if let blockSelf = self {
-                task(blockSelf)
+            if let synchronizedPromise = self {
+                task(synchronizedPromise)
             }
         }
     }
