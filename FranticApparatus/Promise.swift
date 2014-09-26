@@ -107,10 +107,6 @@ class Promise<T> {
                 synchronizedPromise.state = .Rejected(reason)
             case .Deferred(let deferred):
                 switch deferred.state {
-                case .Fulfilled(let deferredValue):
-                    synchronizedPromise.state = .Fulfilled(deferredValue())
-                case .Rejected(let deferredReason):
-                    synchronizedPromise.state = .Rejected(deferredReason)
                 case .Pending:
                     assert(synchronizedPromise !== deferred, "A promise referencing itself causes an unbreakable retain cycle")
                     assert(synchronizedPromise.deferred == nil, "Attempt to reassign deferred")
@@ -126,6 +122,8 @@ class Promise<T> {
                             return .Failure(reason)
                         }
                     )
+                default:
+                    synchronizedPromise.state = deferred.state
                 }
             }
         }
