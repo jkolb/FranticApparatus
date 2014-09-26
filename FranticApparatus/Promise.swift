@@ -91,7 +91,6 @@ class Promise<T> {
                 }
                 onFulfilled.removeAll(keepCapacity: false)
                 onRejected.removeAll(keepCapacity: false)
-                deferred = nil
             default:
                 return
             }
@@ -110,8 +109,7 @@ class Promise<T> {
                 case .Pending:
                     assert(synchronizedPromise !== deferred, "A promise referencing itself causes an unbreakable retain cycle")
                     assert(synchronizedPromise.deferred == nil, "Attempt to reassign deferred")
-                    synchronizedPromise.deferred = deferred
-                    deferred.thenOn(
+                    synchronizedPromise.deferred = deferred.thenOn(
                         synchronizedPromise.synchronizationQueue,
                         onFulfilled: { [weak synchronizedPromise] (value: T) -> Result<T> in
                             synchronizedPromise?.state = .Fulfilled(value)
