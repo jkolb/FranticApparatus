@@ -19,7 +19,7 @@ final class GCDSerialTaskQueue : SerialTaskQueue {
         if main {
             queue = dispatch_get_main_queue()
         } else {
-            queue = dispatch_queue_create("", DISPATCH_QUEUE_SERIAL)
+            queue = dispatch_queue_create("net.franticapparatus.GCDSerialTaskQueue", DISPATCH_QUEUE_SERIAL)
         }
     }
     
@@ -41,6 +41,7 @@ final class NSOperationSerialTaskQueue : SerialTaskQueue {
         } else {
             queue = NSOperationQueue()
             queue.maxConcurrentOperationCount = 1
+            queue.name = "net.franticapparatus.NSOperationSerialTaskQueue"
         }
     }
     

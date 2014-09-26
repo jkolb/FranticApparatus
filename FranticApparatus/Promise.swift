@@ -23,10 +23,6 @@
 // THE SOFTWARE.
 //
 
-import Dispatch
-
-// 2.1 - Promise States
-// A promise must be in one of three states: pending, fulfilled, or rejected.
 enum State<T> {
     case Pending
     case Fulfilled(@autoclosure () -> T)
@@ -48,175 +44,138 @@ class Error {
 }
 
 class Promise<T> {
-    let queue: SerialTaskQueue
+    let synchronizationQueue: SerialTaskQueue
     let parent: (() -> Any)?
-    var state: State<T> = .Pending
+    var currentState: State<T> = .Pending
     var deferred: Promise<T>! = nil
     var onFulfilled = Array<(T) -> ()>()
     var onRejected = Array<(Error) -> ()>()
     
-    init(queue: SerialTaskQueue = GCDSerialTaskQueue(), parent: (() -> Any)? = nil) {
-        self.queue = queue
+    init(synchronizationQueue: SerialTaskQueue = GCDSerialTaskQueue(), parent: (() -> Any)? = nil) {
+        self.synchronizationQueue = synchronizationQueue
         self.parent = parent
     }
     
     func fulfill(value: T) {
-        queue.dispatch { [weak self] in
-            if let blockSelf = self {
-                blockSelf._fulfill(value)
-            }
-        }
-    }
-    
-    func _fulfill(value: T) {
-        switch state {
-        case .Pending:
-            state = .Fulfilled(value)
-            // 2.2.2.2 - it must not be called before promise is fulfilled
-            for fulfillHandler in onFulfilled {
-                fulfillHandler(value)
-            }
-            onFulfilled.removeAll(keepCapacity: false)
-            onRejected.removeAll(keepCapacity: false)
-        default:
-            return
+        synchronize { (synchronizedPromise) -> () in
+            synchronizedPromise.state = .Fulfilled(value)
         }
     }
     
     func reject(reason: Error) {
+        synchronize { (synchronizedPromise) -> () in
+            synchronizedPromise.state = .Rejected(reason)
+        }
+    }
+    
+    var state: State<T> {
+        get {
+            return currentState
+        }
+        set {
+            switch currentState {
+            case .Pending:
+                switch newValue {
+                case .Fulfilled(let value):
+                    currentState = newValue
+                    for fulfillHandler in onFulfilled {
+                        fulfillHandler(value())
+                    }
+                case .Rejected(let reason):
+                    currentState = newValue
+                    for rejectHandler in onRejected {
+                        rejectHandler(reason)
+                    }
+                case .Pending:
+                    fatalError("Attempting to transition from Pending to Pending")
+                }
+                onFulfilled.removeAll(keepCapacity: false)
+                onRejected.removeAll(keepCapacity: false)
+                deferred = nil
+            default:
+                return
+            }
+        }
+    }
+    
+    func resolve(result: Result<T>) {
+        synchronize { (synchronizedPromise) -> () in
+            switch result {
+            case .Success(let value):
+                synchronizedPromise.state = .Fulfilled(value())
+            case .Failure(let reason):
+                synchronizedPromise.state = .Rejected(reason)
+            case .Deferred(let deferred):
+                switch deferred.state {
+                case .Fulfilled(let deferredValue):
+                    synchronizedPromise.state = .Fulfilled(deferredValue())
+                case .Rejected(let deferredReason):
+                    synchronizedPromise.state = .Rejected(deferredReason)
+                case .Pending:
+                    assert(synchronizedPromise !== deferred, "A promise referencing itself causes an unbreakable retain cycle")
+                    assert(synchronizedPromise.deferred == nil, "Attempt to reassign deferred")
+                    synchronizedPromise.deferred = deferred
+                    deferred.thenOn(
+                        synchronizedPromise.synchronizationQueue,
+                        onFulfilled: { [weak synchronizedPromise] (value: T) -> Result<T> in
+                            synchronizedPromise?.state = .Fulfilled(value)
+                            return .Success(value)
+                        },
+                        onRejected: { [weak synchronizedPromise] (reason: Error) -> Result<T> in
+                            synchronizedPromise?.state = .Rejected(reason)
+                            return .Failure(reason)
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    func synchronize(task: (Promise<T>) -> ()) {
+        synchronizeOn(synchronizationQueue, task: task)
+    }
+    
+    func synchronizeOn(queue: SerialTaskQueue, task: (Promise<T>) -> ()) {
         queue.dispatch { [weak self] in
             if let blockSelf = self {
-                blockSelf._reject(reason)
+                task(blockSelf)
             }
         }
     }
     
-    func _reject(reason: Error) {
-        switch state {
-        case .Pending:
-            state = .Rejected(reason)
-            // 2.2.3.2 - it must not be called before promise is rejected
-            for rejectHandler in onRejected {
-                rejectHandler(reason)
-            }
-            onFulfilled.removeAll(keepCapacity: false)
-            onRejected.removeAll(keepCapacity: false)
-        default:
-            return
-        }
-    }
-    
-    func resolve<R>(promise: Promise<R>, result: Result<R>) {
-        switch result {
-        case .Success(let value):
-            promise._fulfill(value())
-        case .Failure(let reason):
-            promise._reject(reason)
-        case .Deferred(let deferred):
-            switch deferred.state {
-            case .Fulfilled(let value):
-                promise._fulfill(value())
-            case .Rejected(let reason):
-                promise._reject(reason)
-            case .Pending:
-                assert(promise !== deferred, "A promise referencing itself causes an unbreakable retain cycle")
-                assert(promise.deferred == nil, "Not yet sure if this is possible")
-                promise.deferred = deferred
-                deferred.thenOn(
-                    promise.queue,
-                    // Is it possible for deferred to be set multiple times (losing the intial values)?
-                    onFulfilled: { [weak promise] (value: R) -> Result<R> in
-                        if let blockPromise = promise {
-                            blockPromise._fulfill(value)
-                            blockPromise.deferred = nil
-                        }
-                        return .Success(value)
-                    },
-                    onRejected: { [weak promise] (reason: Error) -> Result<R> in
-                        if let blockPromise = promise {
-                            blockPromise._reject(reason)
-                            blockPromise.deferred = nil
-                        }
-                        return .Failure(reason)
-                    }
-                )
-            }
-        }
-    }
-    
-    func dispatch<R>(queue: SerialTaskQueue, promise: Promise<R>, task: (blockSelf: Promise<T>, blockPromise: Promise<R>) -> ()) {
-        queue.dispatch { [weak self, weak promise] in
-            if let blockSelf = self {
-                if let blockPromise = promise {
-                    task(blockSelf: blockSelf, blockPromise: blockPromise)
+    func callbackHandler<V>(callbackQueue: SerialTaskQueue, callback: ((V) -> Result<T>)) -> (V) -> () {
+        return { [weak self] (value: V) -> () in
+            if let promise = self {
+                promise.synchronizeOn(callbackQueue) { (synchronizedPromise) -> () in
+                    let result = callback(value)
+                    synchronizedPromise.resolve(result)
                 }
             }
         }
     }
     
-    func fulfillHandler<R>(thenQueue: SerialTaskQueue, promise: Promise<R>, onFulfilled: ((T) -> Result<R>)) -> (T) -> () {
-        return { [weak self, weak promise] (value: T) -> () in
-            if let blockSelf = self {
-                if let blockPromise = promise {
-                    blockSelf.dispatch(thenQueue, promise: blockPromise) { (blockSelf, blockPromise) -> () in
-                        let result = onFulfilled(value)
-                        
-                        blockSelf.dispatch(blockSelf.queue, promise: blockPromise) { (blockSelf, blockPromise) -> () in
-                            blockSelf.resolve(blockPromise, result: result)
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    func rejectHandler<R>(thenQueue: SerialTaskQueue, promise: Promise<R>, onRejected: ((Error) -> Result<R>)) -> (Error) -> () {
-        return { [weak self, weak promise] (reason: Error) -> () in
-            if let blockSelf = self {
-                if let blockPromise = promise {
-                    blockSelf.dispatch(thenQueue, promise: blockPromise) { (blockSelf, blockPromise) -> () in
-                        let result = onRejected(reason)
-                        
-                        blockSelf.dispatch(blockSelf.queue, promise: blockPromise) { (blockSelf, blockPromise) -> () in
-                            blockSelf.resolve(blockPromise, result: result)
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    // 2.2 - The then Method
-    // A promise must provide a then method to access its current or eventual value or reason.
-    // A promise's then method accepts two arguments: promise.then(onFulfilled, onRejected)
-    // 2.2.1 - Both onFulfilled and onRejected are optional arguments
-    //    **** Optional versions are provided by the when and catch methods. Being able to
-    //    **** provide no callbacks at all (when both are optional) is not useful and is
-    //    **** not supported.
     func then<R>(# onFulfilled: ((T) -> Result<R>), onRejected: ((Error) -> Result<R>)) -> Promise<R> {
         return thenOn(GCDSerialTaskQueue.main(), onFulfilled: onFulfilled, onRejected: onRejected)
     }
 
     func thenOn<R>(thenQueue: SerialTaskQueue, onFulfilled: ((T) -> Result<R>), onRejected: ((Error) -> Result<R>)) -> Promise<R> {
-        var promise = Promise<R>(queue: self.queue, parent: {self})
-        let fulfillHandler = self.fulfillHandler(thenQueue, promise: promise, onFulfilled: onFulfilled)
-        let rejectHandler = self.rejectHandler(thenQueue, promise: promise, onRejected: onRejected)
+        var child = Promise<R>(synchronizationQueue: synchronizationQueue, parent: {self})
+        let fulfillChild = child.callbackHandler(thenQueue, callback: onFulfilled)
+        let rejectChild = child.callbackHandler(thenQueue, callback: onRejected)
         
-        queue.dispatch { [weak self] in
-            if let blockSelf = self {
-                switch blockSelf.state {
-                case .Pending:
-                    blockSelf.onFulfilled.append(fulfillHandler);
-                    blockSelf.onRejected.append(rejectHandler);
-                case .Fulfilled(let value):
-                    fulfillHandler(value())
-                case .Rejected(let reason):
-                    rejectHandler(reason)
-                }
+        synchronize { (synchronizedPromise) -> () in
+            switch synchronizedPromise.state {
+            case .Pending:
+                synchronizedPromise.onFulfilled.append(fulfillChild);
+                synchronizedPromise.onRejected.append(rejectChild);
+            case .Fulfilled(let value):
+                fulfillChild(value())
+            case .Rejected(let reason):
+                rejectChild(reason)
             }
         }
         
-        return promise
+        return child
     }
     
     func when(onFulfilled: ((T) -> ())) -> Promise<T> {
