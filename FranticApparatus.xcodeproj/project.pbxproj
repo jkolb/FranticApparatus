@@ -12,8 +12,13 @@
 		E55CA21719C676DC00E66980 /* FranticApparatus.h in Headers */ = {isa = PBXBuildFile; fileRef = E55CA21619C676DC00E66980 /* FranticApparatus.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E55CA21D19C676DC00E66980 /* FranticApparatus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55CA21119C676DC00E66980 /* FranticApparatus.framework */; };
 		E55CA22419C676DC00E66980 /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55CA22319C676DC00E66980 /* PromiseTests.swift */; };
-		E5D1CDFF19D1246C007817A2 /* SerialTaskQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5D1CDFE19D1246C007817A2 /* SerialTaskQueue.swift */; };
-		E5D1CE0019D12485007817A2 /* SerialTaskQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5D1CDFE19D1246C007817A2 /* SerialTaskQueue.swift */; };
+		E5B3740B19D8F9BC00701FF6 /* Deferrable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3740819D8F9BC00701FF6 /* Deferrable.swift */; };
+		E5B3740C19D8F9BC00701FF6 /* DispatchQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3740919D8F9BC00701FF6 /* DispatchQueue.swift */; };
+		E5B3740D19D8F9BC00701FF6 /* Synchronizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3740A19D8F9BC00701FF6 /* Synchronizable.swift */; };
+		E5B3740E19D8FA0F00701FF6 /* Deferrable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3740819D8F9BC00701FF6 /* Deferrable.swift */; };
+		E5B3740F19D8FA1300701FF6 /* DispatchQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3740919D8F9BC00701FF6 /* DispatchQueue.swift */; };
+		E5B3741019D8FA1600701FF6 /* Synchronizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3740A19D8F9BC00701FF6 /* Synchronizable.swift */; };
+		E5B3741219D900DD00701FF6 /* PromiseURLSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3741119D900DD00701FF6 /* PromiseURLSession.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -23,6 +28,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = E55CA21019C676DC00E66980;
 			remoteInfo = FranticApparatus;
+		};
+		E59910CA19D903DA00E07A83 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E59910C519D903D900E07A83 /* FranticApparatusExample_iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E59910A019D903D900E07A83;
+			remoteInfo = FranticApparatusExample_iOS;
+		};
+		E59910CC19D903DA00E07A83 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E59910C519D903D900E07A83 /* FranticApparatusExample_iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E59910B519D903D900E07A83;
+			remoteInfo = FranticApparatusExample_iOSTests;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -34,7 +53,11 @@
 		E55CA21C19C676DC00E66980 /* FranticApparatusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FranticApparatusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E55CA22219C676DC00E66980 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E55CA22319C676DC00E66980 /* PromiseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
-		E5D1CDFE19D1246C007817A2 /* SerialTaskQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerialTaskQueue.swift; sourceTree = "<group>"; };
+		E59910C519D903D900E07A83 /* FranticApparatusExample_iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = FranticApparatusExample_iOS.xcodeproj; path = FranticApparatusExample_iOS/FranticApparatusExample_iOS.xcodeproj; sourceTree = "<group>"; };
+		E5B3740819D8F9BC00701FF6 /* Deferrable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Deferrable.swift; sourceTree = "<group>"; };
+		E5B3740919D8F9BC00701FF6 /* DispatchQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DispatchQueue.swift; sourceTree = "<group>"; };
+		E5B3740A19D8F9BC00701FF6 /* Synchronizable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Synchronizable.swift; sourceTree = "<group>"; };
+		E5B3741119D900DD00701FF6 /* PromiseURLSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseURLSession.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +82,7 @@
 		E55CA20719C676DC00E66980 = {
 			isa = PBXGroup;
 			children = (
+				E59910C519D903D900E07A83 /* FranticApparatusExample_iOS.xcodeproj */,
 				E55CA21319C676DC00E66980 /* FranticApparatus */,
 				E55CA22019C676DC00E66980 /* FranticApparatusTests */,
 				E55CA21219C676DC00E66980 /* Products */,
@@ -78,8 +102,11 @@
 			isa = PBXGroup;
 			children = (
 				E55CA21619C676DC00E66980 /* FranticApparatus.h */,
+				E5B3740819D8F9BC00701FF6 /* Deferrable.swift */,
+				E5B3740919D8F9BC00701FF6 /* DispatchQueue.swift */,
+				E5B3740A19D8F9BC00701FF6 /* Synchronizable.swift */,
 				E54661C919CDE777007488CA /* Promise.swift */,
-				E5D1CDFE19D1246C007817A2 /* SerialTaskQueue.swift */,
+				E5B3741119D900DD00701FF6 /* PromiseURLSession.swift */,
 				E55CA21419C676DC00E66980 /* Supporting Files */,
 			);
 			path = FranticApparatus;
@@ -108,6 +135,15 @@
 				E55CA22219C676DC00E66980 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E59910C619D903D900E07A83 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E59910CB19D903DA00E07A83 /* FranticApparatusExample_iOS.app */,
+				E59910CD19D903DA00E07A83 /* FranticApparatusExample_iOSTests.xctest */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -187,6 +223,12 @@
 			mainGroup = E55CA20719C676DC00E66980;
 			productRefGroup = E55CA21219C676DC00E66980 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = E59910C619D903D900E07A83 /* Products */;
+					ProjectRef = E59910C519D903D900E07A83 /* FranticApparatusExample_iOS.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				E55CA21019C676DC00E66980 /* FranticApparatus */,
@@ -194,6 +236,23 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		E59910CB19D903DA00E07A83 /* FranticApparatusExample_iOS.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = FranticApparatusExample_iOS.app;
+			remoteRef = E59910CA19D903DA00E07A83 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E59910CD19D903DA00E07A83 /* FranticApparatusExample_iOSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = FranticApparatusExample_iOSTests.xctest;
+			remoteRef = E59910CC19D903DA00E07A83 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		E55CA20F19C676DC00E66980 /* Resources */ = {
@@ -217,8 +276,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E5D1CDFF19D1246C007817A2 /* SerialTaskQueue.swift in Sources */,
+				E5B3741219D900DD00701FF6 /* PromiseURLSession.swift in Sources */,
+				E5B3740B19D8F9BC00701FF6 /* Deferrable.swift in Sources */,
 				E54661CA19CDE777007488CA /* Promise.swift in Sources */,
+				E5B3740D19D8F9BC00701FF6 /* Synchronizable.swift in Sources */,
+				E5B3740C19D8F9BC00701FF6 /* DispatchQueue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -228,7 +290,9 @@
 			files = (
 				E55CA22419C676DC00E66980 /* PromiseTests.swift in Sources */,
 				E54661CB19CDE7D9007488CA /* Promise.swift in Sources */,
-				E5D1CE0019D12485007817A2 /* SerialTaskQueue.swift in Sources */,
+				E5B3741019D8FA1600701FF6 /* Synchronizable.swift in Sources */,
+				E5B3740F19D8FA1300701FF6 /* DispatchQueue.swift in Sources */,
+				E5B3740E19D8FA0F00701FF6 /* Deferrable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

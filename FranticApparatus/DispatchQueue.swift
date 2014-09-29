@@ -1,5 +1,5 @@
 //
-// SerialTaskQueue.swift
+// DispatchQueue.swift
 // FranticApparatus
 //
 // Copyright (c) 2014 Justin Kolb - http://franticapparatus.net
@@ -23,56 +23,42 @@
 // THE SOFTWARE.
 //
 
-import Foundation
+import Dispatch
 
-protocol SerialTaskQueue {
-    func dispatch(task: () -> ())
+public protocol DispatchQueue {
+    func dispatch(block: () -> ())
+    func dispatchAndWait(block: () -> ())
+    func dispatchSerialized(block: () -> ())
 }
 
-final class GCDSerialTaskQueue : SerialTaskQueue {
+public final class GCDQueue: DispatchQueue {
     let queue: dispatch_queue_t
     
-    required init(main: Bool = false) {
-        if main {
-            queue = dispatch_get_main_queue()
-        } else {
-            queue = dispatch_queue_create("net.franticapparatus.GCDSerialTaskQueue", DISPATCH_QUEUE_SERIAL)
-        }
+    public init(queue: dispatch_queue_t) {
+        self.queue = queue
     }
     
-    class func main() -> SerialTaskQueue {
-        return self(main: true)
+    public class func main() -> DispatchQueue {
+        return GCDQueue(queue: dispatch_get_main_queue())
     }
     
-    func dispatch(task: () -> ()) {
-        dispatch_async(queue, task)
-    }
-}
-
-final class NSOperationSerialTaskQueue : SerialTaskQueue {
-    let queue: NSOperationQueue
-    
-    required init(main: Bool = false) {
-        if main {
-            queue = NSOperationQueue.mainQueue()
-        } else {
-            queue = NSOperationQueue()
-            queue.maxConcurrentOperationCount = 1
-            queue.name = "net.franticapparatus.NSOperationSerialTaskQueue"
-        }
+    public class func serial(name: String) -> DispatchQueue {
+        return GCDQueue(queue: dispatch_queue_create(name, DISPATCH_QUEUE_SERIAL))
     }
     
-    class func main() -> SerialTaskQueue {
-        return self(main: true)
+    public class func concurrent(name: String) -> DispatchQueue {
+        return GCDQueue(queue: dispatch_queue_create(name, DISPATCH_QUEUE_CONCURRENT))
     }
     
-    func dispatch(task: () -> ()) {
-        queue.addOperationWithBlock(task)
+    public func dispatch(block: () -> ()) {
+        dispatch_async(queue, block)
     }
-}
-
-final class ImmediateSerialTaskQueue : SerialTaskQueue {
-    func dispatch(task: () -> ()) {
-        task()
+    
+    public func dispatchAndWait(block: () -> ()) {
+        dispatch_sync(queue, block)
+    }
+    
+    public func dispatchSerialized(block: () -> ()) {
+        dispatch_barrier_async(queue, block)
     }
 }

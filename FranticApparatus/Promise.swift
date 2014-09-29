@@ -23,48 +23,55 @@
 // THE SOFTWARE.
 //
 
-enum State<T> {
+var promiseIdentifier = 0
+
+public enum State<T> {
     case Pending
     case Fulfilled(@autoclosure () -> T)
     case Rejected(Error)
 }
 
-enum Result<T> {
+public enum Result<T> {
     case Success(@autoclosure () -> T)
     case Deferred(Promise<T>)
     case Failure(Error)
 }
 
-class Error {
-    let message: String
+public class Error {
+    public let message: String
     
-    init(message: String = "") {
+    public init(message: String = "") {
         self.message = message
     }
 }
 
-class Promise<T> {
-    let synchronizationQueue: SerialTaskQueue
+public class Promise<T>: Synchronizable {
+    let identifier = ++promiseIdentifier
+    public let synchronizationQueue: DispatchQueue
     let parent: (() -> Any)?
     var currentState: State<T> = .Pending
     var deferred: Promise<T>! = nil
     var onFulfilled = Array<(T) -> ()>()
     var onRejected = Array<(Error) -> ()>()
     
-    init(synchronizationQueue: SerialTaskQueue = GCDSerialTaskQueue(), parent: (() -> Any)? = nil) {
+    public init(synchronizationQueue: DispatchQueue = GCDQueue.serial("net.franticapparatus.Promise"), parent: (() -> Any)? = nil) {
         self.synchronizationQueue = synchronizationQueue
         self.parent = parent
     }
     
-    func fulfill(value: T) {
-        synchronize { (synchronizedPromise) -> () in
-            synchronizedPromise.state = .Fulfilled(value)
+    deinit {
+        println("deinit: Promise \(identifier)")
+    }
+    
+    public func fulfill(value: T) {
+        synchronizeWrite(self) { (promise) -> () in
+            promise.state = .Fulfilled(value)
         }
     }
     
-    func reject(reason: Error) {
-        synchronize { (synchronizedPromise) -> () in
-            synchronizedPromise.state = .Rejected(reason)
+    public func reject(reason: Error) {
+        synchronizeWrite(self) { (promise) -> () in
+            promise.state = .Rejected(reason)
         }
     }
     
@@ -98,83 +105,66 @@ class Promise<T> {
     }
     
     func resolve(result: Result<T>) {
-        synchronize { (synchronizedPromise) -> () in
+        synchronizeWrite(self) { (promise) -> () in
             switch result {
             case .Success(let value):
-                synchronizedPromise.state = .Fulfilled(value())
+                promise.state = .Fulfilled(value())
             case .Failure(let reason):
-                synchronizedPromise.state = .Rejected(reason)
+                promise.state = .Rejected(reason)
             case .Deferred(let deferred):
                 switch deferred.state {
                 case .Pending:
-                    assert(synchronizedPromise !== deferred, "A promise referencing itself causes an unbreakable retain cycle")
-                    assert(synchronizedPromise.deferred == nil, "Attempt to reassign deferred")
-                    synchronizedPromise.deferred = deferred.thenOn(
-                        synchronizedPromise.synchronizationQueue,
-                        onFulfilled: { [weak synchronizedPromise] (value: T) -> Result<T> in
-                            synchronizedPromise?.state = .Fulfilled(value)
+                    // This section still feels awkward and inefficient
+                    assert(promise !== deferred, "A promise referencing itself causes an unbreakable retain cycle")
+                    assert(promise.deferred == nil, "Attempt to reassign deferred")
+                    promise.deferred = deferred.then(
+                        onFulfilled: { [weak promise] (value: T) -> Result<T> in
+                            promise?.fulfill(value)
                             return .Success(value)
                         },
-                        onRejected: { [weak synchronizedPromise] (reason: Error) -> Result<T> in
-                            synchronizedPromise?.state = .Rejected(reason)
+                        onRejected: { [weak promise] (reason: Error) -> Result<T> in
+                            promise?.reject(reason)
                             return .Failure(reason)
                         }
                     )
                 default:
-                    synchronizedPromise.state = deferred.state
-                }
-            }
-        }
-    }
-
-    func synchronize(task: (Promise<T>) -> ()) {
-        synchronizeOn(synchronizationQueue, task: task)
-    }
-    
-    func synchronizeOn(queue: SerialTaskQueue, task: (Promise<T>) -> ()) {
-        queue.dispatch { [weak self] in
-            if let synchronizedPromise = self {
-                task(synchronizedPromise)
-            }
-        }
-    }
-    
-    func callbackHandler<V>(callbackQueue: SerialTaskQueue, callback: ((V) -> Result<T>)) -> (V) -> () {
-        return { [weak self] (value: V) -> () in
-            if let promise = self {
-                promise.synchronizeOn(callbackQueue) { (synchronizedPromise) -> () in
-                    let result = callback(value)
-                    synchronizedPromise.resolve(result)
+                    promise.state = deferred.state
                 }
             }
         }
     }
     
-    func then<R>(# onFulfilled: ((T) -> Result<R>), onRejected: ((Error) -> Result<R>)) -> Promise<R> {
-        return thenOn(GCDSerialTaskQueue.main(), onFulfilled: onFulfilled, onRejected: onRejected)
+    public func then<R>(# onFulfilled: ((T) -> Result<R>), onRejected: ((Error) -> Result<R>)) -> Promise<R> {
+        return thenOn(GCDQueue.main(), onFulfilled: onFulfilled, onRejected: onRejected)
     }
-
-    func thenOn<R>(thenQueue: SerialTaskQueue, onFulfilled: ((T) -> Result<R>), onRejected: ((Error) -> Result<R>)) -> Promise<R> {
-        var child = Promise<R>(synchronizationQueue: synchronizationQueue, parent: {self})
-        let fulfillChild = child.callbackHandler(thenQueue, callback: onFulfilled)
-        let rejectChild = child.callbackHandler(thenQueue, callback: onRejected)
+    
+    public func thenOn<R>(thenQueue: DispatchQueue, onFulfilled: ((T) -> Result<R>), onRejected: ((Error) -> Result<R>)) -> Promise<R> {
+        var promise = Promise<R>(synchronizationQueue: synchronizationQueue, parent: {self})
+        let fulfiller: (T) -> () = defer(promise, on: thenQueue) { (deferredPromise, value) -> () in
+            let result = onFulfilled(value)
+            deferredPromise.resolve(result)
+        }
+        let rejecter: (Error) -> () = defer(promise, on: thenQueue) { (deferredPromise, value) -> () in
+            let result = onRejected(value)
+            deferredPromise.resolve(result)
+        }
         
-        synchronize { (synchronizedPromise) -> () in
-            switch synchronizedPromise.state {
+        synchronizeWrite(self) { (promise) -> () in
+            switch promise.state {
             case .Pending:
-                synchronizedPromise.onFulfilled.append(fulfillChild);
-                synchronizedPromise.onRejected.append(rejectChild);
+                promise.onFulfilled.append(fulfiller);
+                promise.onRejected.append(rejecter);
             case .Fulfilled(let value):
-                fulfillChild(value())
+                fulfiller(value())
             case .Rejected(let reason):
-                rejectChild(reason)
+                rejecter(reason)
             }
         }
         
-        return child
+        return promise
     }
     
-    func when(onFulfilled: ((T) -> ())) -> Promise<T> {
+    public func when(onFulfilled: ((T) -> ())) -> Promise<T> {
         return then(
             onFulfilled: { (value: T) -> Result<T> in
                 onFulfilled(value)
@@ -186,7 +176,7 @@ class Promise<T> {
         )
     }
     
-    func when<R>(onFulfilled: ((T) -> Result<R>)) -> Promise<R> {
+    public func when<R>(onFulfilled: ((T) -> Result<R>)) -> Promise<R> {
         return then(
             onFulfilled: onFulfilled,
             onRejected: { (reason: Error) -> Result<R> in
@@ -195,7 +185,7 @@ class Promise<T> {
         )
     }
     
-    func catch(onRejected: (Error) -> ()) -> Promise<T> {
+    public func catch(onRejected: (Error) -> ()) -> Promise<T> {
         return then(
             onFulfilled: { (value: T) -> Result<T> in
                 return .Success(value)
@@ -207,7 +197,7 @@ class Promise<T> {
         )
     }
     
-    func finally(onFinally: () -> ()) -> Promise<T> {
+    public func finally(onFinally: () -> ()) -> Promise<T> {
         return then(
             onFulfilled: { (value: T) -> Result<T> in
                 onFinally()

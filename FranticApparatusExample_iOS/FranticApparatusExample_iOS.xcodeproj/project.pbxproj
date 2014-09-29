@@ -1,0 +1,434 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E59910A619D903D900E07A83 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59910A519D903D900E07A83 /* AppDelegate.swift */; };
+		E59910A819D903D900E07A83 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59910A719D903D900E07A83 /* ViewController.swift */; };
+		E59910AB19D903D900E07A83 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E59910A919D903D900E07A83 /* Main.storyboard */; };
+		E59910AD19D903D900E07A83 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E59910AC19D903D900E07A83 /* Images.xcassets */; };
+		E59910B019D903D900E07A83 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = E59910AE19D903D900E07A83 /* LaunchScreen.xib */; };
+		E59910BC19D903D900E07A83 /* FranticApparatusExample_iOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59910BB19D903D900E07A83 /* FranticApparatusExample_iOSTests.swift */; };
+		E59910CF19D903F300E07A83 /* FranticApparatus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59910CE19D903F300E07A83 /* FranticApparatus.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E59910B619D903D900E07A83 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E599109819D903D900E07A83 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E599109F19D903D900E07A83;
+			remoteInfo = FranticApparatusExample_iOS;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		E59910A019D903D900E07A83 /* FranticApparatusExample_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FranticApparatusExample_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E59910A419D903D900E07A83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E59910A519D903D900E07A83 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E59910A719D903D900E07A83 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		E59910AA19D903D900E07A83 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		E59910AC19D903D900E07A83 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		E59910AF19D903D900E07A83 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
+		E59910B519D903D900E07A83 /* FranticApparatusExample_iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FranticApparatusExample_iOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E59910BA19D903D900E07A83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E59910BB19D903D900E07A83 /* FranticApparatusExample_iOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FranticApparatusExample_iOSTests.swift; sourceTree = "<group>"; };
+		E59910CE19D903F300E07A83 /* FranticApparatus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FranticApparatus.framework; path = "../build/Debug-iphoneos/FranticApparatus.framework"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E599109D19D903D900E07A83 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E59910CF19D903F300E07A83 /* FranticApparatus.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E59910B219D903D900E07A83 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E599109719D903D900E07A83 = {
+			isa = PBXGroup;
+			children = (
+				E59910CE19D903F300E07A83 /* FranticApparatus.framework */,
+				E59910A219D903D900E07A83 /* FranticApparatusExample_iOS */,
+				E59910B819D903D900E07A83 /* FranticApparatusExample_iOSTests */,
+				E59910A119D903D900E07A83 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E59910A119D903D900E07A83 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E59910A019D903D900E07A83 /* FranticApparatusExample_iOS.app */,
+				E59910B519D903D900E07A83 /* FranticApparatusExample_iOSTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E59910A219D903D900E07A83 /* FranticApparatusExample_iOS */ = {
+			isa = PBXGroup;
+			children = (
+				E59910A519D903D900E07A83 /* AppDelegate.swift */,
+				E59910A719D903D900E07A83 /* ViewController.swift */,
+				E59910A919D903D900E07A83 /* Main.storyboard */,
+				E59910AC19D903D900E07A83 /* Images.xcassets */,
+				E59910AE19D903D900E07A83 /* LaunchScreen.xib */,
+				E59910A319D903D900E07A83 /* Supporting Files */,
+			);
+			path = FranticApparatusExample_iOS;
+			sourceTree = "<group>";
+		};
+		E59910A319D903D900E07A83 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				E59910A419D903D900E07A83 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E59910B819D903D900E07A83 /* FranticApparatusExample_iOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				E59910BB19D903D900E07A83 /* FranticApparatusExample_iOSTests.swift */,
+				E59910B919D903D900E07A83 /* Supporting Files */,
+			);
+			path = FranticApparatusExample_iOSTests;
+			sourceTree = "<group>";
+		};
+		E59910B919D903D900E07A83 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				E59910BA19D903D900E07A83 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E599109F19D903D900E07A83 /* FranticApparatusExample_iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E59910BF19D903D900E07A83 /* Build configuration list for PBXNativeTarget "FranticApparatusExample_iOS" */;
+			buildPhases = (
+				E599109C19D903D900E07A83 /* Sources */,
+				E599109D19D903D900E07A83 /* Frameworks */,
+				E599109E19D903D900E07A83 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FranticApparatusExample_iOS;
+			productName = FranticApparatusExample_iOS;
+			productReference = E59910A019D903D900E07A83 /* FranticApparatusExample_iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E59910B419D903D900E07A83 /* FranticApparatusExample_iOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E59910C219D903D900E07A83 /* Build configuration list for PBXNativeTarget "FranticApparatusExample_iOSTests" */;
+			buildPhases = (
+				E59910B119D903D900E07A83 /* Sources */,
+				E59910B219D903D900E07A83 /* Frameworks */,
+				E59910B319D903D900E07A83 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E59910B719D903D900E07A83 /* PBXTargetDependency */,
+			);
+			name = FranticApparatusExample_iOSTests;
+			productName = FranticApparatusExample_iOSTests;
+			productReference = E59910B519D903D900E07A83 /* FranticApparatusExample_iOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E599109819D903D900E07A83 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0600;
+				ORGANIZATIONNAME = "Justin Kolb";
+				TargetAttributes = {
+					E599109F19D903D900E07A83 = {
+						CreatedOnToolsVersion = 6.0.1;
+					};
+					E59910B419D903D900E07A83 = {
+						CreatedOnToolsVersion = 6.0.1;
+						TestTargetID = E599109F19D903D900E07A83;
+					};
+				};
+			};
+			buildConfigurationList = E599109B19D903D900E07A83 /* Build configuration list for PBXProject "FranticApparatusExample_iOS" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E599109719D903D900E07A83;
+			productRefGroup = E59910A119D903D900E07A83 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E599109F19D903D900E07A83 /* FranticApparatusExample_iOS */,
+				E59910B419D903D900E07A83 /* FranticApparatusExample_iOSTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E599109E19D903D900E07A83 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E59910AB19D903D900E07A83 /* Main.storyboard in Resources */,
+				E59910B019D903D900E07A83 /* LaunchScreen.xib in Resources */,
+				E59910AD19D903D900E07A83 /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E59910B319D903D900E07A83 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E599109C19D903D900E07A83 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E59910A819D903D900E07A83 /* ViewController.swift in Sources */,
+				E59910A619D903D900E07A83 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E59910B119D903D900E07A83 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E59910BC19D903D900E07A83 /* FranticApparatusExample_iOSTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E59910B719D903D900E07A83 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E599109F19D903D900E07A83 /* FranticApparatusExample_iOS */;
+			targetProxy = E59910B619D903D900E07A83 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		E59910A919D903D900E07A83 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E59910AA19D903D900E07A83 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		E59910AE19D903D900E07A83 /* LaunchScreen.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E59910AF19D903D900E07A83 /* Base */,
+			);
+			name = LaunchScreen.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		E59910BD19D903D900E07A83 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E59910BE19D903D900E07A83 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E59910C019D903D900E07A83 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/jkolb/src/FranticApparatus/build/Debug-iphoneos",
+				);
+				INFOPLIST_FILE = FranticApparatusExample_iOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		E59910C119D903D900E07A83 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/jkolb/src/FranticApparatus/build/Debug-iphoneos",
+				);
+				INFOPLIST_FILE = FranticApparatusExample_iOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		E59910C319D903D900E07A83 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = FranticApparatusExample_iOSTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FranticApparatusExample_iOS.app/FranticApparatusExample_iOS";
+			};
+			name = Debug;
+		};
+		E59910C419D903D900E07A83 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = FranticApparatusExample_iOSTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FranticApparatusExample_iOS.app/FranticApparatusExample_iOS";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E599109B19D903D900E07A83 /* Build configuration list for PBXProject "FranticApparatusExample_iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E59910BD19D903D900E07A83 /* Debug */,
+				E59910BE19D903D900E07A83 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E59910BF19D903D900E07A83 /* Build configuration list for PBXNativeTarget "FranticApparatusExample_iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E59910C019D903D900E07A83 /* Debug */,
+				E59910C119D903D900E07A83 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		E59910C219D903D900E07A83 /* Build configuration list for PBXNativeTarget "FranticApparatusExample_iOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E59910C319D903D900E07A83 /* Debug */,
+				E59910C419D903D900E07A83 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E599109819D903D900E07A83 /* Project object */;
+}
