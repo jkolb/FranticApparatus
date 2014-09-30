@@ -23,8 +23,6 @@
 // THE SOFTWARE.
 //
 
-var promiseIdentifier = 0
-
 public enum State<T> {
     case Pending
     case Fulfilled(@autoclosure () -> T)
@@ -37,16 +35,7 @@ public enum Result<T> {
     case Failure(Error)
 }
 
-public class Error {
-    public let message: String
-    
-    public init(message: String = "") {
-        self.message = message
-    }
-}
-
 public class Promise<T>: Synchronizable {
-    let identifier = ++promiseIdentifier
     public let synchronizationQueue: DispatchQueue
     let parent: (() -> Any)?
     var currentState: State<T> = .Pending
@@ -57,10 +46,6 @@ public class Promise<T>: Synchronizable {
     public init(synchronizationQueue: DispatchQueue = GCDQueue.serial("net.franticapparatus.Promise"), parent: (() -> Any)? = nil) {
         self.synchronizationQueue = synchronizationQueue
         self.parent = parent
-    }
-    
-    deinit {
-        println("deinit: Promise \(identifier)")
     }
     
     public func fulfill(value: T) {

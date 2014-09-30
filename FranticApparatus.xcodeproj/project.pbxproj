@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		09ACD43319DADA66003607D8 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09ACD43219DADA66003607D8 /* Error.swift */; };
+		09ACD43419DADA66003607D8 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09ACD43219DADA66003607D8 /* Error.swift */; };
 		E54661CA19CDE777007488CA /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54661C919CDE777007488CA /* Promise.swift */; };
 		E54661CB19CDE7D9007488CA /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54661C919CDE777007488CA /* Promise.swift */; };
 		E55CA21719C676DC00E66980 /* FranticApparatus.h in Headers */ = {isa = PBXBuildFile; fileRef = E55CA21619C676DC00E66980 /* FranticApparatus.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -46,6 +48,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		09ACD43219DADA66003607D8 /* Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
 		E54661C919CDE777007488CA /* Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
 		E55CA21119C676DC00E66980 /* FranticApparatus.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FranticApparatus.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E55CA21519C676DC00E66980 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -104,6 +107,7 @@
 				E55CA21619C676DC00E66980 /* FranticApparatus.h */,
 				E5B3740819D8F9BC00701FF6 /* Deferrable.swift */,
 				E5B3740919D8F9BC00701FF6 /* DispatchQueue.swift */,
+				09ACD43219DADA66003607D8 /* Error.swift */,
 				E5B3740A19D8F9BC00701FF6 /* Synchronizable.swift */,
 				E54661C919CDE777007488CA /* Promise.swift */,
 				E5B3741119D900DD00701FF6 /* PromiseURLSession.swift */,
@@ -280,6 +284,7 @@
 				E5B3740B19D8F9BC00701FF6 /* Deferrable.swift in Sources */,
 				E54661CA19CDE777007488CA /* Promise.swift in Sources */,
 				E5B3740D19D8F9BC00701FF6 /* Synchronizable.swift in Sources */,
+				09ACD43319DADA66003607D8 /* Error.swift in Sources */,
 				E5B3740C19D8F9BC00701FF6 /* DispatchQueue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -292,6 +297,7 @@
 				E54661CB19CDE7D9007488CA /* Promise.swift in Sources */,
 				E5B3741019D8FA1600701FF6 /* Synchronizable.swift in Sources */,
 				E5B3740F19D8FA1300701FF6 /* DispatchQueue.swift in Sources */,
+				09ACD43419DADA66003607D8 /* Error.swift in Sources */,
 				E5B3740E19D8FA0F00701FF6 /* Deferrable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -46,7 +46,7 @@ public class PromiseURLSession : NSObject, NSURLSessionDataDelegate, Synchroniza
                 if error == nil {
                     promisedData.promise?.fulfill((response: task.response!, data: promisedData.data.copy() as NSData))
                 } else {
-                    promisedData.promise?.reject(Error())
+                    promisedData.promise?.reject(NSErrorWrapperError(cause: error!))
                 }
             }
             
@@ -72,10 +72,14 @@ public class PromiseURLSession : NSObject, NSURLSessionDataDelegate, Synchroniza
         
         synchronizeWrite(self) { [weak promise] (promiseSession) in
             if let strongPromise = promise {
-                let dataTask = promiseSession.session.dataTaskWithRequest(threadSafeRequest)
-                let promisedData = PromisedData(promise: strongPromise, data: NSMutableData(capacity: 4096))
-                promiseSession.taskPromisedData[dataTask] = promisedData
-                dataTask.resume()
+                if let data = NSMutableData(capacity: 4096) {
+                    let dataTask = promiseSession.session.dataTaskWithRequest(threadSafeRequest)
+                    let promisedData = PromisedData(promise: strongPromise, data: data)
+                    promiseSession.taskPromisedData[dataTask] = promisedData
+                    dataTask.resume()
+                } else {
+                    strongPromise.reject(OutOfMemoryError())
+                }
             }
         }
         

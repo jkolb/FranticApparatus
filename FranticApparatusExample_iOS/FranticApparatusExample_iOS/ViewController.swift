@@ -31,13 +31,6 @@ class UnexpectedHTTPStatusCodeError : Error {}
 class MissingContentTypeError : Error {}
 class UnexpectedContentTypeError : Error {}
 class LinkListingParseError : Error {}
-class NSErrorWrapperError : Error {
-    let cause: NSError
-    
-    init(cause: NSError) {
-        self.cause = cause
-    }
-}
 
 class ViewController: UIViewController {
     let session = PromiseURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration())
@@ -50,14 +43,8 @@ class ViewController: UIViewController {
         
         fetch = fetchLinks("all").when({ (json) in
             println(json)
-        }).catch({
-            switch $0 {
-            case is UnexpectedContentTypeError:
-                println("Unexpected content type")
-            default:
-                println($0)
-                println("Default error")
-            }
+        }).catch({ (error) in
+            println(error)
         }).finally({ [unowned self] in
             UIApplication.sharedApplication().networkActivityIndicatorVisible = false;
             self.fetch = nil
@@ -67,7 +54,7 @@ class ViewController: UIViewController {
     func fetchLinks(reddit: String) -> Promise<AnyObject> {
         let url = NSURL(string: "http://reddit.com/r/" + reddit + ".json")
         
-        return fetchJSON(url).when({ [weak self] (data: NSData) -> Result<AnyObject> in
+        return fetchJSON(url!).when({ [weak self] (data: NSData) -> Result<AnyObject> in
             return .Deferred(self!.parseJSON(data))
         })
     }
