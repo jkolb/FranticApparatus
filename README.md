@@ -2,6 +2,8 @@
 
 #### A Promises/A+ implementation for Swift
 
+## Only works on Xcode 6.1 Beta 3
+
 ## Examples
 
 #### A chain of promises that fetches some JSON from a URL, parses the JSON into an NSDictionary, and then maps the NSDictionay into an array of Link objects. All of these tasks occur on separate threads but the callbacks occur on the main thread.
