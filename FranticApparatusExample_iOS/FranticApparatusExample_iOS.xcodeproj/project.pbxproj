@@ -342,10 +342,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"/Users/jkolb/src/FranticApparatus/build/Debug-iphoneos",
-				);
+				FRAMEWORK_SEARCH_PATHS = .;
 				INFOPLIST_FILE = FranticApparatusExample_iOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -356,10 +353,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"/Users/jkolb/src/FranticApparatus/build/Debug-iphoneos",
-				);
+				FRAMEWORK_SEARCH_PATHS = .;
 				INFOPLIST_FILE = FranticApparatusExample_iOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -419,6 +413,7 @@
 				E59910C119D903D900E07A83 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		E59910C219D903D900E07A83 /* Build configuration list for PBXNativeTarget "FranticApparatusExample_iOSTests" */ = {
 			isa = XCConfigurationList;
@@ -427,6 +422,7 @@
 				E59910C419D903D900E07A83 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
