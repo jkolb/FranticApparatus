@@ -31,7 +31,7 @@ public class PromiseURLSession : NSObject, NSURLSessionDataDelegate, Synchroniza
         var data: NSMutableData
     }
     
-    public let synchronizationQueue = GCDQueue.serial("net.franticapparatus.PromiseSession")
+    public let synchronizationQueue = GCDQueue.concurrent("net.franticapparatus.PromiseSession")
     let session: NSURLSession!
     var taskPromisedData = Dictionary<NSURLSessionTask, PromisedData>(minimumCapacity: 8)
     
