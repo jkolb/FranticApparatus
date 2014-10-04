@@ -8,11 +8,15 @@
 
 import Foundation
 
-public class Error {
+public class Error : Printable {
     public let message: String
     
     public init(message: String = "") {
         self.message = message
+    }
+    
+    public var description: String {
+        return reflect(self).summary + ": " + message
     }
 }
 
@@ -21,11 +25,7 @@ public class NSErrorWrapperError : Error, Printable {
     
     public init(cause: NSError) {
         self.cause = cause
-        super.init(message: cause.localizedDescription)
-    }
-    
-    public var description: String {
-        return cause.description
+        super.init(message: cause.description)
     }
 }
 
