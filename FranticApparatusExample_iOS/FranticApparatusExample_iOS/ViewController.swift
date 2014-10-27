@@ -39,14 +39,14 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        UIApplication.sharedApplication().networkActivityIndicatorVisible = true;
+        UIApplication.sharedApplication().networkActivityIndicatorVisible = true
         
         fetch = fetchLinks("all").when({ (json) in
             println(json)
         }).catch({ (error) in
             println(error)
         }).finally({ [unowned self] in
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = false;
+            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
             self.fetch = nil
         })
     }

@@ -137,8 +137,8 @@ public class Promise<T>: Synchronizable {
         synchronizeWrite(self) { (promise) -> () in
             switch promise.state {
             case .Pending:
-                promise.onFulfilled.append(fulfiller);
-                promise.onRejected.append(rejecter);
+                promise.onFulfilled.append(fulfiller)
+                promise.onRejected.append(rejecter)
             case .Fulfilled(let value):
                 fulfiller(value())
             case .Rejected(let reason):
