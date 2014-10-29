@@ -57,7 +57,7 @@ public class PromiseURLSession : NSObject, NSURLSessionDataDelegate, Synchroniza
     }
     
     func accumulate(task: NSURLSessionTask, data: NSData) {
-        synchronizeRead(self) { (promiseSession) in
+        synchronizeWrite(self) { (promiseSession) in
             if let promisedData = promiseSession.taskPromisedData[task] {
                 data.enumerateByteRangesUsingBlock { (bytes, range, stop) -> () in
                     promisedData.data.appendBytes(bytes, length: range.length)
