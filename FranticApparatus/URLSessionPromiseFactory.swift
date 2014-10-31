@@ -1,5 +1,5 @@
 //
-// PromiseURLSession.swift
+// URLSessionPromiseFactory.swift
 // FranticApparatus
 //
 // Copyright (c) 2014 Justin Kolb - http://franticapparatus.net
@@ -25,7 +25,11 @@
 
 import Foundation
 
-public class PromiseURLSession : NSObject, NSURLSessionDataDelegate, Synchronizable {
+public protocol URLPromiseFactory {
+    func promise(request: NSURLRequest) -> Promise<(response: NSURLResponse, data: NSData)>
+}
+
+public class URLSessionPromiseFactory : NSObject, NSURLSessionDataDelegate, URLPromiseFactory, Synchronizable {
     struct PromisedData {
         weak var promise: Promise<(response: NSURLResponse, data: NSData)>?
         var data: NSMutableData
@@ -35,7 +39,7 @@ public class PromiseURLSession : NSObject, NSURLSessionDataDelegate, Synchroniza
     let session: NSURLSession!
     var taskPromisedData = Dictionary<NSURLSessionTask, PromisedData>(minimumCapacity: 8)
     
-    public init(configuration: NSURLSessionConfiguration) {
+    public init(configuration: NSURLSessionConfiguration = NSURLSessionConfiguration.defaultSessionConfiguration()) {
         super.init()
         session = NSURLSession(configuration: configuration, delegate: self, delegateQueue: NSOperationQueue())
     }
