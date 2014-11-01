@@ -50,6 +50,22 @@ public final class GCDQueue: DispatchQueue {
         return GCDQueue(queue: dispatch_queue_create(name, DISPATCH_QUEUE_CONCURRENT))
     }
     
+    public class func globalPriorityDefault() -> DispatchQueue {
+        return GCDQueue(queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
+    }
+    
+    public class func globalPriorityBackground() -> DispatchQueue {
+        return GCDQueue(queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0))
+    }
+    
+    public class func globalPriorityHigh() -> DispatchQueue {
+        return GCDQueue(queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0))
+    }
+    
+    public class func globalPriorityLow() -> DispatchQueue {
+        return GCDQueue(queue: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0))
+    }
+    
     public func dispatch(block: () -> ()) {
         dispatch_async(queue, block)
     }
