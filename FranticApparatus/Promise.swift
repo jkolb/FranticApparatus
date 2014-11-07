@@ -182,6 +182,17 @@ public class Promise<T>: Synchronizable {
         )
     }
     
+    public func retry(onRejected: (Error) -> Result<T>) -> Promise<T> {
+        return then(
+            onFulfilled: { (value: T) -> Result<T> in
+                return .Success(value)
+            },
+            onRejected: { (reason: Error) -> Result<T> in
+                return onRejected(reason)
+            }
+        )
+    }
+    
     public func finally(onFinally: () -> ()) -> Promise<T> {
         return then(
             onFulfilled: { (value: T) -> Result<T> in
