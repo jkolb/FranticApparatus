@@ -30,3 +30,5 @@ public class NSErrorWrapperError : Error, Printable {
 }
 
 public class OutOfMemoryError : Error { }
+
+public class ContextUnavailableError : Error { }

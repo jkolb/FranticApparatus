@@ -45,9 +45,9 @@ class ViewController: UIViewController {
             println(json)
         }).catch({ (error) in
             println(error)
-        }).finally({ [unowned self] in
+        }).finally(self, { (context) in
             UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-            self.fetch = nil
+            context.fetch = nil
         })
     }
     
