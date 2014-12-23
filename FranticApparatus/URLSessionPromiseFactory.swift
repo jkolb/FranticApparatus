@@ -25,14 +25,23 @@
 
 import Foundation
 
+public struct URLResponse {
+    public let metadata: NSURLResponse // NSURLResponse encapsulates the metadata associated with a URL load.
+    public let data: NSData
+}
+
 public protocol URLPromiseFactory {
-    func promise(request: NSURLRequest) -> Promise<(response: NSURLResponse, data: NSData)>
+    func promise(request: NSURLRequest) -> Promise<URLResponse>
 }
 
 public class URLSessionPromiseFactory : NSObject, NSURLSessionDataDelegate, URLPromiseFactory, Synchronizable {
     struct PromisedData {
-        weak var promise: Promise<(response: NSURLResponse, data: NSData)>?
-        var data: NSMutableData
+        weak var promise: Promise<URLResponse>?
+        let data: NSMutableData
+        
+        var responseData: NSData {
+            return data.copy() as NSData
+        }
     }
     
     public let synchronizationQueue = GCDQueue.concurrent("net.franticapparatus.PromiseSession")
@@ -48,7 +57,8 @@ public class URLSessionPromiseFactory : NSObject, NSURLSessionDataDelegate, URLP
         synchronizeRead(self) { (promiseSession) in
             if let promisedData = promiseSession.taskPromisedData[task] {
                 if error == nil {
-                    promisedData.promise?.fulfill((response: task.response!, data: promisedData.data.copy() as NSData))
+                    let response = URLResponse(metadata: task.response!, data: promisedData.responseData)
+                    promisedData.promise?.fulfill(response)
                 } else {
                     promisedData.promise?.reject(NSErrorWrapperError(cause: error!))
                 }
@@ -70,8 +80,8 @@ public class URLSessionPromiseFactory : NSObject, NSURLSessionDataDelegate, URLP
         }
     }
     
-    public func promise(request: NSURLRequest) -> Promise<(response: NSURLResponse, data: NSData)> {
-        let promise = Promise<(response: NSURLResponse, data: NSData)>()
+    public func promise(request: NSURLRequest) -> Promise<URLResponse> {
+        let promise = Promise<URLResponse>()
         let threadSafeRequest = request.copy() as NSURLRequest
         
         synchronizeWrite(self) { [weak promise] (promiseSession) in
