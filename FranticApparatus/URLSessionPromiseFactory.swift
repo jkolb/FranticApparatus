@@ -40,12 +40,12 @@ public class URLSessionPromiseFactory : NSObject, NSURLSessionDataDelegate, URLP
         let data: NSMutableData
         
         var responseData: NSData {
-            return data.copy() as NSData
+            return data.copy() as! NSData
         }
     }
     
     public let synchronizationQueue: DispatchQueue = GCDQueue.concurrent("net.franticapparatus.PromiseSession")
-    let session: NSURLSession!
+    var session: NSURLSession!
     var taskPromisedData = Dictionary<NSURLSessionTask, PromisedData>(minimumCapacity: 8)
     
     public init(configuration: NSURLSessionConfiguration = NSURLSessionConfiguration.defaultSessionConfiguration()) {
@@ -82,7 +82,7 @@ public class URLSessionPromiseFactory : NSObject, NSURLSessionDataDelegate, URLP
     
     public func promise(request: NSURLRequest) -> Promise<URLResponse> {
         let promise = Promise<URLResponse>()
-        let threadSafeRequest = request.copy() as NSURLRequest
+        let threadSafeRequest = request.copy() as! NSURLRequest
         
         synchronizeWrite(self) { [weak promise] (promiseSession) in
             if let strongPromise = promise {

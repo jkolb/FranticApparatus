@@ -107,7 +107,7 @@ class FranticApparatusTests: XCTestCase {
             onFulfilled: { (value: Int) -> Result<Int> in
                 isFulfilled = true
                 promiseFulfilled2.fulfill()
-                return .Success(value)
+                return .Success(Box(value))
             },
             onRejected: { (reason: Error) -> Result<Int> in
                 isFulfilled = false
@@ -171,7 +171,7 @@ class FranticApparatusTests: XCTestCase {
             onFulfilled: { (value: Int) -> Result<Int> in
                 isRejected = false
                 promiseRejected2.fulfill()
-                return .Success(value)
+                return .Success(Box(value))
             },
             onRejected: { (reason: Error) -> Result<Int> in
                 isRejected = true
@@ -274,7 +274,7 @@ class FranticApparatusTests: XCTestCase {
             onFulfilled: { (value: Int) -> Result<String> in
                 fulfilledToken.append(1)
                 callThenOnce.fulfill()
-                return .Success("")
+                return .Success(Box(""))
             }, onRejected: { (reason: Error) -> Result<String> in
                 return .Failure(ExpectedRejectionError())
             }
@@ -285,7 +285,7 @@ class FranticApparatusTests: XCTestCase {
             onFulfilled: { (value: Int) -> Result<String> in
                 fulfilledToken.append(2)
                 callThenTwice.fulfill()
-                return .Success("")
+                return .Success(Box(""))
             }, onRejected: { (reason: Error) -> Result<String> in
                 return .Failure(ExpectedRejectionError())
             }
@@ -310,7 +310,7 @@ class FranticApparatusTests: XCTestCase {
             onFulfilled: { (value: Int) -> Result<String> in
                 fulfilledToken.append(1)
                 callThenOnce.fulfill()
-                return .Success("")
+                return .Success(Box(""))
             }, onRejected: { (reason: Error) -> Result<String> in
                 return .Failure(ExpectedRejectionError())
             }
@@ -321,7 +321,7 @@ class FranticApparatusTests: XCTestCase {
             onFulfilled: { (value: Int) -> Result<String> in
                 fulfilledToken.append(2)
                 callThenTwice.fulfill()
-                return .Success("")
+                return .Success(Box(""))
             }, onRejected: { (reason: Error) -> Result<String> in
                 return .Failure(ExpectedRejectionError())
             }
@@ -345,7 +345,7 @@ class FranticApparatusTests: XCTestCase {
         let callThenOnce = self.expectationWithDescription("Call then once")
         let promise2 = promise1.then(
             onFulfilled: { (value: Int) -> Result<String> in
-                return .Success("")
+                return .Success(Box(""))
             }, onRejected: { (reason: Error) -> Result<String> in
                 rejectedToken.append(1)
                 callThenOnce.fulfill()
@@ -356,7 +356,7 @@ class FranticApparatusTests: XCTestCase {
         let callThenTwice = self.expectationWithDescription("Call then twice")
         let promise3 = promise1.then(
             onFulfilled: { (value: Int) -> Result<String> in
-                return .Success("")
+                return .Success(Box(""))
             }, onRejected: { (reason: Error) -> Result<String> in
                 rejectedToken.append(2)
                 callThenTwice.fulfill()
@@ -381,7 +381,7 @@ class FranticApparatusTests: XCTestCase {
         let promise1 = Promise<Int>()
         let promise2: Any = promise1.then(
             onFulfilled: { (value: Int) -> Result<String> in
-                return .Success("")
+                return .Success(Box(""))
             }, onRejected: { (reason: Error) -> Result<String> in
                 return .Failure(ExpectedRejectionError())
             }
@@ -472,7 +472,7 @@ class FranticApparatusTests: XCTestCase {
         let promise1 = Promise<Int>()
         let promise2 = promise1.then(
             onFulfilled: { (value: Int) -> Result<String> in
-                return .Success("fulfilled")
+                return .Success(Box("fulfilled"))
             },
             onRejected: { (reason: Error) -> Result<String> in
                 return .Failure(ExpectedRejectionError())
