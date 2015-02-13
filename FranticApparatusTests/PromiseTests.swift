@@ -107,12 +107,12 @@ class FranticApparatusTests: XCTestCase {
             onFulfilled: { (value: Int) -> Result<Int> in
                 isFulfilled = true
                 promiseFulfilled2.fulfill()
-                return .Success(Box(value))
+                return Result(value)
             },
             onRejected: { (reason: Error) -> Result<Int> in
                 isFulfilled = false
                 promiseFulfilled2.fulfill()
-                return .Failure(reason)
+                return Result(reason)
             }
         )
 
@@ -171,12 +171,12 @@ class FranticApparatusTests: XCTestCase {
             onFulfilled: { (value: Int) -> Result<Int> in
                 isRejected = false
                 promiseRejected2.fulfill()
-                return .Success(Box(value))
+                return Result(value)
             },
             onRejected: { (reason: Error) -> Result<Int> in
                 isRejected = true
                 promiseRejected2.fulfill()
-                return .Failure(reason)
+                return Result(reason)
             }
         )
         
@@ -274,9 +274,9 @@ class FranticApparatusTests: XCTestCase {
             onFulfilled: { (value: Int) -> Result<String> in
                 fulfilledToken.append(1)
                 callThenOnce.fulfill()
-                return .Success(Box(""))
+                return Result("")
             }, onRejected: { (reason: Error) -> Result<String> in
-                return .Failure(ExpectedRejectionError())
+                return Result(ExpectedRejectionError())
             }
         )
 
@@ -285,9 +285,9 @@ class FranticApparatusTests: XCTestCase {
             onFulfilled: { (value: Int) -> Result<String> in
                 fulfilledToken.append(2)
                 callThenTwice.fulfill()
-                return .Success(Box(""))
+                return Result("")
             }, onRejected: { (reason: Error) -> Result<String> in
-                return .Failure(ExpectedRejectionError())
+                return Result(ExpectedRejectionError())
             }
         )
         
@@ -310,9 +310,9 @@ class FranticApparatusTests: XCTestCase {
             onFulfilled: { (value: Int) -> Result<String> in
                 fulfilledToken.append(1)
                 callThenOnce.fulfill()
-                return .Success(Box(""))
+                return Result("")
             }, onRejected: { (reason: Error) -> Result<String> in
-                return .Failure(ExpectedRejectionError())
+                return Result(ExpectedRejectionError())
             }
         )
         
@@ -321,9 +321,9 @@ class FranticApparatusTests: XCTestCase {
             onFulfilled: { (value: Int) -> Result<String> in
                 fulfilledToken.append(2)
                 callThenTwice.fulfill()
-                return .Success(Box(""))
+                return Result("")
             }, onRejected: { (reason: Error) -> Result<String> in
-                return .Failure(ExpectedRejectionError())
+                return Result(ExpectedRejectionError())
             }
         )
         
@@ -345,22 +345,22 @@ class FranticApparatusTests: XCTestCase {
         let callThenOnce = self.expectationWithDescription("Call then once")
         let promise2 = promise1.then(
             onFulfilled: { (value: Int) -> Result<String> in
-                return .Success(Box(""))
+                return Result("")
             }, onRejected: { (reason: Error) -> Result<String> in
                 rejectedToken.append(1)
                 callThenOnce.fulfill()
-                return .Failure(ExpectedRejectionError())
+                return Result(ExpectedRejectionError())
             }
         )
         
         let callThenTwice = self.expectationWithDescription("Call then twice")
         let promise3 = promise1.then(
             onFulfilled: { (value: Int) -> Result<String> in
-                return .Success(Box(""))
+                return Result("")
             }, onRejected: { (reason: Error) -> Result<String> in
                 rejectedToken.append(2)
                 callThenTwice.fulfill()
-                return .Failure(ExpectedRejectionError())
+                return Result(ExpectedRejectionError())
             }
         )
         
@@ -381,9 +381,9 @@ class FranticApparatusTests: XCTestCase {
         let promise1 = Promise<Int>()
         let promise2: Any = promise1.then(
             onFulfilled: { (value: Int) -> Result<String> in
-                return .Success(Box(""))
+                return Result("")
             }, onRejected: { (reason: Error) -> Result<String> in
-                return .Failure(ExpectedRejectionError())
+                return Result(ExpectedRejectionError())
             }
         )
         
@@ -404,10 +404,10 @@ class FranticApparatusTests: XCTestCase {
         let deferred = Promise<String>()
         let promise2 = promise1.then(
             onFulfilled: { (value: Int) -> Result<String> in
-                return .Deferred(deferred)
+                return Result(deferred)
             },
             onRejected: { (reason: Error) -> Result<String> in
-                return .Failure(reason)
+                return Result(reason)
             }
             ).when({ (value: String) -> () in
                 XCTAssertEqual(value, "deferred", "If either onFulfilled or onRejected returns a value x, run the Promise Resolution Procedure [[Resolve]](promise2, x).")
@@ -427,10 +427,10 @@ class FranticApparatusTests: XCTestCase {
         let deferred = Promise<String>()
         let promise2 = promise1.then(
             onFulfilled: { (value: Int) -> Result<String> in
-                return .Deferred(deferred)
+                return Result(deferred)
             },
             onRejected: { (reason: Error) -> Result<String> in
-                return .Failure(reason)
+                return Result(reason)
             }
             ).when({ (value: String) -> () in
                 XCTAssertEqual(value, "deferred", "If either onFulfilled or onRejected returns a value x, run the Promise Resolution Procedure [[Resolve]](promise2, x).")
@@ -451,10 +451,10 @@ class FranticApparatusTests: XCTestCase {
         let promise1 = Promise<Int>()
         let promise2 = promise1.then(
             onFulfilled: { (value: Int) -> Result<String> in
-                return .Failure(ExpectedRejectionError())
+                return Result(ExpectedRejectionError())
             },
             onRejected: { (reason: Error) -> Result<String> in
-                return .Failure(reason)
+                return Result(reason)
             }
             ).catch({ (reason: Error) -> () in
                 XCTAssertTrue(reason is ExpectedRejectionError, "If onFulfilled returns an error, promise2 must be rejected with the same reason")
@@ -472,10 +472,10 @@ class FranticApparatusTests: XCTestCase {
         let promise1 = Promise<Int>()
         let promise2 = promise1.then(
             onFulfilled: { (value: Int) -> Result<String> in
-                return .Success(Box("fulfilled"))
+                return Result("fulfilled")
             },
             onRejected: { (reason: Error) -> Result<String> in
-                return .Failure(ExpectedRejectionError())
+                return Result(ExpectedRejectionError())
             }
             ).catch({ (reason: Error) -> () in
                 XCTAssertTrue(reason is ExpectedRejectionError, "If onRejected returns an error, promise2 must be rejected with the same reason")
