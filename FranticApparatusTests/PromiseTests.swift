@@ -53,10 +53,10 @@ class FranticApparatusTests: XCTestCase {
     
     func testWhenPendingIsFulfilledTransitionsToFulfilledState() {
         let expectation = self.expectationWithDescription("onFulfilled called")
-        let promise = Promise<Int>()
+        let promise = Promise<Int> { (fulfill, reject, isCancelled) -> () in
+            fulfill(1)
+        }
         var isFulfilled = false
-        
-        promise.fulfill(1)
         
         let promiseA = promise.when { (value: Int) -> () in
             isFulfilled = true
@@ -70,11 +70,11 @@ class FranticApparatusTests: XCTestCase {
     
     func testWhenPendingIsRejectedTransitionsToRejectedState() {
         let expectation = self.expectationWithDescription("onRejected called")
-        let promise = Promise<Int>()
+        let promise = Promise<Int> { (fulfill, reject, isCancelled) -> () in
+            reject(ExpectedRejectionError())
+        }
         var isRejected = false
-        
-        promise.reject(ExpectedRejectionError())
-        
+
         let promiseA = promise.catch { (reason: Error) -> () in
             isRejected = true
             expectation.fulfill()

@@ -34,9 +34,22 @@ public protocol URLPromiseFactory {
     func promise(request: NSURLRequest) -> Promise<URLResponse>
 }
 
-public class URLSessionPromiseFactory : NSObject, NSURLSessionDataDelegate, URLPromiseFactory, Synchronizable {
-    struct PromisedData {
-        weak var promise: Promise<URLResponse>?
+extension NSURLSession : URLPromiseFactory {
+    public func promise(request: NSURLRequest) -> Promise<URLResponse> {
+        let promiseDelegate = delegate as! NSURLSessionPromiseDelegate
+        return promiseDelegate.URLSession(self, promiseForRequest: request)
+    }
+}
+
+public protocol NSURLSessionPromiseDelegate : NSURLSessionDelegate {
+    func URLSession(session: NSURLSession, promiseForRequest request: NSURLRequest) -> Promise<URLResponse>
+}
+
+public class SimpleURLSessionDataDelegate : NSObject, NSURLSessionPromiseDelegate, Synchronizable {
+    struct CallbacksAndData {
+        let fulfill: (URLResponse) -> ()
+        let reject: (Error) -> ()
+        let isCancelled: () -> Bool
         let data: NSMutableData
         
         var responseData: NSData {
@@ -44,60 +57,61 @@ public class URLSessionPromiseFactory : NSObject, NSURLSessionDataDelegate, URLP
         }
     }
     
+    var callbacksAndData = Dictionary<NSURLSessionTask, CallbacksAndData>(minimumCapacity: 8)
     public let synchronizationQueue: DispatchQueue = GCDQueue.concurrent("net.franticapparatus.PromiseSession")
-    var session: NSURLSession!
-    var taskPromisedData = Dictionary<NSURLSessionTask, PromisedData>(minimumCapacity: 8)
     
-    public init(configuration: NSURLSessionConfiguration = NSURLSessionConfiguration.defaultSessionConfiguration()) {
-        super.init()
-        session = NSURLSession(configuration: configuration, delegate: self, delegateQueue: NSOperationQueue())
-    }
-
     func complete(task: NSURLSessionTask, error: NSError?) {
-        synchronizeRead(self) { (promiseSession) in
-            if let promisedData = promiseSession.taskPromisedData[task] {
+        synchronizeRead(self) { (delegate) in
+            if let callbacksAndData = delegate.callbacksAndData[task] {
                 if error == nil {
-                    let response = URLResponse(metadata: task.response!, data: promisedData.responseData)
-                    promisedData.promise?.fulfill(response)
+                    let value = URLResponse(metadata: task.response!, data: callbacksAndData.responseData)
+                    callbacksAndData.fulfill(value)
                 } else {
-                    promisedData.promise?.reject(NSErrorWrapperError(cause: error!))
+                    let reason = NSErrorWrapperError(cause: error!)
+                    callbacksAndData.reject(reason)
                 }
             }
             
-            synchronizeWrite(promiseSession) { (promiseSession) in
-                promiseSession.taskPromisedData[task] = nil
+            synchronizeWrite(delegate) { (delegate) in
+                delegate.callbacksAndData[task] = nil
             }
         }
     }
     
     func accumulate(task: NSURLSessionTask, data: NSData) {
-        synchronizeWrite(self) { (promiseSession) in
-            if let promisedData = promiseSession.taskPromisedData[task] {
-                data.enumerateByteRangesUsingBlock { (bytes, range, stop) -> () in
-                    promisedData.data.appendBytes(bytes, length: range.length)
+        synchronizeWrite(self) { (delegate) in
+            if let callbacksAndData = delegate.callbacksAndData[task] {
+                if callbacksAndData.isCancelled() {
+                    task.cancel()
+                    delegate.callbacksAndData[task] = nil
+                } else {
+                    data.enumerateByteRangesUsingBlock { (bytes, range, stop) -> () in
+                        callbacksAndData.data.appendBytes(bytes, length: range.length)
+                    }
                 }
             }
         }
     }
     
-    public func promise(request: NSURLRequest) -> Promise<URLResponse> {
-        let promise = Promise<URLResponse>()
-        let threadSafeRequest = request.copy() as! NSURLRequest
-        
-        synchronizeWrite(self) { [weak promise] (promiseSession) in
-            if let strongPromise = promise {
+    func promise(session: NSURLSession, request: NSURLRequest) -> Promise<URLResponse> {
+        return Promise<URLResponse> { (fulfill, reject, isCancelled) -> () in
+            let threadSafeRequest = request.copy() as! NSURLRequest
+            
+            synchronizeWrite(self) { (delegate) in
+                if isCancelled() {
+                    return;
+                }
+                
                 if let data = NSMutableData(capacity: 4096) {
-                    let dataTask = promiseSession.session.dataTaskWithRequest(threadSafeRequest)
-                    let promisedData = PromisedData(promise: strongPromise, data: data)
-                    promiseSession.taskPromisedData[dataTask] = promisedData
+                    let dataTask = session.dataTaskWithRequest(threadSafeRequest)
+                    let callbacksAndData = CallbacksAndData(fulfill: fulfill, reject: reject, isCancelled: isCancelled, data: data)
+                    delegate.callbacksAndData[dataTask] = callbacksAndData
                     dataTask.resume()
                 } else {
-                    strongPromise.reject(OutOfMemoryError())
+                    reject(OutOfMemoryError())
                 }
             }
         }
-        
-        return promise
     }
     
     public func URLSession(session: NSURLSession, dataTask: NSURLSessionDataTask, didReceiveData data: NSData) {
@@ -106,5 +120,9 @@ public class URLSessionPromiseFactory : NSObject, NSURLSessionDataDelegate, URLP
     
     public func URLSession(session: NSURLSession, task: NSURLSessionTask, didCompleteWithError error: NSError?) {
         complete(task, error: error)
+    }
+    
+    public func URLSession(session: NSURLSession, promiseForRequest request: NSURLRequest) -> Promise<URLResponse> {
+        return promise(session, request: request)
     }
 }

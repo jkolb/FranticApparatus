@@ -68,6 +68,24 @@ public class Promise<T>: Synchronizable {
         self.parent = parent
     }
     
+    public convenience init(_ resolver: (fulfill: (T) -> (), reject: (Error) -> (), isCancelled: () -> Bool) -> ()) {
+        self.init()
+        let weakFulfill: (T) -> () = { [weak self] (value) -> () in
+            if let strongSelf = self {
+                Promise<T>.fulfill(strongSelf)(value)
+            }
+        }
+        let weakReject: (Error) -> () = { [weak self] (reason) -> () in
+            if let strongSelf = self {
+                Promise<T>.reject(strongSelf)(reason)
+            }
+        }
+        let isCancelled: () -> Bool = { [weak self] in
+            return self != nil
+        }
+        resolver(fulfill: weakFulfill, reject: weakReject, isCancelled: isCancelled)
+    }
+    
     public func fulfill(value: T) {
         synchronizeWrite(self) { (promise) -> () in
             promise.state = .Fulfilled(Value(value))
