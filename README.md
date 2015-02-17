@@ -1,99 +1,133 @@
-# [FranticApparatus 2.0](https://github.com/jkolb/FranticApparatus)
+# [FranticApparatus 2.2](https://github.com/jkolb/FranticApparatus)
 
-#### A Promises/A+ implementation for Swift
+#### A [Promises/A+](https://promisesaplus.com) implementation for Swift 1.2
 
-## Only works on Xcode 6.1 Beta 3
+## What is a promise?
 
-## Examples
+A promise, at its most simple definition, is a proxy for a value that has not been calculated yet. This [blog](http://andyshora.com/promises-angularjs-explained-as-cartoon.html) provides a good high level overview of how they work. Unfortunately that does not give much insight into the usefulness they provide. The utility of promises arises because they are recursively composable, which makes for easily defining complex combinations of asynchronous functionality. Promises can be combined so they execute serially or in parallel*, but no matter which way you compose them they still effectively read like a serialized order of steps. Being able to write code that looks (as best it can) like it executes from top to bottom while actually wrapping multiple asynchronous calls is where the true power of promises lies.
 
-#### A chain of promises that fetches some JSON from a URL, parses the JSON into an NSDictionary, and then maps the NSDictionay into an array of Link objects. All of these tasks occur on separate threads but the callbacks occur on the main thread.
+**Parallel promises are more tricky in a strongly typed language, and I am still working out a good way to implement it.*
 
-    func fetchLinks(reddit: String) -> Promise<[Link]> {
-        let url = NSURL(string: baseURL + "/r/" + reddit + ".json")
-        
-        return fetchJSON(url).when({ (data: NSData) -> Result<NSDictionary> in
-            return .Deferred(parseJSON(data))
-        }).when({ (json: NSDictionary) -> Result<[Link]> in
-            return .Deferred(mapLinks(json))
+You may be thinking to yourself that this sounds like it could be done just as well with normal asynchronous callbacks, and you would not be wrong. While you can do something similar using everyday blocks they quickly become ugly nests of callbacks and make error handling more difficult. As a simple example imagine you would like to download some data from a remote web service, parse that data as JSON, and then map that JSON into a data model object (also imagine you can not use your favorite networking library). It might look like the following (thread safe memory management included, strong error handling not included):
+
+	func fetch(url: NSURL, completion: (dataModel: DataModel?, error: NSError?) -> ()) {
+		self.download(url) { [weak self] (data: NSData?, error: NSError?) in
+			if let downloadSelf = self {
+				if error != nil {
+					completion(nil, error)
+					return
+				}
+			
+				downloadSelf.parseJSON(data!) { [weak downloadSelf] (json: NSDictionary?, error: NSError?) in
+					if let parseSelf = downloadSelf {
+						if error != nil {
+							completion(nil, error)
+							return
+						}
+						
+						parseSelf.mapDataModel(json!) { (dataModel: DataModel?, error: NSError?) in
+							if error == nil {
+								completion(nil, error)
+								return
+							}
+							
+							completion(dataModel!, nil)
+						}
+					}
+				}
+			}
+		}
+	}
+	
+
+Then the usage would look something like this:
+
+    self.showActivityIndicator()
+	
+	self.fetch(NSURL(string: "http://example.com/datamodel.json")) { [weak self] (dataModel: DataModel?, error: NSError?) in
+		if let strongSelf = self {
+			if error != nil {
+				strongSelf.displayError(error!)
+			} else {
+				strongSelf.displayDataModel(dataModel!)
+			}
+			
+			strongSelf.hideActivityIndicator()
+		}
+	}
+
+Here is the same example assuming that there are three methods that return promises to download, parse, and map the data similar to the above methods that just take callbacks:
+
+    func fetch(url: NSURL) -> Promise<DataModel> {
+        return self.download(url).when(self, { (strongSelf, data) -> Result<NSDictionary> in
+            return Result(strongSelf.parseJSON(data))
+        }).when(self, { (strongSelf, json) -> Result<[DataModel]> in
+            return Result(strongSelf.mapDataModel(json))
         })
     }
 
-#### An example of how to use the fetchLinks function defined above.
+And again how it would be used:
 
-    UIApplication.sharedApplication().networkActivityIndicatorVisible = true;
+    self.showActivityIndicator()
         
-    fetch = reddit.fetchLinks("all").when({ (links) in
-		println(links)
-    }).catch({ (error) in
-		println(error)
-    }).finally({ [unowned self] in
-        UIApplication.sharedApplication().networkActivityIndicatorVisible = false;
-        self.fetch = nil
+    self.promise = self.fetch(NSURL(string: "http://example.com/datamodel.json")).when(self, { (strongSelf, dataModel) in
+		strongSelf.displayDataModel(dataModel)
+    }).catch(self, { (strongSelf, error) in
+		strongSelf.displayError(error)
+    }).finally(self, { (strongSelf) in
+        strongSelf.hideActivityIndicator()
+        strongSelf.promise = nil
     })
 
-#### An example of how to create a simple promise that returns data from a URL get request.
+Note the missing rightward drift of the nested callbacks and also the small amount of error handling code.
 
-    func fetchJSON(url: NSURL) -> Promise<NSData> {
-        let promise = Promise<NSData>()
-        
-        dataTask = session.dataTaskWithURL(url) { (data: NSData!, response: NSURLResponse!, error: NSError!) -> Void in
-            if error != nil {
-                promise.reject(NSErrorWrapperError(cause: error))
-                return
-            }
-            
-            if let httpResponse = response as? NSHTTPURLResponse {
-                if httpResponse.statusCode != 200 {
-                    promise.reject(UnexpectedHTTPStatusCodeError())
-                    return
-                }
-                
-                let contentType = httpResponse.MIMEType != nil ? httpResponse.MIMEType : ""
-                
-                if contentType == "" {
-                    promise.reject(MissingContentTypeError())
-                    return
-                }
-                
-                if contentType != "application/json" {
-                    promise.reject(UnexpectedContentTypeError())
-                    return
-                }
-                
-                promise.fulfill(data)
-            } else {
-                promise.reject(UnexpectedResponseError())
-            }
-        }
-        dataTask.resume()
-        
-        return promise
-    }
+## What is going on here?
 
-#### An example of a promise that returns an NSDictionary from JSON data.
+The `fetch` method is building a promise that represents a `DataModel` value that will be calculated and returned sometime in the future. To extract a value from a promise you must call its `then` method and provide an `onFulfilled` and an `onRejected` callback. This is very similar to the normal callback methods above, but this is where the similarity ends. If the fetch completes successfully it will execute the `onFulfilled` block and pass in the value that was generated. If later on you call `then` on the same promise you will get back the same value as before without having to recalculate. This is because once a promise is fulfilled it stays that way. Also if multiple objects call `then` on the same promise they can all wait for the promise to be fulfilled or rejected.
+
+In the same vein, if there is a problem calculating the value, the promise will be rejected and the `onRejected` callback will be triggered instead. Once a promise is rejected it will stay that way and also multiple objects can receive the same rejection notice as long as each object calls `then` on the same promise instance*.
+
+In the example above a `when` method is used in place of `then`. The `when` method is a convenience that calls `then` behind the scenes and allows you to provide a callback for `onFulfilled`. It also creates an `onRejected` callback but its implementation effectively just forwards any errors on to the next promise in the chain of promises (if any). The `catch` method is the opposite of `when` as it allows you to provide an `onRejected` callback while forwarding on any fulfilled values to the next promise in the chain. Lastly the `finally` method generates implementations of both `onFulfilled` and `onRejected` that foward on the values but also gives you a way to execute the same block no matter if the promise is rejected or fulfilled.
+
+**There are some details of the memory management this entails that will be covered later*
+
+## How does this work?
+
+Each time you call `then` on a promise, you generate a new and distinct promise. Effectively you are building a linked list of promises which when complete will either give a final value or an error. You must keep a reference to the last promise returned by the last call to `then` to keep the promise chain alive, otherwise the promises will be deinitialized, which cancels any processing the promise may have started. In fact that is how cancellation is implemented in FranticApparatus. When you you need to cancel any promise just make sure it gets deinitailized. Behind the scenes any asynchronous processes will have a weak reference to the promise and will not be able to fulfill or reject it once its weak reference changes to nil. Note though that if multiple objects are making use of the same promise all of them would have to be deinitialized to fully cancel.
+
+On that note, for multiple objects to call `then` on the same promise, they all must keep their separate references to the promise generated by `then` alive otherwise they will not get their `onFulfilled` and/or `onRejected` callbacks triggered. Additionally they could do separate processing of the same original promise ultimately generating distinct promises that share a common child promise under the hood. An example of this might be one promise that returns an image from a remote API call that is used in two places, one to generate a blurred version of the full size image, and another to genrate a thumbnail of the same image. Both of the tasks can proceed in parallel once the first promise is fulfilled with the remote image.
+
+## Is there more to it than this?
+
+Not covered yet is how a chain of promises, that each return a specific data type, work together to generate a final different data type value. This can be seen in the `fetch` example above where the initial promise returns `NSData`, which then becomes `NSDictionary`, and then finally an instance of `DataModel`. The trick to this is the type of result that is returned from inside the `onFulfilled` or `onRejected` callback. No matter if a promise is fulfilled or rejected, three types of results can be returned which are then passed on to the next promise in the chain. Having all three types available in both callbacks allows you to transform the result from one promise before it is passed to the next.
+
+For example in an `onRejected` callback you could check the error that was generated, and if it matches a certain type of error return a result that represents a valid default value, otherwise just return the original error result. The next promise will either fulfill if the default value is returned or reject if the original error is returned. Another example is taking the original value passed into `onFulfilled` and then extracting one part of it or mapping it to another type of object and then returning that instead. Additionally you could determine that a certain range of values could be considered an error and return an error result instead which would cause any chained promises to reject with that error.
+
+Lastly we come to the most powerful type of result, instead of returning a value or an error, returning a promise instead. When you return a promise in the `onFulfilled` or `onRejected` callbacks you are saying that the chain of promises will not be fulfilled until this new promise is fulfilled. Then when it does fulfill the result it generates (value, error, or proimse) will be used to continue the chain. This is exactly how the `fetch` method is implemented.
+
+
+## How do I make my own promises?
+
+#### A promise that returns an NSDictionary from JSON data.
 
     func parseJSON(data: NSData, options: NSJSONReadingOptions = NSJSONReadingOptions(0)) -> Promise<NSDictionary> {
-        let promise = Promise<JSONValue>()
-        
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) { [weak promise] in
-            if let blockPromise = promise {
-                var error: NSError?
-                let value: AnyObject? = NSJSONSerialization.JSONObjectWithData(data, options: options, error: &error)
+        return Promise<NSDictionary> { (fulfill, reject, isCancelled) in
+			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+				var error: NSError?
+				let value: AnyObject? = NSJSONSerialization.JSONObjectWithData(data, options: options, error: &error)
                 
-                if value == nil {
-                    if error == nil {
-                        blockPromise.fulfill(InvalidJSONError())
-                    } else {
-                        blockPromise.reject(NSErrorWrapperError(cause: error!))
-                    }
+				if value == nil {
+					reject(NSErrorWrapperError(cause: error!))
                 } else {
-                    blockPromise.fulfill(value! as NSDictionary) // Unsafe cast!
+                    fulfill(value! as NSDictionary) // Unsafe cast!
                 }
-            }
-        }
-        
-        return promise
+        	}
+		}
     }
+
+#### Using promises to perform networking
+
+See `URLPromiseFactory.swift` for a basic example of generating promises backed by a NSURLSession.
 
 ## Contact
 
