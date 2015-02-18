@@ -42,15 +42,15 @@ public enum Result<T> {
     case Deferred(Promise<T>)
     case Failure(Error)
     
-    init(_ value: T) {
+    public init(_ value: T) {
         self = Success(Value(value))
     }
     
-    init(_ promise: Promise<T>) {
+    public init(_ promise: Promise<T>) {
         self = Deferred(promise)
     }
     
-    init(_ reason: Error) {
+    public init(_ reason: Error) {
         self = Failure(reason)
     }
 }
@@ -204,7 +204,7 @@ public class Promise<T> : Synchronizable {
         )
     }
     
-    public func when<C: AnyObject>(context: C, onFulfilled: (C, T) -> ()) -> Promise<T> {
+    public func when<C: AnyObject>(context: C, _ onFulfilled: (C, T) -> ()) -> Promise<T> {
         return then(
             onFulfilled: { [weak context] (value: T) -> Result<T> in
                 if let strongContext = context {
@@ -227,7 +227,7 @@ public class Promise<T> : Synchronizable {
         )
     }
     
-    public func when<C: AnyObject, R>(context: C, onFulfilled: (C, T) -> Result<R>) -> Promise<R> {
+    public func when<C: AnyObject, R>(context: C, _ onFulfilled: (C, T) -> Result<R>) -> Promise<R> {
         return then(
             onFulfilled: { [weak context] (value: T) -> Result<R> in
                 if let strongContext = context {
@@ -254,7 +254,7 @@ public class Promise<T> : Synchronizable {
         )
     }
     
-    public func catch<C: AnyObject>(context: C, onRejected: (C, Error) -> ()) -> Promise<T> {
+    public func catch<C: AnyObject>(context: C, _ onRejected: (C, Error) -> ()) -> Promise<T> {
         return then(
             onFulfilled: { (value: T) -> Result<T> in
                 return Result(value)
@@ -277,7 +277,7 @@ public class Promise<T> : Synchronizable {
         )
     }
     
-    public func recover<C: AnyObject>(context: C, onRejected: (C, Error) -> Result<T>) -> Promise<T> {
+    public func recover<C: AnyObject>(context: C, _ onRejected: (C, Error) -> Result<T>) -> Promise<T> {
         return then(
             onFulfilled: { (value: T) -> Result<T> in
                 return Result(value)
@@ -305,7 +305,7 @@ public class Promise<T> : Synchronizable {
         )
     }
     
-    public func finally<C: AnyObject>(context: C, onFinally: (C) -> ()) -> Promise<T> {
+    public func finally<C: AnyObject>(context: C, _ onFinally: (C) -> ()) -> Promise<T> {
         return then(
             onFulfilled: { [weak context] (value: T) -> Result<T> in
                 if let strongContext = context {
