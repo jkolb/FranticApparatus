@@ -80,7 +80,7 @@ public class Promise<T> : Synchronizable {
         }
 
         let isCancelled: () -> Bool = { [weak self] in
-            return self != nil
+            return self == nil
         }
         
         resolver(fulfill: weakFulfill, reject: weakReject, isCancelled: isCancelled)
@@ -108,9 +108,9 @@ public class Promise<T> : Synchronizable {
     private func transition(result: Result<T>) {
         switch state {
         case .Pending:
-            self.result = result
             switch result {
             case .Success(let value):
+                self.result = result
                 state = .Fulfilled
                 for fulfillHandler in onFulfilled {
                     fulfillHandler(value.unwrap)
@@ -118,6 +118,7 @@ public class Promise<T> : Synchronizable {
                 onFulfilled.removeAll(keepCapacity: false)
                 onRejected.removeAll(keepCapacity: false)
             case .Failure(let reason):
+                self.result = result
                 state = .Rejected
                 for rejectHandler in onRejected {
                     rejectHandler(reason)
@@ -126,8 +127,7 @@ public class Promise<T> : Synchronizable {
                 onRejected.removeAll(keepCapacity: false)
             case .Deferred(let promise):
                 assert(promise !== self, "A promise referencing itself causes an unbreakable retain cycle, and an infinite loop")
-                
-                promise.thenOn(
+                self.result = Result(promise.thenOn(
                     synchronizationQueue,
                     onFulfilled: { [weak self] (value: T) -> Result<T> in
                         let result: Result<T> = Result(value)
@@ -143,7 +143,8 @@ public class Promise<T> : Synchronizable {
                         }
                         return result
                     }
-                )
+                ))
+                state = .Pending
             }
         default:
             return
