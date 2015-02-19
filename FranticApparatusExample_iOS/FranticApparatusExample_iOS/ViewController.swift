@@ -55,7 +55,7 @@ class ViewController: UIViewController {
         let url = NSURL(string: "http://reddit.com/r/" + reddit + ".json")
         
         return fetchJSON(url!).when({ [weak self] (data: NSData) -> Result<AnyObject> in
-            return .Deferred(self!.parseJSON(data))
+            return Result(self!.parseJSON(data))
         })
     }
 
