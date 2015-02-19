@@ -31,7 +31,7 @@ public class Value<T> {
     }
 }
 
-enum State {
+private enum State {
     case Pending
     case Fulfilled
     case Rejected
@@ -106,27 +106,28 @@ public class Promise<T> : Synchronizable {
     }
     
     private func transition(result: Result<T>) {
-        switch state {
+        switch self.state {
         case .Pending:
             switch result {
             case .Success(let value):
+                self.state = .Fulfilled
                 self.result = result
-                state = .Fulfilled
                 for fulfillHandler in onFulfilled {
                     fulfillHandler(value.unwrap)
                 }
                 onFulfilled.removeAll(keepCapacity: false)
                 onRejected.removeAll(keepCapacity: false)
             case .Failure(let reason):
+                self.state = .Rejected
                 self.result = result
-                state = .Rejected
                 for rejectHandler in onRejected {
                     rejectHandler(reason)
                 }
                 onFulfilled.removeAll(keepCapacity: false)
                 onRejected.removeAll(keepCapacity: false)
             case .Deferred(let promise):
-                assert(promise !== self, "A promise referencing itself causes an unbreakable retain cycle, and an infinite loop")
+                assert(promise !== self, "A promise referencing itself causes an unbreakable retain cycle")
+                self.state = .Pending
                 self.result = Result(promise.thenOn(
                     synchronizationQueue,
                     onFulfilled: { [weak self] (value: T) -> Result<T> in
@@ -144,7 +145,6 @@ public class Promise<T> : Synchronizable {
                         return result
                     }
                 ))
-                state = .Pending
             }
         default:
             return
