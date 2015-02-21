@@ -59,7 +59,7 @@ class FranticApparatusTests: XCTestCase {
         }
         var isFulfilled = false
         
-        let promiseA = promise.when { (value: Int) -> () in
+        let promiseA = promise.then { (value: Int) -> () in
             isFulfilled = true
             expectation.fulfill()
         }
@@ -98,7 +98,7 @@ class FranticApparatusTests: XCTestCase {
         }
         var isFulfilled = false
         
-        let promiseA = promise.when { (value: Int) -> () in
+        let promiseA = promise.then { (value: Int) -> () in
             isFulfilled = true
             promiseFulfilled1.fulfill()
         }
@@ -133,12 +133,12 @@ class FranticApparatusTests: XCTestCase {
         }
         var fulfilledValue = 0
         
-        let promiseA = promise.when { (value: Int) -> () in
+        let promiseA = promise.then { (value: Int) -> () in
             fulfilledValue = value
             promiseFulfilled1.fulfill()
         }
 
-        let promiseB = promise.when { (value: Int) -> () in
+        let promiseB = promise.then { (value: Int) -> () in
             fulfilledValue = value
             promiseFulfilled2.fulfill()
         }
@@ -224,7 +224,7 @@ class FranticApparatusTests: XCTestCase {
         let promise1 = Promise<Int> { (fulfill, reject, isCancelled) -> () in
             fulfill(1)
         }
-        let promise2 = promise1.when({ (value: Int) -> () in
+        let promise2 = promise1.then({ (value: Int) -> () in
             XCTAssertEqual(value, 1, "If onFulfilled is a function it must be called after promise is fulfilled, with promise's value as its first argument")
             expectation.fulfill()
         })
@@ -411,7 +411,7 @@ class FranticApparatusTests: XCTestCase {
             onRejected: { (reason: Error) -> Result<String> in
                 return Result(reason)
             }
-            ).when({ (value: String) -> () in
+            ).then({ (value: String) -> () in
                 XCTAssertEqual(value, "deferred", "If either onFulfilled or onRejected returns a value x, run the Promise Resolution Procedure [[Resolve]](promise2, x).")
                 expectation.fulfill()
             })
@@ -435,7 +435,7 @@ class FranticApparatusTests: XCTestCase {
             onRejected: { (reason: Error) -> Result<String> in
                 return Result(reason)
             }
-            ).when({ (value: String) -> () in
+            ).then({ (value: String) -> () in
                 XCTAssertEqual(value, "deferred", "If either onFulfilled or onRejected returns a value x, run the Promise Resolution Procedure [[Resolve]](promise2, x).")
                 expectation.fulfill()
             })
@@ -497,7 +497,7 @@ class FranticApparatusTests: XCTestCase {
         }
         let promise2 = promise1.catch { (reason: Error) -> () in
         }
-        let promise3 = promise2.when { (value: Int) -> () in
+        let promise3 = promise2.then { (value: Int) -> () in
             XCTAssertEqual(value, 1, "If onFulfilled is not a function and promise1 is fulfilled, promise2 must be fulfilled with the same value as promise1")
             expectation.fulfill()
         }
@@ -513,7 +513,7 @@ class FranticApparatusTests: XCTestCase {
         let promise1 = Promise<Int>() { (fulfill, reject, isCancelled) -> () in
             reject(ExpectedRejectionError())
         }
-        let promise2 = promise1.when { (value: Int) -> () in
+        let promise2 = promise1.then { (value: Int) -> () in
         }
         let promise3 = promise2.catch { (reason: Error) -> () in
             XCTAssertTrue(reason is ExpectedRejectionError, "If onRejected is not a function and promise1 is rejected, promise2 must be rejected with the same reason as promise1")

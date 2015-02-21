@@ -193,7 +193,7 @@ public class Promise<T> : Synchronizable {
         }
     }
     
-    public func when(onFulfilled: (T) -> ()) -> Promise<T> {
+    public func then(onFulfilled: (T) -> ()) -> Promise<T> {
         return then(
             onFulfilled: { (value: T) -> Result<T> in
                 onFulfilled(value)
@@ -205,7 +205,7 @@ public class Promise<T> : Synchronizable {
         )
     }
     
-    public func when<C: AnyObject>(context: C, _ onFulfilled: (C, T) -> ()) -> Promise<T> {
+    public func then<C: AnyObject>(context: C, _ onFulfilled: (C, T) -> ()) -> Promise<T> {
         return then(
             onFulfilled: { [weak context] (value: T) -> Result<T> in
                 if let strongContext = context {
@@ -219,7 +219,7 @@ public class Promise<T> : Synchronizable {
         )
     }
     
-    public func when<R>(onFulfilled: ((T) -> Result<R>)) -> Promise<R> {
+    public func then<R>(onFulfilled: ((T) -> Result<R>)) -> Promise<R> {
         return then(
             onFulfilled: onFulfilled,
             onRejected: { (reason: Error) -> Result<R> in
@@ -228,7 +228,7 @@ public class Promise<T> : Synchronizable {
         )
     }
     
-    public func when<C: AnyObject, R>(context: C, _ onFulfilled: (C, T) -> Result<R>) -> Promise<R> {
+    public func then<C: AnyObject, R>(context: C, _ onFulfilled: (C, T) -> Result<R>) -> Promise<R> {
         return then(
             onFulfilled: { [weak context] (value: T) -> Result<R> in
                 if let strongContext = context {

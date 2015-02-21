@@ -1,4 +1,4 @@
-# [FranticApparatus 2.2](https://github.com/jkolb/FranticApparatus)
+# [FranticApparatus 2.2.1](https://github.com/jkolb/FranticApparatus)
 
 #### A [Promises/A+](https://promisesaplus.com) implementation for Swift 1.2
 
@@ -59,9 +59,9 @@ Then the usage would look something like this:
 Here is the same example assuming that there are three methods that return promises to download, parse, and map the data similar to the above methods that just take callbacks:
 
     func fetch(url: NSURL) -> Promise<DataModel> {
-        return self.download(url).when(self, { (strongSelf, data) -> Result<NSDictionary> in
+        return self.download(url).then(self, { (strongSelf, data) -> Result<NSDictionary> in
             return Result(strongSelf.parseJSON(data))
-        }).when(self, { (strongSelf, json) -> Result<[DataModel]> in
+        }).then(self, { (strongSelf, json) -> Result<[DataModel]> in
             return Result(strongSelf.mapDataModel(json))
         })
     }
@@ -70,7 +70,7 @@ And again how it would be used:
 
     self.showActivityIndicator()
         
-    self.promise = self.fetch(NSURL(string: "http://example.com/datamodel.json")).when(self, { (strongSelf, dataModel) in
+    self.promise = self.fetch(NSURL(string: "http://example.com/datamodel.json")).then(self, { (strongSelf, dataModel) in
 		strongSelf.displayDataModel(dataModel)
     }).catch(self, { (strongSelf, error) in
 		strongSelf.displayError(error)
@@ -79,7 +79,7 @@ And again how it would be used:
         strongSelf.promise = nil
     })
 
-Note the missing rightward drift of the nested callbacks and also the small amount of error handling code.
+Note the missing rightward drift of the nested callbacks and also the small amount of error handling code. Also as a convenience to aid in thread safety most of the methods in FranticApparatus have a special form that turns the first parameter into a weak reference and then when the block is executed provides you with a strong reference inside the closure. If the reference becomes nil the body of the closure will not execute preventing a common source of bugs. Additionally this saves you from writing extra boiler plate memory management code in all of your closures.
 
 ## What is going on here?
 
@@ -87,7 +87,7 @@ The `fetch` method is building a promise that represents a `DataModel` value tha
 
 In the same vein, if there is a problem calculating the value, the promise will be rejected and the `onRejected` callback will be triggered instead. Once a promise is rejected it will stay that way and also multiple objects can receive the same rejection notice as long as each object calls `then` on the same promise instance*.
 
-In the example above a `when` method is used in place of `then`. The `when` method is a convenience that calls `then` behind the scenes and allows you to provide a callback for `onFulfilled`. It also creates an `onRejected` callback but its implementation effectively just forwards any errors on to the next promise in the chain of promises (if any). The `catch` method is the opposite of `when` as it allows you to provide an `onRejected` callback while forwarding on any fulfilled values to the next promise in the chain. Lastly the `finally` method generates implementations of both `onFulfilled` and `onRejected` that foward on the values but also gives you a way to execute the same block no matter if the promise is rejected or fulfilled.
+In the example above a shortcut `then` method is used in place of `then`. This version of the `then` method is a convenience that calls the normal `then` behind the scenes and allows you to just provide a callback for `onFulfilled`. It also creates an `onRejected` callback but its implementation effectively just forwards any errors on to the next promise in the chain of promises (if any). The `catch` method does the opposite, as it allows you to provide an `onRejected` callback while forwarding on any fulfilled values to the next promise in the chain. Lastly the `finally` method generates implementations of both `onFulfilled` and `onRejected` that foward on the values but also gives you a way to execute the same block no matter if the promise is rejected or fulfilled.
 
 **There are some details of the memory management this entails that will be covered later*
 
@@ -131,7 +131,7 @@ When the work to calculate the value is complete the original promise can be ful
 
 #### Using promises to perform networking
 
-See `URLPromiseFactory.swift` for a basic example of generating promises backed by a NSURLSession.
+See `URLPromiseFactory.swift` for a basic example of generating promises backed by a NSURLSession. The included FranticApparatusExample_iOS project gives a rough example of loading from the network using a `URLPromiseFactory` and parsing the results using promises.
 
 ## Contact
 
