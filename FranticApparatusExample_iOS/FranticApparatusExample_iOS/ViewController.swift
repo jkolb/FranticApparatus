@@ -34,21 +34,42 @@ class LinkListingParseError : Error {}
 
 class ViewController: UIViewController {
     let session: URLPromiseFactory = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration(), delegate: SimpleURLSessionDataDelegate(), delegateQueue: NSOperationQueue())
-    var fetch: Promise<AnyObject>?
-
+    var promise: Promise<AnyObject>?
+    let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .Gray)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
         
-        UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+        refreshData()
+    }
+    
+    func refreshData() {
+        self.showActivity()
         
-        fetch = fetchLinks("all").then({ (json) in
+        promise = fetchLinks("all").then({ (json) in
             println(json)
         }).catch({ (error) in
             println(error)
         }).finally(self, { (strongSelf) in
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-            strongSelf.fetch = nil
+            strongSelf.hideActivity()
+            strongSelf.promise = nil
         })
+    }
+    
+    func showActivity() {
+        activityIndicator.sizeToFit()
+        activityIndicator.center = view.center
+        activityIndicator.startAnimating()
+        view.addSubview(activityIndicator)
+    }
+    
+    func hideActivity() {
+        activityIndicator.stopAnimating()
+        activityIndicator.removeFromSuperview()
     }
     
     func fetchLinks(reddit: String) -> Promise<AnyObject> {
