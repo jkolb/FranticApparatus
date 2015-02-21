@@ -33,7 +33,7 @@ class UnexpectedContentTypeError : Error {}
 class LinkListingParseError : Error {}
 
 class ViewController: UIViewController {
-    let session = PromiseURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration())
+    let session: URLPromiseFactory = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration(), delegate: SimpleURLSessionDataDelegate(), delegateQueue: NSOperationQueue())
     var fetch: Promise<AnyObject>?
 
     override func viewDidLoad() {
@@ -41,68 +41,65 @@ class ViewController: UIViewController {
         
         UIApplication.sharedApplication().networkActivityIndicatorVisible = true
         
-        fetch = fetchLinks("all").when({ (json) in
+        fetch = fetchLinks("all").then({ (json) in
             println(json)
         }).catch({ (error) in
             println(error)
-        }).finally(self, { (context) in
+        }).finally(self, { (strongSelf) in
             UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-            context.fetch = nil
+            strongSelf.fetch = nil
         })
     }
     
     func fetchLinks(reddit: String) -> Promise<AnyObject> {
         let url = NSURL(string: "http://reddit.com/r/" + reddit + ".json")
         
-        return fetchJSON(url!).when({ [weak self] (data: NSData) -> Result<AnyObject> in
-            return Result(self!.parseJSON(data))
+        return fetchJSON(url!).then(self, { (strongSelf, data) -> Result<AnyObject> in
+            return Result(strongSelf.parseJSON(data))
         })
     }
 
     func fetchJSON(url: NSURL) -> Promise<NSData> {
         let request = NSURLRequest(URL: url)
-        return session.promise(request).when { (response, data) -> Result<NSData> in
-            if let httpResponse = response as? NSHTTPURLResponse {
+        return session.promise(request).then { (response) -> Result<NSData> in
+            if let httpResponse = response.metadata as? NSHTTPURLResponse {
                 if httpResponse.statusCode != 200 {
-                    return .Failure(UnexpectedHTTPStatusCodeError())
+                    return Result(UnexpectedHTTPStatusCodeError())
                 }
                 
-                let contentType = httpResponse.MIMEType != nil ? httpResponse.MIMEType : ""
+                let contentType = httpResponse.MIMEType ?? ""
                 
                 if contentType == "" {
-                    return .Failure(MissingContentTypeError())
+                    return Result(MissingContentTypeError())
                 }
                 
                 if contentType != "application/json" {
-                    return .Failure(UnexpectedContentTypeError())
+                    return Result(UnexpectedContentTypeError())
                 }
                 
-                return .Success(data)
+                return Result(response.data)
             } else {
-                return .Failure(UnexpectedResponseError())
+                return Result(UnexpectedResponseError())
             }
         }
     }
     
     func parseJSON(data: NSData, options: NSJSONReadingOptions = NSJSONReadingOptions(0)) -> Promise<AnyObject> {
-        let promise = Promise<AnyObject>()
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) { [weak promise] in
-            if let blockPromise = promise {
+        return Promise<AnyObject> { (fulfill, reject, isCancelled) in
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
                 var error: NSError?
                 let value: AnyObject? = NSJSONSerialization.JSONObjectWithData(data, options: options, error: &error)
                 
                 if value == nil {
                     if error == nil {
-                        blockPromise.fulfill(NSNull())
+                        fulfill(NSNull())
                     } else {
-                        blockPromise.reject(NSErrorWrapperError(cause: error!))
+                        reject(NSErrorWrapperError(cause: error!))
                     }
                 } else {
-                    blockPromise.fulfill(value!)
+                    fulfill(value!)
                 }
             }
         }
-        
-        return promise
     }
 }
