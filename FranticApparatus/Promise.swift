@@ -31,10 +31,25 @@ public class Value<T> {
     }
 }
 
-private enum State {
-    case Pending
-    case Fulfilled
-    case Rejected
+private class PendingInfo<T> {
+    let parent: (() -> Any)?
+    var deferred: Promise<T>? = nil
+    var onFulfilled: Array<T -> ()> = []
+    var onRejected: Array<Error -> ()> = []
+    
+    private init() {
+        self.parent = nil
+    }
+
+    private init(parent: () -> Any) {
+        self.parent = parent
+    }
+}
+
+private enum State<T> {
+    case Pending(PendingInfo<T>)
+    case Fulfilled(Value<T>)
+    case Rejected(Error)
 }
 
 public enum Result<T> {
@@ -57,14 +72,10 @@ public enum Result<T> {
 
 public class Promise<T> : Synchronizable {
     public let synchronizationQueue: DispatchQueue
-    private var state: State = .Pending
-    private var result: Result<T>? = nil
-    private var parent: (() -> Any)? = nil
-    private var onFulfilled: Array<(T) -> ()>! = []
-    private var onRejected: Array<(Error) -> ()>! = []
+    private var state: State<T>
     
     public init(_ resolver: (fulfill: T -> (), reject: Error -> (), isCancelled: () -> Bool) -> ()) {
-        self.parent = nil
+        self.state = .Pending(PendingInfo())
         self.synchronizationQueue = GCDQueue.serial("net.franticapparatus.Promise")
         
         let weakFulfill: T -> () = { [weak self] value in
@@ -87,7 +98,7 @@ public class Promise<T> : Synchronizable {
     }
     
     private init(parent: () -> Any, synchronizationQueue: DispatchQueue, resolver: (Result<T> -> ()) -> ()) {
-        self.parent = parent
+        self.state = .Pending(PendingInfo(parent: parent))
         self.synchronizationQueue = synchronizationQueue
         
         let weakResolve: Result<T> -> () = { [weak self] result in
@@ -107,30 +118,21 @@ public class Promise<T> : Synchronizable {
     
     private func transition(result: Result<T>) {
         switch self.state {
-        case .Pending:
+        case .Pending(let info):
             switch result {
             case .Success(let value):
-                self.state = .Fulfilled
-                self.result = result
-                for fulfillHandler in onFulfilled {
+                self.state = .Fulfilled(value)
+                for fulfillHandler in info.onFulfilled {
                     fulfillHandler(value.unwrap)
                 }
-                onFulfilled = nil
-                onRejected = nil
-                parent = nil
             case .Failure(let reason):
-                self.state = .Rejected
-                self.result = result
-                for rejectHandler in onRejected {
+                self.state = .Rejected(reason)
+                for rejectHandler in info.onRejected {
                     rejectHandler(reason)
                 }
-                onFulfilled = nil
-                onRejected = nil
-                parent = nil
             case .Deferred(let promise):
                 assert(promise !== self, "A promise referencing itself causes an unbreakable retain cycle")
-                self.state = .Pending
-                self.result = Result(promise.thenOn(
+                info.deferred = promise.thenOn(
                     synchronizationQueue,
                     onFulfilled: { [weak self] value in
                         let valueResult: Result<T> = Result(value)
@@ -146,7 +148,7 @@ public class Promise<T> : Synchronizable {
                         }
                         return reasonResult
                     }
-                ))
+                )
             }
         default:
             return
@@ -174,22 +176,13 @@ public class Promise<T> : Synchronizable {
             
             synchronizeWrite(self) { parent in
                 switch parent.state {
-                case .Pending:
-                    parent.onFulfilled.append(fulfiller)
-                    parent.onRejected.append(rejecter)
-                default:
-                    if let result = parent.result {
-                        switch result {
-                        case .Success(let value):
-                            fulfiller(value.unwrap)
-                        case .Failure(let reason):
-                            rejecter(reason)
-                        default:
-                            fatalError("Promise must have a success or failure result when not pending")
-                        }
-                    } else {
-                        fatalError("Promise is required to have a result when not pending")
-                    }
+                case .Pending(let info):
+                    info.onFulfilled.append(fulfiller)
+                    info.onRejected.append(rejecter)
+                case .Fulfilled(let value):
+                    fulfiller(value.unwrap)
+                case .Rejected(let reason):
+                    rejecter(reason)
                 }
             }
         }
