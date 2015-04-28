@@ -28,6 +28,11 @@ import Foundation
 public struct URLResponse {
     public let metadata: NSURLResponse // NSURLResponse encapsulates the metadata associated with a URL load.
     public let data: NSData
+    
+    public init(metadata: NSURLResponse, data: NSData) {
+        self.metadata = metadata
+        self.data = data
+    }
 }
 
 public protocol URLPromiseFactory {
