@@ -41,16 +41,12 @@ public protocol URLPromiseFactory {
 
 extension NSURLSession : URLPromiseFactory {
     public func promise(request: NSURLRequest) -> Promise<URLResponse> {
-        let promiseDelegate = delegate as! NSURLSessionPromiseDelegate
+        let promiseDelegate = delegate as! SimpleURLSessionDataDelegate
         return promiseDelegate.URLSession(self, promiseForRequest: request)
     }
 }
 
-public protocol NSURLSessionPromiseDelegate : NSURLSessionDelegate {
-    func URLSession(session: NSURLSession, promiseForRequest request: NSURLRequest) -> Promise<URLResponse>
-}
-
-public class SimpleURLSessionDataDelegate : NSObject, NSURLSessionPromiseDelegate, Synchronizable {
+public class SimpleURLSessionDataDelegate : NSObject, NSURLSessionDataDelegate, Synchronizable {
     struct CallbacksAndData {
         let fulfill: (URLResponse) -> ()
         let reject: (Error) -> ()
