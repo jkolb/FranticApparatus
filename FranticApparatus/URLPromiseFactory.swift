@@ -28,6 +28,11 @@ import Foundation
 public struct URLResponse {
     public let metadata: NSURLResponse // NSURLResponse encapsulates the metadata associated with a URL load.
     public let data: NSData
+    
+    public init(metadata: NSURLResponse, data: NSData) {
+        self.metadata = metadata
+        self.data = data
+    }
 }
 
 public protocol URLPromiseFactory {
@@ -36,16 +41,12 @@ public protocol URLPromiseFactory {
 
 extension NSURLSession : URLPromiseFactory {
     public func promise(request: NSURLRequest) -> Promise<URLResponse> {
-        let promiseDelegate = delegate as! NSURLSessionPromiseDelegate
+        let promiseDelegate = delegate as! SimpleURLSessionDataDelegate
         return promiseDelegate.URLSession(self, promiseForRequest: request)
     }
 }
 
-public protocol NSURLSessionPromiseDelegate : NSURLSessionDelegate {
-    func URLSession(session: NSURLSession, promiseForRequest request: NSURLRequest) -> Promise<URLResponse>
-}
-
-public class SimpleURLSessionDataDelegate : NSObject, NSURLSessionPromiseDelegate, Synchronizable {
+public class SimpleURLSessionDataDelegate : NSObject, NSURLSessionDataDelegate, Synchronizable {
     struct CallbacksAndData {
         let fulfill: (URLResponse) -> ()
         let reject: (Error) -> ()

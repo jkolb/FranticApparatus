@@ -1,6 +1,10 @@
-# [FranticApparatus 2.2.1](https://github.com/jkolb/FranticApparatus)
+# [FranticApparatus 2.2.2](https://github.com/jkolb/FranticApparatus)
 
 #### A [Promises/A+](https://promisesaplus.com) implementation for Swift 1.2
+
+## Changes for 2.2.2
+
+Each promise should now use less memory as once it reaches its fulfilled state all pending state used while processing will be released.
 
 ## What is a promise?
 
