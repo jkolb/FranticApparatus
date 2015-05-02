@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E544BDB01AF4695B008271E7 /* FranticApparatus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E544BDAF1AF4695B008271E7 /* FranticApparatus.framework */; };
+		E544BDB11AF4695B008271E7 /* FranticApparatus.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E544BDAF1AF4695B008271E7 /* FranticApparatus.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E59910A619D903D900E07A83 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59910A519D903D900E07A83 /* AppDelegate.swift */; };
 		E59910A819D903D900E07A83 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59910A719D903D900E07A83 /* ViewController.swift */; };
 		E59910AB19D903D900E07A83 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E59910A919D903D900E07A83 /* Main.storyboard */; };
 		E59910AD19D903D900E07A83 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E59910AC19D903D900E07A83 /* Images.xcassets */; };
 		E59910B019D903D900E07A83 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = E59910AE19D903D900E07A83 /* LaunchScreen.xib */; };
 		E59910BC19D903D900E07A83 /* FranticApparatusExample_iOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59910BB19D903D900E07A83 /* FranticApparatusExample_iOSTests.swift */; };
-		E59910CF19D903F300E07A83 /* FranticApparatus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E59910CE19D903F300E07A83 /* FranticApparatus.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,7 +27,22 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		E544BDB21AF4695B008271E7 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E544BDB11AF4695B008271E7 /* FranticApparatus.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		E544BDAF1AF4695B008271E7 /* FranticApparatus.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = FranticApparatus.framework; path = "/Users/jkolb/Library/Developer/Xcode/DerivedData/FranticApparatus-auswscgsauvevpgexacziduqkbjc/Build/Products/Debug-iphoneos/FranticApparatus.framework"; sourceTree = "<absolute>"; };
 		E59910A019D903D900E07A83 /* FranticApparatusExample_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FranticApparatusExample_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E59910A419D903D900E07A83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E59910A519D903D900E07A83 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -37,7 +53,6 @@
 		E59910B519D903D900E07A83 /* FranticApparatusExample_iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FranticApparatusExample_iOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E59910BA19D903D900E07A83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E59910BB19D903D900E07A83 /* FranticApparatusExample_iOSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FranticApparatusExample_iOSTests.swift; sourceTree = "<group>"; };
-		E59910CE19D903F300E07A83 /* FranticApparatus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FranticApparatus.framework; path = "../build/Debug-iphoneos/FranticApparatus.framework"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,7 +60,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E59910CF19D903F300E07A83 /* FranticApparatus.framework in Frameworks */,
+				E544BDB01AF4695B008271E7 /* FranticApparatus.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,7 +77,7 @@
 		E599109719D903D900E07A83 = {
 			isa = PBXGroup;
 			children = (
-				E59910CE19D903F300E07A83 /* FranticApparatus.framework */,
+				E544BDAF1AF4695B008271E7 /* FranticApparatus.framework */,
 				E59910A219D903D900E07A83 /* FranticApparatusExample_iOS */,
 				E59910B819D903D900E07A83 /* FranticApparatusExample_iOSTests */,
 				E59910A119D903D900E07A83 /* Products */,
@@ -126,6 +141,7 @@
 				E599109C19D903D900E07A83 /* Sources */,
 				E599109D19D903D900E07A83 /* Frameworks */,
 				E599109E19D903D900E07A83 /* Resources */,
+				E544BDB21AF4695B008271E7 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -342,7 +358,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				FRAMEWORK_SEARCH_PATHS = .;
+				FRAMEWORK_SEARCH_PATHS = (
+					.,
+					"$(USER_LIBRARY_DIR)/Developer/Xcode/DerivedData/FranticApparatus-auswscgsauvevpgexacziduqkbjc/Build/Products/Debug-iphoneos",
+				);
 				INFOPLIST_FILE = FranticApparatusExample_iOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -353,7 +372,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				FRAMEWORK_SEARCH_PATHS = .;
+				FRAMEWORK_SEARCH_PATHS = (
+					.,
+					"$(USER_LIBRARY_DIR)/Developer/Xcode/DerivedData/FranticApparatus-auswscgsauvevpgexacziduqkbjc/Build/Products/Debug-iphoneos",
+				);
 				INFOPLIST_FILE = FranticApparatusExample_iOS/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
