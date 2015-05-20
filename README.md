@@ -1,6 +1,12 @@
-# [FranticApparatus 2.2.2](https://github.com/jkolb/FranticApparatus)
+# [FranticApparatus 2.2.3](https://github.com/jkolb/FranticApparatus)
 
 #### A [Promises/A+](https://promisesaplus.com) implementation for Swift 1.2
+
+[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+
+## Changes for 2.2.3
+
+Attempting to add Carthage support.
 
 ## Changes for 2.2.2
 
