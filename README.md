@@ -7,6 +7,7 @@
 ## Changes for 2.2.3
 
 Attempting to add Carthage support.
+Turned on Whole Module Optimization to speed up compilation.
 
 ## Changes for 2.2.2
 
