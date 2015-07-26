@@ -26,20 +26,19 @@
 import UIKit
 import FranticApparatus
 
-class UnexpectedResponseError : Error {}
-class UnexpectedHTTPStatusCodeError : Error {}
-class MissingContentTypeError : Error {}
-class UnexpectedContentTypeError : Error {}
-class LinkListingParseError : Error {}
+enum ExampleError : ErrorType {
+    case UnexpectedResponse
+    case UnexpectedHTTPStatusCode
+    case MissingContentType
+    case UnexpectedContentType
+    case UnexpectedJSON
+    case LinkListingParse
+}
 
 class ViewController: UIViewController {
     let session: URLPromiseFactory = NSURLSession(configuration: NSURLSessionConfiguration.defaultSessionConfiguration(), delegate: SimpleURLSessionDataDelegate(), delegateQueue: NSOperationQueue())
-    var promise: Promise<AnyObject>?
+    var promise: Promise<NSDictionary>?
     let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .Gray)
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
@@ -50,11 +49,11 @@ class ViewController: UIViewController {
     func refreshData() {
         self.showActivity()
         
-        promise = fetchLinks("all").then({ (json) in
-            println(json)
-        }).catch({ (error) in
-            println(error)
-        }).finally(self, { (strongSelf) in
+        promise = fetchLinks("all").then({ json in
+            print(json, appendNewline: true)
+        }).handle({ error in
+            print(error, appendNewline: true)
+        }).finally(self, { strongSelf in
             strongSelf.hideActivity()
             strongSelf.promise = nil
         })
@@ -72,53 +71,54 @@ class ViewController: UIViewController {
         activityIndicator.removeFromSuperview()
     }
     
-    func fetchLinks(reddit: String) -> Promise<AnyObject> {
-        let url = NSURL(string: "http://reddit.com/r/" + reddit + ".json")
+    func fetchLinks(reddit: String) -> Promise<NSDictionary> {
+        let url = NSURL(string: "https://reddit.com/r/" + reddit + ".json")
         
-        return fetchJSON(url!).then(self, { (strongSelf, data) -> Result<AnyObject> in
-            return Result(strongSelf.parseJSON(data))
+        return fetchJSON(url!).then(self, { (strongSelf, data) -> Result<NSDictionary> in
+            return .Deferred(strongSelf.parseJSON(data))
         })
     }
 
     func fetchJSON(url: NSURL) -> Promise<NSData> {
         let request = NSURLRequest(URL: url)
+        
         return session.promise(request).then { (response) -> Result<NSData> in
             if let httpResponse = response.metadata as? NSHTTPURLResponse {
                 if httpResponse.statusCode != 200 {
-                    return Result(UnexpectedHTTPStatusCodeError())
+                    return .Failure(ExampleError.UnexpectedHTTPStatusCode)
                 }
                 
                 let contentType = httpResponse.MIMEType ?? ""
                 
                 if contentType == "" {
-                    return Result(MissingContentTypeError())
+                    return .Failure(ExampleError.MissingContentType)
                 }
                 
                 if contentType != "application/json" {
-                    return Result(UnexpectedContentTypeError())
+                    return .Failure(ExampleError.UnexpectedContentType)
                 }
                 
-                return Result(response.data)
+                return .Success(response.data)
             } else {
-                return Result(UnexpectedResponseError())
+                return .Failure(ExampleError.UnexpectedResponse)
             }
         }
     }
     
-    func parseJSON(data: NSData, options: NSJSONReadingOptions = NSJSONReadingOptions(0)) -> Promise<AnyObject> {
-        return Promise<AnyObject> { (fulfill, reject, isCancelled) in
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-                var error: NSError?
-                let value: AnyObject? = NSJSONSerialization.JSONObjectWithData(data, options: options, error: &error)
-                
-                if value == nil {
-                    if error == nil {
-                        fulfill(NSNull())
+    func parseJSON(data: NSData, options: NSJSONReadingOptions = []) -> Promise<NSDictionary> {
+        return Promise<NSDictionary> { (fulfill, reject, isCancelled) in
+            GCDQueue.globalPriorityDefault().dispatch {
+                do {
+                    let value: AnyObject? = try NSJSONSerialization.JSONObjectWithData(data, options: options)
+                    
+                    if let dictionary = value as? NSDictionary {
+                        fulfill(dictionary)
                     } else {
-                        reject(NSErrorWrapperError(cause: error!))
+                        reject(ExampleError.UnexpectedJSON)
                     }
-                } else {
-                    fulfill(value!)
+                }
+                catch {
+                    reject(error)
                 }
             }
         }

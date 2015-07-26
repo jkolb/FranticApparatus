@@ -23,19 +23,15 @@
 // THE SOFTWARE.
 //
 
-public class Value<T> {
-    public let unwrap: T
-    
-    public init(_ value: T) {
-        self.unwrap = value
-    }
+public enum PromiseError : ErrorType {
+    case ContextUnavailable
 }
 
 private class PendingInfo<T> {
     let parent: (() -> Any)?
     var deferred: Promise<T>? = nil
     var onFulfilled: Array<T -> ()> = []
-    var onRejected: Array<Error -> ()> = []
+    var onRejected: Array<ErrorType -> ()> = []
     
     private init() {
         self.parent = nil
@@ -48,45 +44,33 @@ private class PendingInfo<T> {
 
 private enum State<T> {
     case Pending(PendingInfo<T>)
-    case Fulfilled(Value<T>)
-    case Rejected(Error)
+    case Fulfilled(T)
+    case Rejected(ErrorType)
 }
 
 public enum Result<T> {
-    case Success(Value<T>)
+    case Success(T)
     case Deferred(Promise<T>)
-    case Failure(Error)
-    
-    public init(_ value: T) {
-        self = Success(Value(value))
-    }
-    
-    public init(_ promise: Promise<T>) {
-        self = Deferred(promise)
-    }
-    
-    public init(_ reason: Error) {
-        self = Failure(reason)
-    }
+    case Failure(ErrorType)
 }
 
 public class Promise<T> : Synchronizable {
     public let synchronizationQueue: DispatchQueue
     private var state: State<T>
     
-    public init(_ resolver: (fulfill: T -> (), reject: Error -> (), isCancelled: () -> Bool) -> ()) {
+    public init(_ resolver: (fulfill: T -> (), reject: ErrorType -> (), isCancelled: () -> Bool) -> ()) {
         self.state = .Pending(PendingInfo())
         self.synchronizationQueue = GCDQueue.serial("net.franticapparatus.Promise")
         
         let weakFulfill: T -> () = { [weak self] value in
             if let strongSelf = self {
-                Promise<T>.resolve(strongSelf)(Result(value))
+                Promise<T>.resolve(strongSelf)(.Success(value))
             }
         }
         
-        let weakReject: Error -> () = { [weak self] reason in
+        let weakReject: ErrorType -> () = { [weak self] reason in
             if let strongSelf = self {
-                Promise<T>.resolve(strongSelf)(Result(reason))
+                Promise<T>.resolve(strongSelf)(.Failure(reason))
             }
         }
 
@@ -123,7 +107,7 @@ public class Promise<T> : Synchronizable {
             case .Success(let value):
                 self.state = .Fulfilled(value)
                 for fulfillHandler in info.onFulfilled {
-                    fulfillHandler(value.unwrap)
+                    fulfillHandler(value)
                 }
             case .Failure(let reason):
                 self.state = .Rejected(reason)
@@ -135,14 +119,14 @@ public class Promise<T> : Synchronizable {
                 info.deferred = promise.thenOn(
                     synchronizationQueue,
                     onFulfilled: { [weak self] value in
-                        let valueResult: Result<T> = Result(value)
+                        let valueResult: Result<T> = .Success(value)
                         if let strongSelf = self {
                             strongSelf.transition(valueResult)
                         }
                         return valueResult
                     },
                     onRejected: { [weak self] reason in
-                        let reasonResult: Result<T> = Result(reason)
+                        let reasonResult: Result<T> = .Failure(reason)
                         if let strongSelf = self {
                             strongSelf.transition(reasonResult)
                         }
@@ -155,11 +139,11 @@ public class Promise<T> : Synchronizable {
         }
     }
     
-    public func then<R>(# onFulfilled: T -> Result<R>, onRejected: Error -> Result<R>) -> Promise<R> {
+    public func then<R>(onFulfilled onFulfilled: T -> Result<R>, onRejected: ErrorType -> Result<R>) -> Promise<R> {
         return thenOn(GCDQueue.main(), onFulfilled: onFulfilled, onRejected: onRejected)
     }
     
-    public func thenOn<R>(thenQueue: DispatchQueue, onFulfilled: T -> Result<R>, onRejected: Error -> Result<R>) -> Promise<R> {
+    public func thenOn<R>(thenQueue: DispatchQueue, onFulfilled: T -> Result<R>, onRejected: ErrorType -> Result<R>) -> Promise<R> {
         return Promise<R>(parent: {self}, synchronizationQueue: synchronizationQueue) { resolve in
             let fulfiller: T -> () = { value in
                 thenQueue.dispatch {
@@ -167,7 +151,7 @@ public class Promise<T> : Synchronizable {
                     resolve(result)
                 }
             }
-            let rejecter: Error -> () = { reason in
+            let rejecter: ErrorType -> () = { reason in
                 thenQueue.dispatch {
                     let result = onRejected(reason)
                     resolve(result)
@@ -180,7 +164,7 @@ public class Promise<T> : Synchronizable {
                     info.onFulfilled.append(fulfiller)
                     info.onRejected.append(rejecter)
                 case .Fulfilled(let value):
-                    fulfiller(value.unwrap)
+                    fulfiller(value)
                 case .Rejected(let reason):
                     rejecter(reason)
                 }
@@ -192,10 +176,10 @@ public class Promise<T> : Synchronizable {
         return then(
             onFulfilled: { value in
                 onFulfilled(value)
-                return Result(value)
+                return .Success(value)
             },
             onRejected: { reason in
-                return Result(reason)
+                return .Failure(reason)
             }
         )
     }
@@ -206,10 +190,10 @@ public class Promise<T> : Synchronizable {
                 if let strongContext = context {
                     onFulfilled(strongContext, value)
                 }
-                return Result(value)
+                return .Success(value)
             },
             onRejected: { reason in
-                return Result(reason)
+                return .Failure(reason)
             }
         )
     }
@@ -218,7 +202,7 @@ public class Promise<T> : Synchronizable {
         return then(
             onFulfilled: onFulfilled,
             onRejected: { reason in
-                return Result(reason)
+                return .Failure(reason)
             }
         )
     }
@@ -229,60 +213,60 @@ public class Promise<T> : Synchronizable {
                 if let strongContext = context {
                     return onFulfilled(strongContext, value)
                 } else {
-                    return Result(ContextUnavailableError())
+                    return .Failure(PromiseError.ContextUnavailable)
                 }
             },
             onRejected: { reason in
-                return Result(reason)
+                return .Failure(reason)
             }
         )
     }
     
-    public func catch(onRejected: Error -> ()) -> Promise<T> {
+    public func handle(onRejected: ErrorType -> ()) -> Promise<T> {
         return then(
             onFulfilled: { value in
-                return Result(value)
+                return .Success(value)
             },
             onRejected: { reason in
                 onRejected(reason)
-                return Result(reason)
+                return .Failure(reason)
             }
         )
     }
     
-    public func catch<C: AnyObject>(context: C, _ onRejected: (C, Error) -> ()) -> Promise<T> {
+    public func handle<C: AnyObject>(context: C, _ onRejected: (C, ErrorType) -> ()) -> Promise<T> {
         return then(
             onFulfilled: { value in
-                return Result(value)
+                return .Success(value)
             },
             onRejected: { [weak context] reason in
                 if let strongContext = context {
                     onRejected(strongContext, reason)
                 }
-                return Result(reason)
+                return .Failure(reason)
             }
         )
     }
     
-    public func recover(onRejected: Error -> Result<T>) -> Promise<T> {
+    public func recover(onRejected: ErrorType -> Result<T>) -> Promise<T> {
         return then(
             onFulfilled: { value in
-                return Result(value)
+                return .Success(value)
             },
             onRejected: onRejected
         )
     }
     
-    public func recover<C: AnyObject>(context: C, _ onRejected: (C, Error) -> Result<T>) -> Promise<T> {
+    public func recover<C: AnyObject>(context: C, _ onRejected: (C, ErrorType) -> Result<T>) -> Promise<T> {
         return then(
             onFulfilled: { value in
-                return Result(value)
+                return .Success(value)
             },
             onRejected: { [weak context] error in
                 if let strongContext = context {
                     return onRejected(strongContext, error)
                 } else {
-                    return Result(error)
+                    return .Failure(error)
                 }
             }
         )
@@ -292,11 +276,11 @@ public class Promise<T> : Synchronizable {
         return then(
             onFulfilled: { value in
                 onFinally()
-                return Result(value)
+                return .Success(value)
             },
             onRejected: { reason in
                 onFinally()
-                return Result(reason)
+                return .Failure(reason)
             }
         )
     }
@@ -307,13 +291,13 @@ public class Promise<T> : Synchronizable {
                 if let strongContext = context {
                     onFinally(strongContext)
                 }
-                return Result(value)
+                return .Success(value)
             },
             onRejected: { [weak context] reason in
                 if let strongContext = context {
                     onFinally(strongContext)
                 }
-                return Result(reason)
+                return .Failure(reason)
             }
         )
     }

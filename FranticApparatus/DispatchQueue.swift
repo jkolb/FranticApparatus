@@ -25,7 +25,7 @@
 
 import Dispatch
 
-public protocol DispatchQueue : class, Printable {
+public protocol DispatchQueue : class, CustomStringConvertible {
     func dispatch(block: () -> ())
     func dispatchAndWait(block: () -> ())
     func dispatchSerialized(block: () -> ())

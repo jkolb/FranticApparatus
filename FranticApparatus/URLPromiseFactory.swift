@@ -25,6 +25,10 @@
 
 import Foundation
 
+public enum URLPromiseFactoryError : ErrorType {
+    case OutOfMemory
+}
+
 public struct URLResponse {
     public let metadata: NSURLResponse // NSURLResponse encapsulates the metadata associated with a URL load.
     public let data: NSData
@@ -49,7 +53,7 @@ extension NSURLSession : URLPromiseFactory {
 public class SimpleURLSessionDataDelegate : NSObject, NSURLSessionDataDelegate, Synchronizable {
     struct CallbacksAndData {
         let fulfill: (URLResponse) -> ()
-        let reject: (Error) -> ()
+        let reject: (ErrorType) -> ()
         let isCancelled: () -> Bool
         let data: NSMutableData
         
@@ -68,8 +72,7 @@ public class SimpleURLSessionDataDelegate : NSObject, NSURLSessionDataDelegate, 
                     let value = URLResponse(metadata: task.response!, data: callbacksAndData.responseData)
                     callbacksAndData.fulfill(value)
                 } else {
-                    let reason = NSErrorWrapperError(cause: error!)
-                    callbacksAndData.reject(reason)
+                    callbacksAndData.reject(error!)
                 }
             }
             
@@ -109,7 +112,7 @@ public class SimpleURLSessionDataDelegate : NSObject, NSURLSessionDataDelegate, 
                     delegate.callbacksAndData[dataTask] = callbacksAndData
                     dataTask.resume()
                 } else {
-                    reject(OutOfMemoryError())
+                    reject(URLPromiseFactoryError.OutOfMemory)
                 }
             }
         }

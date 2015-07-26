@@ -1,17 +1,28 @@
-# [FranticApparatus 2.2.3](https://github.com/jkolb/FranticApparatus)
+# [FranticApparatus 3.0.0](https://github.com/jkolb/FranticApparatus)
 
-#### A [Promises/A+](https://promisesaplus.com) implementation for Swift 1.2
+#### A [Promises/A+](https://promisesaplus.com) implementation for Swift 2
 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
+## Changes for 3.0.0
+
+* Updated to support Swift 2.
+* Removed custom Error struct and replaced it with the Swift built-in ErrorType.
+* NSErrorWrapperError has also been removed as NSError already conforms to ErrorType.
+* Existing FranticApparatus Error subclasses have been converted to enums that derive from ErrorType.
+* Removed Value struct since boxing enum associated values is not longer needed.
+* You must update all places were you call `Result(value)`, `Result(error)`, and `Result(promise)` to now be `.Success(value)`, `.Failure(error)`, `.Deferred(promise)` since enum boxing is no longer needed.
+* The `catch` method has been renamed to `handle` to not conflict with the new `catch` keyword.
+* Tests have been rewritten to better show how to do memory management with promises.
+
 ## Changes for 2.2.3
 
-Attempting to add Carthage support.
-Turned on Whole Module Optimization to speed up compilation.
+* Attempting to add Carthage support.
+* Turned on Whole Module Optimization to speed up compilation.
 
 ## Changes for 2.2.2
 
-Each promise should now use less memory as once it reaches its fulfilled state all pending state used while processing will be released.
+* Each promise should now use less memory as once it reaches its fulfilled state all pending state used while processing will be released.
 
 ## What is a promise?
 
@@ -71,9 +82,9 @@ Here is the same example assuming that there are three methods that return promi
 
     func fetch(url: NSURL) -> Promise<DataModel> {
         return self.download(url).then(self, { (strongSelf, data) -> Result<NSDictionary> in
-            return Result(strongSelf.parseJSON(data))
-        }).then(self, { (strongSelf, json) -> Result<[DataModel]> in
-            return Result(strongSelf.mapDataModel(json))
+            return .Deferred(strongSelf.parseJSON(data))
+        }).then(self, { (strongSelf, json) -> Result<DataModel> in
+            return .Deferred(strongSelf.mapDataModel(json))
         })
     }
 
@@ -83,7 +94,7 @@ And again how it would be used:
         
     self.promise = self.fetch(NSURL(string: "http://example.com/datamodel.json")).then(self, { (strongSelf, dataModel) in
 		strongSelf.displayDataModel(dataModel)
-    }).catch(self, { (strongSelf, error) in
+    }).handle(self, { (strongSelf, error) in
 		strongSelf.displayError(error)
     }).finally(self, { (strongSelf) in
         strongSelf.hideActivityIndicator()
@@ -98,7 +109,7 @@ The `fetch` method is building a promise that represents a `DataModel` value tha
 
 In the same vein, if there is a problem calculating the value, the promise will be rejected and the `onRejected` callback will be triggered instead. Once a promise is rejected it will stay that way and also multiple objects can receive the same rejection notice as long as each object calls `then` on the same promise instance*.
 
-In the example above a shortcut `then` method is used in place of `then`. This version of the `then` method is a convenience that calls the normal `then` behind the scenes and allows you to just provide a callback for `onFulfilled`. It also creates an `onRejected` callback but its implementation effectively just forwards any errors on to the next promise in the chain of promises (if any). The `catch` method does the opposite, as it allows you to provide an `onRejected` callback while forwarding on any fulfilled values to the next promise in the chain. Lastly the `finally` method generates implementations of both `onFulfilled` and `onRejected` that foward on the values but also gives you a way to execute the same block no matter if the promise is rejected or fulfilled.
+In the example above a shortcut `then` method is used in place of `then`. This version of the `then` method is a convenience that calls the normal `then` behind the scenes and allows you to just provide a callback for `onFulfilled`. It also creates an `onRejected` callback but its implementation effectively just forwards any errors on to the next promise in the chain of promises (if any). The `handle` method does the opposite, as it allows you to provide an `onRejected` callback while forwarding on any fulfilled values to the next promise in the chain. Lastly the `finally` method generates implementations of both `onFulfilled` and `onRejected` that foward on the values but also gives you a way to execute the same block no matter if the promise is rejected or fulfilled.
 
 **There are some details of the memory management this entails that will be covered later*
 
@@ -121,24 +132,32 @@ Lastly we come to the most powerful type of result, instead of returning a value
 
 #### A promise that returns an NSDictionary from JSON data.
 
-    func parseJSON(data: NSData, options: NSJSONReadingOptions = NSJSONReadingOptions(0)) -> Promise<NSDictionary> {
+    enum ParseError : ErrorType {
+		case UnexpectedJSON
+	}
+	
+	func parseJSON(data: NSData, options: NSJSONReadingOptions = []) -> Promise<NSDictionary> {
         return Promise<NSDictionary> { (fulfill, reject, isCancelled) in
-			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-				var error: NSError?
-				let value: AnyObject? = NSJSONSerialization.JSONObjectWithData(data, options: options, error: &error)
-                
-				if value == nil {
-					reject(NSErrorWrapperError(cause: error!))
-                } else {
-                    fulfill(value! as NSDictionary) // Unsafe cast!
-                }
+			GCDQueue.globalPriorityDefault().dispatch {
+				do {
+					let value: AnyObject? = try NSJSONSerialization.JSONObjectWithData(data, options: options)
+					
+					if let dictionary = value as? NSDictionary {
+						fulfill(dictionary)
+					} else {
+						reject(ParseError.UnexpectedJSON)
+					}
+				}
+				catch {
+					reject(error)
+				}
         	}
 		}
     }
 
-When you make a promise you pass in a closure to the initiailizer representing the work required to generate the promise's value. At the end of the promise initiaizer it will execute this closure and pass in three closures to it as parameters: `fulfill`, `reject`, and `isCancelled`. These parameters allow the closure doing the work to safely interact with the promise without worrying about memory management or keeping up with a separate reference to the promise instance. To be most useful any work required to calculate the result of the promise should be done on a separate thread. In this case we are using Grand Central Dispatch to execute a block on a global queue.
+When you make a promise you pass in a closure to the initiailizer representing the work required to generate the promise's value. At the end of the promise initiaizer it will execute this closure and pass in three closures to it as parameters: `fulfill`, `reject`, and `isCancelled`. These parameters allow the closure doing the work to safely interact with the promise without worrying about memory management or keeping up with a separate reference to the promise instance. To be most useful any work required to calculate the result of the promise should be done on a separate thread. In this case we are using Grand Central Dispatch to execute a block on a global queue using a helper class from FranticApparatus.
 
-When the work to calculate the value is complete the original promise can be fulfilled by calling `fulfill` and passing in the generated value. If there is an error whie generating the value you can call `reject` instead passing in an instance of a subclass of `Error` that represents the error condition. `NSErrorWrapperError` is provided to translate between `NSError` and `Error` if needed. Lastly if the work required to do the calculation is long and has multiple sections of complex logic you can intersperse that logic with calls to `isCancelled()` so you can detect as early as you can if the promise associated with the work has been deinitialized and exit early if it makes sense to do so. If the promise has been deinitialized it is still safe to call `fulfill` and `reject` as they do nothing if the promise is missing.
+When the work to calculate the value is complete the original promise can be fulfilled by calling `fulfill` and passing in the generated value. If there is an error whie generating the value you can call `reject` instead passing in an instance of an object that coforms to the Swift 2 protocol `ErrorType`. If the work required to do the calculation is long and has multiple sections of complex logic you can intersperse that logic with calls to `isCancelled()` so you can detect as early as you can if the promise associated with the work has been deinitialized and exit early if it makes sense to do so. If the promise has already been deinitialized it is still safe to call `fulfill`, `reject`, and `isCancelled` as they are written to be safe in this use case.
 
 #### Using promises to perform networking
 

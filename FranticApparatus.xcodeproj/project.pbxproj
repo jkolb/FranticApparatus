@@ -7,17 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		09ACD43319DADA66003607D8 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09ACD43219DADA66003607D8 /* Error.swift */; };
-		09ACD43419DADA66003607D8 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09ACD43219DADA66003607D8 /* Error.swift */; };
 		E54661CA19CDE777007488CA /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54661C919CDE777007488CA /* Promise.swift */; };
-		E54661CB19CDE7D9007488CA /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54661C919CDE777007488CA /* Promise.swift */; };
 		E55CA21719C676DC00E66980 /* FranticApparatus.h in Headers */ = {isa = PBXBuildFile; fileRef = E55CA21619C676DC00E66980 /* FranticApparatus.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E55CA21D19C676DC00E66980 /* FranticApparatus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55CA21119C676DC00E66980 /* FranticApparatus.framework */; };
 		E55CA22419C676DC00E66980 /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55CA22319C676DC00E66980 /* PromiseTests.swift */; };
 		E5B3740C19D8F9BC00701FF6 /* DispatchQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3740919D8F9BC00701FF6 /* DispatchQueue.swift */; };
 		E5B3740D19D8F9BC00701FF6 /* Synchronizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3740A19D8F9BC00701FF6 /* Synchronizable.swift */; };
-		E5B3740F19D8FA1300701FF6 /* DispatchQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3740919D8F9BC00701FF6 /* DispatchQueue.swift */; };
-		E5B3741019D8FA1600701FF6 /* Synchronizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3740A19D8F9BC00701FF6 /* Synchronizable.swift */; };
 		E5B3741219D900DD00701FF6 /* URLPromiseFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3741119D900DD00701FF6 /* URLPromiseFactory.swift */; };
 /* End PBXBuildFile section */
 
@@ -46,7 +41,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		09ACD43219DADA66003607D8 /* Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
 		E54661C919CDE777007488CA /* Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
 		E55CA21119C676DC00E66980 /* FranticApparatus.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FranticApparatus.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E55CA21519C676DC00E66980 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -103,7 +97,6 @@
 			children = (
 				E55CA21619C676DC00E66980 /* FranticApparatus.h */,
 				E5B3740919D8F9BC00701FF6 /* DispatchQueue.swift */,
-				09ACD43219DADA66003607D8 /* Error.swift */,
 				E5B3740A19D8F9BC00701FF6 /* Synchronizable.swift */,
 				E54661C919CDE777007488CA /* Promise.swift */,
 				E5B3741119D900DD00701FF6 /* URLPromiseFactory.swift */,
@@ -202,7 +195,8 @@
 		E55CA20819C676DC00E66980 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0600;
+				LastSwiftUpdateCheck = 0700;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Justin Kolb";
 				TargetAttributes = {
 					E55CA21019C676DC00E66980 = {
@@ -279,7 +273,6 @@
 				E5B3741219D900DD00701FF6 /* URLPromiseFactory.swift in Sources */,
 				E54661CA19CDE777007488CA /* Promise.swift in Sources */,
 				E5B3740D19D8F9BC00701FF6 /* Synchronizable.swift in Sources */,
-				09ACD43319DADA66003607D8 /* Error.swift in Sources */,
 				E5B3740C19D8F9BC00701FF6 /* DispatchQueue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -289,10 +282,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E55CA22419C676DC00E66980 /* PromiseTests.swift in Sources */,
-				E54661CB19CDE7D9007488CA /* Promise.swift in Sources */,
-				E5B3741019D8FA1600701FF6 /* Synchronizable.swift in Sources */,
-				E5B3740F19D8FA1300701FF6 /* DispatchQueue.swift in Sources */,
-				09ACD43419DADA66003607D8 /* Error.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,6 +317,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -346,8 +336,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_WHOLE_MODULE_OPTIMIZATION = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -386,7 +375,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
-				SWIFT_WHOLE_MODULE_OPTIMIZATION = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -405,6 +394,7 @@
 				INFOPLIST_FILE = FranticApparatus/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.franticapparatus.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -422,6 +412,7 @@
 				INFOPLIST_FILE = FranticApparatus/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.franticapparatus.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -440,6 +431,7 @@
 				);
 				INFOPLIST_FILE = FranticApparatusTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.franticapparatus.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -453,6 +445,7 @@
 				);
 				INFOPLIST_FILE = FranticApparatusTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.franticapparatus.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
