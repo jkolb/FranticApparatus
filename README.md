@@ -1,8 +1,13 @@
-# [FranticApparatus 3.0.0](https://github.com/jkolb/FranticApparatus)
+# [FranticApparatus 3.0.1](https://github.com/jkolb/FranticApparatus)
 
 #### A [Promises/A+](https://promisesaplus.com) implementation for Swift 2
 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+
+## Changes for 3.0.1
+
+* Implemented Synchronizable as a protocol extension to make it read better.
+* Added @noescape to the public Promise initializer since the block is always run inline.
 
 ## Changes for 3.0.0
 
