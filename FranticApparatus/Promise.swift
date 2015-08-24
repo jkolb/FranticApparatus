@@ -58,7 +58,7 @@ public class Promise<T> : Synchronizable {
     public let synchronizationQueue: DispatchQueue
     private var state: State<T>
     
-    public init(_ resolver: (fulfill: T -> (), reject: ErrorType -> (), isCancelled: () -> Bool) -> ()) {
+    public init(@noescape _ resolver: (fulfill: T -> (), reject: ErrorType -> (), isCancelled: () -> Bool) -> ()) {
         self.state = .Pending(PendingInfo())
         self.synchronizationQueue = GCDQueue.serial("net.franticapparatus.Promise")
         
@@ -95,7 +95,7 @@ public class Promise<T> : Synchronizable {
     }
     
     private func resolve(result: Result<T>) {
-        synchronizeWrite(self) { promise in
+        synchronizeWrite { promise in
             promise.transition(result)
         }
     }
@@ -158,7 +158,7 @@ public class Promise<T> : Synchronizable {
                 }
             }
             
-            synchronizeWrite(self) { parent in
+            self.synchronizeWrite { parent in
                 switch parent.state {
                 case .Pending(let info):
                     info.onFulfilled.append(fulfiller)

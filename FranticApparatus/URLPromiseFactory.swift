@@ -66,7 +66,7 @@ public class SimpleURLSessionDataDelegate : NSObject, NSURLSessionDataDelegate, 
     public let synchronizationQueue: DispatchQueue = GCDQueue.concurrent("net.franticapparatus.PromiseSession")
     
     func complete(task: NSURLSessionTask, error: NSError?) {
-        synchronizeRead(self) { (delegate) in
+        synchronizeRead { delegate in
             if let callbacksAndData = delegate.callbacksAndData[task] {
                 if error == nil {
                     let value = URLResponse(metadata: task.response!, data: callbacksAndData.responseData)
@@ -76,14 +76,14 @@ public class SimpleURLSessionDataDelegate : NSObject, NSURLSessionDataDelegate, 
                 }
             }
             
-            synchronizeWrite(delegate) { (delegate) in
+            delegate.synchronizeWrite { delegate in
                 delegate.callbacksAndData[task] = nil
             }
         }
     }
     
     func accumulate(task: NSURLSessionTask, data: NSData) {
-        synchronizeWrite(self) { (delegate) in
+        synchronizeWrite { delegate in
             if let callbacksAndData = delegate.callbacksAndData[task] {
                 if callbacksAndData.isCancelled() {
                     task.cancel()
@@ -101,7 +101,7 @@ public class SimpleURLSessionDataDelegate : NSObject, NSURLSessionDataDelegate, 
         return Promise<URLResponse> { (fulfill, reject, isCancelled) -> () in
             let threadSafeRequest = request.copy() as! NSURLRequest
             
-            synchronizeWrite(self) { (delegate) in
+            self.synchronizeWrite { delegate in
                 if isCancelled() {
                     return;
                 }

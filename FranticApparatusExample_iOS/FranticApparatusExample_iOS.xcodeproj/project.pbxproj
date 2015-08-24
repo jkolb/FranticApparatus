@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E544BDB01AF4695B008271E7 /* FranticApparatus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E544BDAF1AF4695B008271E7 /* FranticApparatus.framework */; };
-		E544BDB11AF4695B008271E7 /* FranticApparatus.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E544BDAF1AF4695B008271E7 /* FranticApparatus.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E59910A619D903D900E07A83 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59910A519D903D900E07A83 /* AppDelegate.swift */; };
 		E59910A819D903D900E07A83 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59910A719D903D900E07A83 /* ViewController.swift */; };
 		E59910AB19D903D900E07A83 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E59910A919D903D900E07A83 /* Main.storyboard */; };
@@ -34,7 +32,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				E544BDB11AF4695B008271E7 /* FranticApparatus.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -42,7 +39,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		E544BDAF1AF4695B008271E7 /* FranticApparatus.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = FranticApparatus.framework; path = "/Users/jkolb/Library/Developer/Xcode/DerivedData/FranticApparatus-auswscgsauvevpgexacziduqkbjc/Build/Products/Debug-iphoneos/FranticApparatus.framework"; sourceTree = "<absolute>"; };
 		E59910A019D903D900E07A83 /* FranticApparatusExample_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FranticApparatusExample_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E59910A419D903D900E07A83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E59910A519D903D900E07A83 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -60,7 +56,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E544BDB01AF4695B008271E7 /* FranticApparatus.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,7 +72,6 @@
 		E599109719D903D900E07A83 = {
 			isa = PBXGroup;
 			children = (
-				E544BDAF1AF4695B008271E7 /* FranticApparatus.framework */,
 				E59910A219D903D900E07A83 /* FranticApparatusExample_iOS */,
 				E59910B819D903D900E07A83 /* FranticApparatusExample_iOSTests */,
 				E59910A119D903D900E07A83 /* Products */,

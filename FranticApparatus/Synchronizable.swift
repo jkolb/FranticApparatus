@@ -27,34 +27,34 @@ public protocol Synchronizable: class {
     var synchronizationQueue: DispatchQueue { get }
 }
 
-public func synchronizeRead<T: Synchronizable>(synchronizable: T, block: (T) -> ()) {
-    synchronizable.synchronizationQueue.dispatch { [weak synchronizable] in
-        if let strongSynchronizable = synchronizable {
-            block(strongSynchronizable)
+public extension Synchronizable {
+    public func synchronizeRead(synchronized: (Self) -> ()) {
+        synchronizationQueue.dispatch { [weak self] in
+            guard let strongSelf = self else { return }
+            synchronized(strongSelf)
         }
     }
-}
-
-public func synchronizeRead<T: Synchronizable, R>(synchronizable: T, block: (T) -> R) -> R {
-    var result: R!
-    synchronizable.synchronizationQueue.dispatchAndWait { [unowned synchronizable] in
-        result = block(synchronizable)
+    
+    public func synchronizeRead<ResultType>(synchronized: (Self) -> ResultType) -> ResultType {
+        var result: ResultType!
+        synchronizationQueue.dispatchAndWait { [unowned self] in
+            result = synchronized(self)
+        }
+        return result
     }
-    return result
-}
-
-public func synchronizeRead<T: Synchronizable, R>(synchronizable: T, block: (T) -> R?) -> R? {
-    var result: R?
-    synchronizable.synchronizationQueue.dispatchAndWait { [unowned synchronizable] in
-        result = block(synchronizable)
+    
+    public func synchronizeRead<ResultType>(synchronized: (Self) -> ResultType?) -> ResultType? {
+        var result: ResultType?
+        synchronizationQueue.dispatchAndWait { [unowned self] in
+            result = synchronized(self)
+        }
+        return result
     }
-    return result
-}
-
-public func synchronizeWrite<T: Synchronizable>(synchronizable: T, block: (T) -> ()) {
-    synchronizable.synchronizationQueue.dispatchSerialized { [weak synchronizable] in
-        if let strongSynchronizable = synchronizable {
-            block(strongSynchronizable)
+    
+    public func synchronizeWrite(synchronized: (Self) -> ()) {
+        synchronizationQueue.dispatchSerialized { [weak self] in
+            guard let strongSelf = self else { return }
+            synchronized(strongSelf)
         }
     }
 }
