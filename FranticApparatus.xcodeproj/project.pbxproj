@@ -31,6 +31,8 @@
 		E55CA21C19C676DC00E66980 /* FranticApparatusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FranticApparatusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E55CA22219C676DC00E66980 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E55CA22319C676DC00E66980 /* PromiseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
+		E5C64A9B1C35E1DA00A3402D /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = SOURCE_ROOT; };
+		E5C64A9C1C35E1DA00A3402D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +75,8 @@
 		E55CA21319C676DC00E66980 /* FranticApparatus */ = {
 			isa = PBXGroup;
 			children = (
+				E5C64A9C1C35E1DA00A3402D /* README.md */,
+				E5C64A9B1C35E1DA00A3402D /* LICENSE */,
 				E55CA21619C676DC00E66980 /* FranticApparatus.h */,
 				E54661C919CDE777007488CA /* Promise.swift */,
 				E55CA21419C676DC00E66980 /* Supporting Files */,
