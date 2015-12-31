@@ -11,9 +11,6 @@
 		E55CA21719C676DC00E66980 /* FranticApparatus.h in Headers */ = {isa = PBXBuildFile; fileRef = E55CA21619C676DC00E66980 /* FranticApparatus.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E55CA21D19C676DC00E66980 /* FranticApparatus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55CA21119C676DC00E66980 /* FranticApparatus.framework */; };
 		E55CA22419C676DC00E66980 /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55CA22319C676DC00E66980 /* PromiseTests.swift */; };
-		E5B3740C19D8F9BC00701FF6 /* DispatchQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3740919D8F9BC00701FF6 /* DispatchQueue.swift */; };
-		E5B3740D19D8F9BC00701FF6 /* Synchronizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3740A19D8F9BC00701FF6 /* Synchronizable.swift */; };
-		E5B3741219D900DD00701FF6 /* URLPromiseFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B3741119D900DD00701FF6 /* URLPromiseFactory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -23,20 +20,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = E55CA21019C676DC00E66980;
 			remoteInfo = FranticApparatus;
-		};
-		E59910CA19D903DA00E07A83 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E59910C519D903D900E07A83 /* FranticApparatusExample_iOS.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E59910A019D903D900E07A83;
-			remoteInfo = FranticApparatusExample_iOS;
-		};
-		E59910CC19D903DA00E07A83 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E59910C519D903D900E07A83 /* FranticApparatusExample_iOS.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E59910B519D903D900E07A83;
-			remoteInfo = FranticApparatusExample_iOSTests;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -48,10 +31,8 @@
 		E55CA21C19C676DC00E66980 /* FranticApparatusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FranticApparatusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E55CA22219C676DC00E66980 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E55CA22319C676DC00E66980 /* PromiseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
-		E59910C519D903D900E07A83 /* FranticApparatusExample_iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = FranticApparatusExample_iOS.xcodeproj; path = FranticApparatusExample_iOS/FranticApparatusExample_iOS.xcodeproj; sourceTree = "<group>"; };
-		E5B3740919D8F9BC00701FF6 /* DispatchQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DispatchQueue.swift; sourceTree = "<group>"; };
-		E5B3740A19D8F9BC00701FF6 /* Synchronizable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Synchronizable.swift; sourceTree = "<group>"; };
-		E5B3741119D900DD00701FF6 /* URLPromiseFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLPromiseFactory.swift; sourceTree = "<group>"; };
+		E5C64A9B1C35E1DA00A3402D /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = SOURCE_ROOT; };
+		E5C64A9C1C35E1DA00A3402D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,7 +57,6 @@
 		E55CA20719C676DC00E66980 = {
 			isa = PBXGroup;
 			children = (
-				E59910C519D903D900E07A83 /* FranticApparatusExample_iOS.xcodeproj */,
 				E55CA21319C676DC00E66980 /* FranticApparatus */,
 				E55CA22019C676DC00E66980 /* FranticApparatusTests */,
 				E55CA21219C676DC00E66980 /* Products */,
@@ -95,11 +75,10 @@
 		E55CA21319C676DC00E66980 /* FranticApparatus */ = {
 			isa = PBXGroup;
 			children = (
+				E5C64A9C1C35E1DA00A3402D /* README.md */,
+				E5C64A9B1C35E1DA00A3402D /* LICENSE */,
 				E55CA21619C676DC00E66980 /* FranticApparatus.h */,
-				E5B3740919D8F9BC00701FF6 /* DispatchQueue.swift */,
-				E5B3740A19D8F9BC00701FF6 /* Synchronizable.swift */,
 				E54661C919CDE777007488CA /* Promise.swift */,
-				E5B3741119D900DD00701FF6 /* URLPromiseFactory.swift */,
 				E55CA21419C676DC00E66980 /* Supporting Files */,
 			);
 			path = FranticApparatus;
@@ -128,15 +107,6 @@
 				E55CA22219C676DC00E66980 /* Info.plist */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		E59910C619D903D900E07A83 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				E59910CB19D903DA00E07A83 /* FranticApparatusExample_iOS.app */,
-				E59910CD19D903DA00E07A83 /* FranticApparatusExample_iOSTests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -217,12 +187,6 @@
 			mainGroup = E55CA20719C676DC00E66980;
 			productRefGroup = E55CA21219C676DC00E66980 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = E59910C619D903D900E07A83 /* Products */;
-					ProjectRef = E59910C519D903D900E07A83 /* FranticApparatusExample_iOS.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				E55CA21019C676DC00E66980 /* FranticApparatus */,
@@ -230,23 +194,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		E59910CB19D903DA00E07A83 /* FranticApparatusExample_iOS.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = FranticApparatusExample_iOS.app;
-			remoteRef = E59910CA19D903DA00E07A83 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E59910CD19D903DA00E07A83 /* FranticApparatusExample_iOSTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = FranticApparatusExample_iOSTests.xctest;
-			remoteRef = E59910CC19D903DA00E07A83 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		E55CA20F19C676DC00E66980 /* Resources */ = {
@@ -270,10 +217,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E5B3741219D900DD00701FF6 /* URLPromiseFactory.swift in Sources */,
 				E54661CA19CDE777007488CA /* Promise.swift in Sources */,
-				E5B3740D19D8F9BC00701FF6 /* Synchronizable.swift in Sources */,
-				E5B3740C19D8F9BC00701FF6 /* DispatchQueue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -421,10 +365,6 @@
 		E55CA22B19C676DC00E66980 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -439,10 +379,6 @@
 		E55CA22C19C676DC00E66980 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
 				INFOPLIST_FILE = FranticApparatusTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.franticapparatus.$(PRODUCT_NAME:rfc1034identifier)";

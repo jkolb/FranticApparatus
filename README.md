@@ -1,8 +1,20 @@
-# [FranticApparatus 3.0.1](https://github.com/jkolb/FranticApparatus)
+# [FranticApparatus 4.0](https://github.com/jkolb/FranticApparatus)
 
-#### A [Promises/A+](https://promisesaplus.com) implementation for Swift 2
+#### A thread safe, type safe, and memory safe [Promises/A+](https://promisesaplus.com) implementation for Swift 2
 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+
+## Changes for 4.0.0
+
+* Major change in the API to take better advantage of Swift 2 features.
+* Removed the `Result` enum, now you can return a value or throw an error directly from the `onFulfilled` or `onRejected` closures.
+* Instead of using `.Deferred` to chain promises, now just return a promise directly.
+* If you need to conditionally return either a value or a promise from `onFulfilled`, then return the promise normally but wrap the value like this: `return Promise(value)`
+* Switched from using GCD to `NSLock` for thread safety.
+* Removed the `Synchronizable` protocol as `NSLock` is used instead.
+* Removed the `DispatchQueue` helper class as there is no longer as strong reliance on GCD.
+* Removed `URLPromiseFactory` and associated code, to simplify the code base and concentrate on the core functionality.
+* Methods that take a context parameter now have `WithContext` in their names. For example: `thenWithContext`
 
 ## Changes for 3.0.1
 
@@ -86,10 +98,10 @@ Then the usage would look something like this:
 Here is the same example assuming that there are three methods that return promises to download, parse, and map the data similar to the above methods that just take callbacks:
 
     func fetch(url: NSURL) -> Promise<DataModel> {
-        return self.download(url).then(self, { (strongSelf, data) -> Result<NSDictionary> in
-            return .Deferred(strongSelf.parseJSON(data))
-        }).then(self, { (strongSelf, json) -> Result<DataModel> in
-            return .Deferred(strongSelf.mapDataModel(json))
+        return self.download(url).thenWithContext(self, { (strongSelf, data) -> Promise<NSDictionary> in
+            return strongSelf.parseJSON(data)
+        }).thenWithContext(self, { (strongSelf, json) -> Promise<DataModel> in
+            return strongSelf.mapDataModel(json)
         })
     }
 
@@ -97,11 +109,11 @@ And again how it would be used:
 
     self.showActivityIndicator()
         
-    self.promise = self.fetch(NSURL(string: "http://example.com/datamodel.json")).then(self, { (strongSelf, dataModel) in
+    self.promise = self.fetch(NSURL(string: "http://example.com/datamodel.json")).thenWithContext(self, { (strongSelf, dataModel) -> Void in
 		strongSelf.displayDataModel(dataModel)
-    }).handle(self, { (strongSelf, error) in
+    }).handleWithContext(self, { (strongSelf, error) -> Void in
 		strongSelf.displayError(error)
-    }).finally(self, { (strongSelf) in
+    }).finallyWithContext(self, { (strongSelf) -> Void in
         strongSelf.hideActivityIndicator()
         strongSelf.promise = nil
     })
@@ -142,8 +154,8 @@ Lastly we come to the most powerful type of result, instead of returning a value
 	}
 	
 	func parseJSON(data: NSData, options: NSJSONReadingOptions = []) -> Promise<NSDictionary> {
-        return Promise<NSDictionary> { (fulfill, reject, isCancelled) in
-			GCDQueue.globalPriorityDefault().dispatch {
+        return Promise<NSDictionary> { (fulfill, reject, isCancelled) -> Void in
+			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
 				do {
 					let value: AnyObject? = try NSJSONSerialization.JSONObjectWithData(data, options: options)
 					
@@ -163,10 +175,6 @@ Lastly we come to the most powerful type of result, instead of returning a value
 When you make a promise you pass in a closure to the initiailizer representing the work required to generate the promise's value. At the end of the promise initiaizer it will execute this closure and pass in three closures to it as parameters: `fulfill`, `reject`, and `isCancelled`. These parameters allow the closure doing the work to safely interact with the promise without worrying about memory management or keeping up with a separate reference to the promise instance. To be most useful any work required to calculate the result of the promise should be done on a separate thread. In this case we are using Grand Central Dispatch to execute a block on a global queue using a helper class from FranticApparatus.
 
 When the work to calculate the value is complete the original promise can be fulfilled by calling `fulfill` and passing in the generated value. If there is an error whie generating the value you can call `reject` instead passing in an instance of an object that coforms to the Swift 2 protocol `ErrorType`. If the work required to do the calculation is long and has multiple sections of complex logic you can intersperse that logic with calls to `isCancelled()` so you can detect as early as you can if the promise associated with the work has been deinitialized and exit early if it makes sense to do so. If the promise has already been deinitialized it is still safe to call `fulfill`, `reject`, and `isCancelled` as they are written to be safe in this use case.
-
-#### Using promises to perform networking
-
-See `URLPromiseFactory.swift` for a basic example of generating promises backed by a NSURLSession. The included FranticApparatusExample_iOS project gives a rough example of loading from the network using a `URLPromiseFactory` and parsing the results using promises.
 
 ## Contact
 

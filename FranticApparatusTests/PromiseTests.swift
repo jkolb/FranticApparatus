@@ -1,8 +1,4 @@
-//
-// FranticApparatusTests.swift
-// FranticApparatusTests
-//
-// Copyright (c) 2014-2015 Justin Kolb - http://franticapparatus.net
+// Copyright (c) 2016 Justin Kolb - http://franticapparatus.net
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +17,11 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
 
 import XCTest
-import FranticApparatus
+@testable import FranticApparatus
 
-enum FranticApparatusTestError : ErrorType {
+enum TestError : ErrorType {
     case ExpectedRejection
     case UnexpectedRejection
 }
@@ -35,21 +30,6 @@ class FranticApparatusTests: XCTestCase {
     
     // 2.1.1 - When pending, a promise:
     // 2.1.1.1 - may transition to either the fulfilled or rejected state
-    
-    //    func testNewlyCreatedPromiseIsPending() {
-    //        let promise = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-    //        }
-    //        var isPending = false
-    //
-    //        switch promise.state {
-    //        case .Pending:
-    //            isPending = true
-    //        default:
-    //            isPending = false
-    //        }
-    //
-    //        XCTAssertTrue(isPending, "A newly created promise must be in the pending state")
-    //    }
     
     var waitForPromiseA: Promise<Int>! = nil
     var waitForPromiseB: Promise<Int>! = nil
@@ -60,15 +40,13 @@ class FranticApparatusTests: XCTestCase {
     func testWhenPendingIsFulfilledTransitionsToFulfilledState() {
         let expectation = self.expectationWithDescription("onFulfilled called")
         
-        let promise = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                fulfill(1)
-            }
+        let promise = Promise<Int> { (fulfill, reject, isCancelled) in
+            fulfill(1)
         }
         
         var isFulfilled = false
         
-        waitForPromiseA = promise.then(self) { (strongSelf, value) -> () in
+        waitForPromiseA = promise.thenWithContext(self) { (strongSelf, value) -> Void in
             isFulfilled = true
             strongSelf.waitForPromiseA = nil
             expectation.fulfill()
@@ -82,15 +60,13 @@ class FranticApparatusTests: XCTestCase {
     func testWhenPendingIsRejectedTransitionsToRejectedState() {
         let expectation = self.expectationWithDescription("onRejected called")
         
-        let promise = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                reject(FranticApparatusTestError.ExpectedRejection)
-            }
+        let promise = Promise<Int> { (fulfill, reject, isCancelled) in
+            reject(TestError.ExpectedRejection)
         }
         
         var isRejected = false
         
-        waitForPromiseA = promise.handle(self) { (strongSelf, error) in
+        waitForPromiseA = promise.handleWithContext(self) { (strongSelf, error) in
             isRejected = true
             strongSelf.waitForPromiseA = nil
             expectation.fulfill()
@@ -104,153 +80,144 @@ class FranticApparatusTests: XCTestCase {
     // 2.1.2 - When fulfilled, a promise:
     // 2.1.2.1 - must not transition to any other state
     
-    func testFulfilledMustNotTranstionToAnyOtherState() {
-        let promiseFulfilled1 = self.expectationWithDescription("onFulfilled called once")
-        
-        let promiseFulfilled2 = self.expectationWithDescription("onFulfilled called twice")
-        
-        let promise = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                fulfill(1)
-                reject(FranticApparatusTestError.ExpectedRejection)
-            }
-        }
-        
-        var isFulfilled = false
-        
-        waitForPromiseA = promise.then(self) { (strongSelf, value) -> () in
-            isFulfilled = true
-            strongSelf.waitForPromiseA = nil
-            promiseFulfilled1.fulfill()
-        }
-        
-        waitForPromiseB = promise.then(
-            onFulfilled: { (value) -> Result<Int> in
-                isFulfilled = true
-                return .Success(value)
-            },
-            onRejected: { (reason) -> Result<Int> in
-                isFulfilled = false
-                return .Failure(reason)
-            }
-        ).finally(self, { strongSelf in
-            strongSelf.waitForPromiseB = nil
-            promiseFulfilled2.fulfill()
-        })
-        
-        self.waitForExpectationsWithTimeout(1.0) { error in
-            XCTAssertTrue(isFulfilled, "When fulfilled, a promise must not transition to any other state")
-        }
-        
-    }
+//    func testFulfilledMustNotTranstionToAnyOtherState() {
+//        let promiseFulfilled1 = self.expectationWithDescription("onFulfilled called once")
+//        
+//        let promiseFulfilled2 = self.expectationWithDescription("onFulfilled called twice")
+//        
+//        let promise = Promise<Int> { (fulfill, reject, isCancelled) in
+//            fulfill(1)
+//            reject(TestError.ExpectedRejection)
+//        }
+//        
+//        var isFulfilled = false
+//        
+//        waitForPromiseA = promise.thenWithContext(self) { (strongSelf, value) in
+//            isFulfilled = true
+//            strongSelf.waitForPromiseA = nil
+//            promiseFulfilled1.fulfill()
+//        }
+//        
+//        waitForPromiseB = promise.then(
+//            onFulfilled: { (value) -> Int in
+//                isFulfilled = true
+//                return value
+//            },
+//            onRejected: { (reason) -> Int in
+//                isFulfilled = false
+//                throw reason
+//            }
+//        ).finallyWithContext(self, { strongSelf in
+//            strongSelf.waitForPromiseB = nil
+//            promiseFulfilled2.fulfill()
+//        })
+//        
+//        self.waitForExpectationsWithTimeout(1.0) { error in
+//            XCTAssertTrue(isFulfilled, "When fulfilled, a promise must not transition to any other state")
+//        }
+//    }
     
     // 2.1.2.2 - must have a value, which must not change
     
-    func testFulfilledMustHaveAValueWhichMustNotChange() {
-        let promiseFulfilled1 = self.expectationWithDescription("onFulfilled called once")
-        
-        let promiseFulfilled2 = self.expectationWithDescription("onFulfilled called twice")
-        
-        let promise = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                fulfill(1)
-                fulfill(2)
-            }
-        }
-        
-        var fulfilledValue = 0
-        
-        waitForPromiseA = promise.then(self) { (strongSelf, value) -> () in
-            fulfilledValue = value
-            strongSelf.waitForPromiseA = nil
-            promiseFulfilled1.fulfill()
-        }
-        
-        waitForPromiseB = promise.then(self) { (strongSelf, value) -> () in
-            fulfilledValue = value
-            strongSelf.waitForPromiseB = nil
-            promiseFulfilled2.fulfill()
-        }
-        
-        self.waitForExpectationsWithTimeout(1.0) { error in
-            XCTAssertEqual(fulfilledValue, 1, "When fulfilled, a promise must have a value, which must not change")
-        }
-    }
+//    func testFulfilledMustHaveAValueWhichMustNotChange() {
+//        let promiseFulfilled1 = self.expectationWithDescription("onFulfilled called once")
+//        
+//        let promiseFulfilled2 = self.expectationWithDescription("onFulfilled called twice")
+//        
+//        let promise = Promise<Int> { (fulfill, reject, isCancelled) in
+//            fulfill(1)
+//            fulfill(2)
+//        }
+//        
+//        var fulfilledValue = 0
+//        
+//        waitForPromiseA = promise.thenWithContext(self) { (strongSelf, value) in
+//            fulfilledValue = value
+//            strongSelf.waitForPromiseA = nil
+//            promiseFulfilled1.fulfill()
+//        }
+//        
+//        waitForPromiseB = promise.thenWithContext(self) { (strongSelf, value) in
+//            fulfilledValue = value
+//            strongSelf.waitForPromiseB = nil
+//            promiseFulfilled2.fulfill()
+//        }
+//        
+//        self.waitForExpectationsWithTimeout(1.0) { error in
+//            XCTAssertEqual(fulfilledValue, 1, "When fulfilled, a promise must have a value, which must not change")
+//        }
+//    }
     
     // 2.1.3 - When rejected, a promise
     // 2.1.3.1 - must not transition to any other state
     
-    func testRejectedMustNotTransitionToAnyOtherState() {
-        let promiseRejected1 = self.expectationWithDescription("onRejected called once")
-        
-        let promiseRejected2 = self.expectationWithDescription("onRejected called twice")
-        
-        let promise = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                reject(FranticApparatusTestError.ExpectedRejection)
-                fulfill(1)
-            }
-        }
-        
-        var isRejected = false
-        
-        waitForPromiseA = promise.handle(self) { (strongSelf, error) in
-            isRejected = true
-            promiseRejected1.fulfill()
-            strongSelf.waitForPromiseA = nil
-        }
-        
-        waitForPromiseB = promise.then(
-            onFulfilled: { (value) -> Result<Int> in
-                isRejected = false
-                return .Success(value)
-            },
-            onRejected: { (reason) -> Result<Int> in
-                isRejected = true
-                return .Failure(reason)
-            }
-        ).finally(self, { strongSelf in
-            strongSelf.waitForPromiseB = nil
-            promiseRejected2.fulfill()
-        })
-        
-        self.waitForExpectationsWithTimeout(1.0) { error in
-            XCTAssertTrue(isRejected, "When rejected, a promise must not transtion to any other state")
-        }
-    }
+//    func testRejectedMustNotTransitionToAnyOtherState() {
+//        let promiseRejected1 = self.expectationWithDescription("onRejected called once")
+//        
+//        let promiseRejected2 = self.expectationWithDescription("onRejected called twice")
+//        
+//        let promise = Promise<Int> { (fulfill, reject, isCancelled) in
+//            reject(TestError.ExpectedRejection)
+//            fulfill(1)
+//        }
+//        
+//        var isRejected = false
+//        
+//        waitForPromiseA = promise.handleWithContext(self) { (strongSelf, error) in
+//            isRejected = true
+//            promiseRejected1.fulfill()
+//            strongSelf.waitForPromiseA = nil
+//        }
+//        
+//        waitForPromiseB = promise.then(
+//            onFulfilled: { (value) -> Int in
+//                isRejected = false
+//                return value
+//            },
+//            onRejected: { (reason) -> Int in
+//                isRejected = true
+//                throw reason
+//            }
+//        ).finallyWithContext(self, { strongSelf in
+//            strongSelf.waitForPromiseB = nil
+//            promiseRejected2.fulfill()
+//        })
+//        
+//        self.waitForExpectationsWithTimeout(1.0) { error in
+//            XCTAssertTrue(isRejected, "When rejected, a promise must not transtion to any other state")
+//        }
+//    }
     
     // 2.1.3.2 - must have a reason, which must not change
     
-    func testRejectedMustHaveAReasonWhichMustNotChange() {
-        let promiseRejected1 = self.expectationWithDescription("onRejected called once")
-        
-        let promiseRejected2 = self.expectationWithDescription("onRejected called twice")
-        
-        let promise = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                reject(FranticApparatusTestError.ExpectedRejection)
-                reject(FranticApparatusTestError.UnexpectedRejection)
-            }
-        }
-        
-        var rejectedReason: ErrorType = FranticApparatusTestError.UnexpectedRejection
-        
-        waitForPromiseA = promise.handle(self) { (strongSelf, error) in
-            rejectedReason = error
-            strongSelf.waitForPromiseA = nil
-            promiseRejected1.fulfill()
-        }
-        
-        waitForPromiseB = promise.handle(self) { (strongSelf, error) in
-            rejectedReason = error
-            strongSelf.waitForPromiseB = nil
-            promiseRejected2.fulfill()
-        }
-        
-        self.waitForExpectationsWithTimeout(1.0) { error in
-            XCTAssertTrue(rejectedReason as? FranticApparatusTestError == FranticApparatusTestError.ExpectedRejection, "When rejected, a promise must have a reason, which must not change")
-        }
-    }
+//    func testRejectedMustHaveAReasonWhichMustNotChange() {
+//        let promiseRejected1 = self.expectationWithDescription("onRejected called once")
+//        
+//        let promiseRejected2 = self.expectationWithDescription("onRejected called twice")
+//        
+//        let promise = Promise<Int> { (fulfill, reject, isCancelled) in
+//            reject(TestError.ExpectedRejection)
+//            reject(TestError.UnexpectedRejection)
+//        }
+//        
+//        var rejectedReason: ErrorType = TestError.UnexpectedRejection
+//        
+//        waitForPromiseA = promise.handleWithContext(self) { (strongSelf, error) in
+//            rejectedReason = error
+//            strongSelf.waitForPromiseA = nil
+//            promiseRejected1.fulfill()
+//        }
+//        
+//        waitForPromiseB = promise.handleWithContext(self) { (strongSelf, error) in
+//            rejectedReason = error
+//            strongSelf.waitForPromiseB = nil
+//            promiseRejected2.fulfill()
+//        }
+//        
+//        self.waitForExpectationsWithTimeout(1.0) { error in
+//            XCTAssertTrue(rejectedReason as? TestError == TestError.ExpectedRejection, "When rejected, a promise must have a reason, which must not change")
+//        }
+//    }
     
     // 2.2.1.1 - If onFulfilled is not a function, it must be ignored
     // 2.2.1.2 - If onRejected is not a function, it must be ignored
@@ -265,15 +232,13 @@ class FranticApparatusTests: XCTestCase {
     func testOnFulfilledMustBeCalledAfterPromiseIsFulfilledWithThePromiseValueAsItsFirstArgument() {
         let expectation = self.expectationWithDescription("onFulfilled called")
         
-        let promise1 = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                fulfill(1)
-            }
+        let promise1 = Promise<Int> { (fulfill, reject, isCancelled) in
+            fulfill(1)
         }
         
         var receivedValue = 2
         
-        waitForPromiseA = promise1.then(self) { (strongSelf, value) -> () in
+        waitForPromiseA = promise1.thenWithContext(self) { (strongSelf, value) -> Void in
             receivedValue = value
             strongSelf.waitForPromiseA = nil
             expectation.fulfill()
@@ -285,20 +250,6 @@ class FranticApparatusTests: XCTestCase {
     }
     
     // 2.2.2.3 - it must not be called more than once
-    
-    //    func testOnFulfilledMustNotBeCalledMoreThanOnce() {
-    //        let expectation = self.expectationWithDescription("onFulfilled called")
-    //        let promise1 = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-    //            fulfill(1)
-    //        }
-    //        let promise2 = promise1.when({ value in
-    //            XCTAssertEqual(promise1.onFulfilled.count, 0, "If onFulfilled is a function it must not be called more than once")
-    //            expectation.fulfill()
-    //        })
-    //
-    //        self.waitForExpectationsWithTimeout(1.0) { (error: NSError!) -> () in
-    //        }
-    //    }
     
     // 2.2.3 - If onRejected is a function
     
@@ -315,23 +266,21 @@ class FranticApparatusTests: XCTestCase {
     func testThenMayBeCalledMultipleTimesOnTheSamePromise() {
         var fulfilledToken = Array<Int>()
         
-        let promise1 = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                fulfill(1)
-            }
+        let promise1 = Promise<Int> { (fulfill, reject, isCancelled) -> Void in
+            fulfill(1)
         }
         
         let callThenOnce = self.expectationWithDescription("Call then once")
         
         waitForPromiseY = promise1.then(
-            onFulfilled: { (value) -> Result<String> in
+            onFulfilled: { (value) -> String in
                 fulfilledToken.append(1)
-                return .Success("")
+                return ""
             },
-            onRejected: { (reason) -> Result<String> in
-                return .Failure(FranticApparatusTestError.ExpectedRejection)
+            onRejected: { (reason) -> String in
+                throw TestError.ExpectedRejection
             }
-            ).finally(self, { strongSelf in
+            ).finallyWithContext(self, { strongSelf in
                 strongSelf.waitForPromiseY = nil
                 callThenOnce.fulfill()
             })
@@ -339,14 +288,14 @@ class FranticApparatusTests: XCTestCase {
         let callThenTwice = self.expectationWithDescription("Call then twice")
         
         waitForPromiseZ = promise1.then(
-            onFulfilled: { (value) -> Result<String> in
+            onFulfilled: { (value) -> String in
                 fulfilledToken.append(2)
-                return .Success("")
+                return ""
             },
-            onRejected: { (reason) -> Result<String> in
-                return .Failure(FranticApparatusTestError.ExpectedRejection)
+            onRejected: { (reason) -> String in
+                throw TestError.ExpectedRejection
             }
-            ).finally(self, { strongSelf in
+            ).finallyWithContext(self, { strongSelf in
                 strongSelf.waitForPromiseZ = nil
                 callThenTwice.fulfill()
             })
@@ -361,23 +310,21 @@ class FranticApparatusTests: XCTestCase {
     func testOnFulfilledCallbacksMustExecuteInTheOrderOfTheirOriginatingCallsToThen() {
         var fulfilledToken = Array<Int>()
         
-        let promise1 = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                fulfill(1)
-            }
+        let promise1 = Promise<Int> { (fulfill, reject, isCancelled) -> Void in
+            fulfill(1)
         }
         
         let callThenOnce = self.expectationWithDescription("Call then once")
         
         waitForPromiseY = promise1.then(
-            onFulfilled: { (value) -> Result<String> in
+            onFulfilled: { (value) -> String in
                 fulfilledToken.append(1)
-                return .Success("")
+                return ""
             },
-            onRejected: { (reason) -> Result<String> in
-                return .Failure(FranticApparatusTestError.ExpectedRejection)
+            onRejected: { (reason) -> String in
+                throw TestError.ExpectedRejection
             }
-            ).finally(self, { strongSelf in
+            ).finallyWithContext(self, { strongSelf in
                 strongSelf.waitForPromiseY = nil
                 callThenOnce.fulfill()
             })
@@ -385,13 +332,13 @@ class FranticApparatusTests: XCTestCase {
         let callThenTwice = self.expectationWithDescription("Call then twice")
         
         waitForPromiseZ = promise1.then(
-            onFulfilled: { (value) -> Result<String> in
+            onFulfilled: { (value) -> String in
                 fulfilledToken.append(2)
-                return .Success("")
-            }, onRejected: { (reason) -> Result<String> in
-                return .Failure(FranticApparatusTestError.ExpectedRejection)
+                return ""
+            }, onRejected: { (reason) -> String in
+                throw TestError.ExpectedRejection
             }
-            ).finally(self, { strongSelf in
+            ).finallyWithContext(self, { strongSelf in
                 strongSelf.waitForPromiseZ = nil
                 callThenTwice.fulfill()
             })
@@ -407,23 +354,21 @@ class FranticApparatusTests: XCTestCase {
     func testOnRejectedCallbacksMustExecuteInTheOrderOfTheirOriginatingCallsToThen() {
         var rejectedToken = Array<Int>()
         
-        let promise1 = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                reject(FranticApparatusTestError.ExpectedRejection)
-            }
+        let promise1 = Promise<Int> { (fulfill, reject, isCancelled) -> Void in
+            reject(TestError.ExpectedRejection)
         }
         
         let callThenOnce = self.expectationWithDescription("Call then once")
         
         waitForPromiseY = promise1.then(
-            onFulfilled: { (value) -> Result<String> in
-                return .Success("")
+            onFulfilled: { value in
+                return ""
             },
-            onRejected: { (reason) -> Result<String> in
+            onRejected: { reason in
                 rejectedToken.append(1)
-                return .Failure(FranticApparatusTestError.ExpectedRejection)
+                throw TestError.ExpectedRejection
             }
-            ).finally(self, { strongSelf in
+            ).finallyWithContext(self, { strongSelf in
                 strongSelf.waitForPromiseY = nil
                 callThenOnce.fulfill()
             })
@@ -431,14 +376,14 @@ class FranticApparatusTests: XCTestCase {
         let callThenTwice = self.expectationWithDescription("Call then twice")
         
         waitForPromiseZ = promise1.then(
-            onFulfilled: { (value) -> Result<String> in
-                return .Success("")
+            onFulfilled: { (value) -> String in
+                return ""
             },
-            onRejected: { (reason) -> Result<String> in
+            onRejected: { (reason) -> String in
                 rejectedToken.append(2)
-                return .Failure(FranticApparatusTestError.ExpectedRejection)
+                throw TestError.ExpectedRejection
             }
-            ).finally(self, { strongSelf in
+            ).finallyWithContext(self, { strongSelf in
                 strongSelf.waitForPromiseZ = nil
                 callThenTwice.fulfill()
             })
@@ -450,20 +395,17 @@ class FranticApparatusTests: XCTestCase {
     }
     
     // 2.2.7 - then must return a promise. promise2 = promise1.then(onFulfilled, onRejected)
-    //    **** The static type system limits the types that can be returned by the next promise to
-    //    **** just 1 type. This seems like a reasonable limitation as it seems like each callback
-    //    **** should do "one thing" well. If multiple types are really needed a tuple or enum can
-    //    **** be used as the one type instead.
+
     func testThenMustReturnAPromise() {
-        let promise1  = Promise<Int> { (fulfill, reject, isCancelled) -> () in
+        let promise1  = Promise<Int> { (fulfill, reject, isCancelled) -> Void in
         }
         
         let promise2: Any = promise1.then(
-            onFulfilled: { (value) -> Result<String> in
-                return .Success("")
+            onFulfilled: { (value) -> String in
+                return ""
             },
-            onRejected: { (reason) -> Result<String> in
-                return .Failure(FranticApparatusTestError.ExpectedRejection)
+            onRejected: { (reason) -> String in
+                throw TestError.ExpectedRejection
             })
         
         var thenReturnedPromise = false
@@ -477,31 +419,27 @@ class FranticApparatusTests: XCTestCase {
     
     // 2.2.7.1 - If either onFulfilled or onRejected returns a value x, run the Promise Resolution Procedure [[Resolve]](promise2, x).
     
-    func testPromise1OnFulfilledReturnsAFulfilledDeferredPromise2WillFulfillWithValueOfDeferred() {
+    func testWhenPromise1OnFulfilledReturnsAnotherPromiseThenPromise2WillFulfillWithValueOfDeferred() {
         let expectation = self.expectationWithDescription("")
         
-        let promise1  = Promise<Int> { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                fulfill(1)
-            }
+        let promise1  = Promise<Int> { (fulfill, reject, isCancelled) -> Void in
+            fulfill(1)
         }
         
-        let deferred = Promise<String>() { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                fulfill("deferred")
-            }
+        let deferred = Promise<String>() { (fulfill, reject, isCancelled) -> Void in
+            fulfill("deferred")
         }
         
         var receivedValue: String! = nil
         
         waitForPromiseY = promise1.then(
-            onFulfilled: { (value) -> Result<String> in
-                return .Deferred(deferred)
+            onFulfilled: { (value) -> Promise<String> in
+                return deferred
             },
-            onRejected: { (reason) -> Result<String> in
-                return .Failure(reason)
+            onRejected: { (reason) -> Promise<String> in
+                throw reason
             }
-            ).then(self, { (strongSelf, value) -> () in
+            ).thenWithContext(self, { (strongSelf, value) -> Void in
                 receivedValue = value
                 strongSelf.waitForPromiseY = nil
                 expectation.fulfill()
@@ -512,31 +450,27 @@ class FranticApparatusTests: XCTestCase {
         }
     }
     
-    func testPromise1OnFulfilledReturnsAPendingDeferredPromise2WillFulfillWithValueOfDeferred() {
+    func testWhenPromise1OnRejectedReturnsAnotherPromiseThenPromise2WillFulfillWithValueOfDeferred() {
         let expectation = self.expectationWithDescription("")
         
-        let promise1 = Promise<Int>() { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                fulfill(1)
-            }
+        let promise1 = Promise<Int>() { (fulfill, reject, isCancelled) -> Void in
+            reject(TestError.ExpectedRejection)
         }
         
-        let deferred = Promise<String>() { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                fulfill("deferred")
-            }
+        let deferred = Promise<String>() { (fulfill, reject, isCancelled) -> Void in
+            fulfill("deferred")
         }
         
         var receivedValue: String! = nil
 
         waitForPromiseY = promise1.then(
-            onFulfilled: { (value) -> Result<String> in
-                return .Deferred(deferred)
+            onFulfilled: { (value) in
+                return Promise("")
             },
-            onRejected: { (reason) -> Result<String> in
-                return .Failure(reason)
+            onRejected: { (reason) in
+                return deferred
             }
-            ).then(self, { (strongSelf, value) -> () in
+            ).thenWithContext(self, { (strongSelf, value) -> Void in
                 receivedValue = value
                 expectation.fulfill()
             })
@@ -551,58 +485,54 @@ class FranticApparatusTests: XCTestCase {
     func testPromise1OnFulfilledReturnsErrorPromise2MustBeRejectedWithSameErrorAsReason() {
         let expectation = self.expectationWithDescription("testPromise1OnFulfilledReturnsErrorPromise2MustBeRejectedWithSameErrorAsReason")
         
-        let promise1 = Promise<Int>() { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                fulfill(1)
-            }
+        let promise1 = Promise<Int>() { (fulfill, reject, isCancelled) -> Void in
+            fulfill(1)
         }
         
         var receivedReason: ErrorType! = nil
         
         waitForPromiseY = promise1.then(
-            onFulfilled: { (valu) -> Result<String> in
-                return .Failure(FranticApparatusTestError.ExpectedRejection)
+            onFulfilled: { (value) -> String in
+                throw TestError.ExpectedRejection
             },
-            onRejected: { (reason) -> Result<String> in
-                return .Failure(reason)
+            onRejected: { (reason) -> String in
+                throw reason
             }
-            ).handle(self, { (strongSelf, reason) in
+            ).handleWithContext(self, { (strongSelf, reason) in
                 receivedReason = reason
                 strongSelf.waitForPromiseY = nil
                 expectation.fulfill()
             })
         
         self.waitForExpectationsWithTimeout(1.0) { error in
-            XCTAssertTrue(receivedReason as? FranticApparatusTestError == FranticApparatusTestError.ExpectedRejection, "If onFulfilled returns an error, promise2 must be rejected with the same reason")
+            XCTAssertTrue(receivedReason as? TestError == TestError.ExpectedRejection, "If onFulfilled returns an error, promise2 must be rejected with the same reason")
         }
     }
     
     func testPromise1OnRejectedReturnsErrorPromise2MustBeRejectedWithSameErrorAsReason() {
         let expectation = self.expectationWithDescription("testPromise1OnRejectedReturnsErrorPromise2MustBeRejectedWithSameErrorAsReason")
         
-        let promise1 = Promise<Int>() { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                reject(FranticApparatusTestError.ExpectedRejection)
-            }
+        let promise1 = Promise<Int>() { (fulfill, reject, isCancelled) -> Void in
+            reject(TestError.ExpectedRejection)
         }
         
         var receivedReason: ErrorType! = nil
         
         waitForPromiseY = promise1.then(
-            onFulfilled: { (value) -> Result<String> in
-                return .Success("fulfilled")
+            onFulfilled: { (value) -> String in
+                return "fulfilled"
             },
-            onRejected: { (reason) -> Result<String> in
-                return .Failure(FranticApparatusTestError.ExpectedRejection)
+            onRejected: { (reason) -> String in
+                 throw TestError.ExpectedRejection
             }
-            ).handle(self, { (strongSelf, reason) in
+            ).handleWithContext(self, { (strongSelf, reason) in
                 receivedReason = reason
                 strongSelf.waitForPromiseY = nil
                 expectation.fulfill()
             })
         
         self.waitForExpectationsWithTimeout(1.0) { error in
-            XCTAssertTrue(receivedReason as? FranticApparatusTestError == FranticApparatusTestError.ExpectedRejection, "If onRejected returns an error, promise2 must be rejected with the same reason")
+            XCTAssertTrue(receivedReason as? TestError == TestError.ExpectedRejection, "If onRejected returns an error, promise2 must be rejected with the same reason")
         }
     }
     
@@ -611,18 +541,16 @@ class FranticApparatusTests: XCTestCase {
     func testFulfillingPromise1AndNotHandlingValueAndThenHandlingValueInPromise2ShouldBeSameValue() {
         let expectation = self.expectationWithDescription("testFulfillingPromise1AndNotHandlingValueAndThenHandlingValueInPromise2ShouldBeSameValue")
         
-        let promise1 = Promise<Int>() { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                fulfill(1)
-            }
+        let promise1 = Promise<Int>() { (fulfill, reject, isCancelled) in
+            fulfill(1)
         }
         
-        let promise2 = promise1.handle { reason in
+        let promise2 = promise1.handle { (reason) -> Void in
         }
         
         var receivedValue = 2
         
-        waitForPromiseA = promise2.then(self) { (strongSelf, value) -> () in
+        waitForPromiseA = promise2.thenWithContext(self) { (strongSelf, value) -> Void in
             receivedValue = value
             strongSelf.waitForPromiseY = nil
             expectation.fulfill()
@@ -638,10 +566,8 @@ class FranticApparatusTests: XCTestCase {
     func testRejectingPromise1AndNotHandlingReasonAndThenHandlingReasonInPromise2ShouldBeSameReason() {
         let expectation = self.expectationWithDescription("testRejectingPromise1AndNotHandlingReasonAndThenHandlingReasonInPromise2ShouldBeSameReason")
         
-        let promise1 = Promise<Int>() { (fulfill, reject, isCancelled) -> () in
-            GCDQueue.globalPriorityDefault().dispatch {
-                reject(FranticApparatusTestError.ExpectedRejection)
-            }
+        let promise1 = Promise<Int>() { (fulfill, reject, isCancelled) -> Void in
+            reject(TestError.ExpectedRejection)
         }
         
         let promise2 = promise1.then { value in
@@ -649,14 +575,14 @@ class FranticApparatusTests: XCTestCase {
         
         var receivedReason: ErrorType! = nil
         
-        waitForPromiseA = promise2.handle(self) { (strongSelf, reason) in
+        waitForPromiseA = promise2.handleWithContext(self) { (strongSelf, reason) in
             receivedReason = reason
             strongSelf.waitForPromiseA = nil
             expectation.fulfill()
         }
         
         self.waitForExpectationsWithTimeout(1.0) { error in
-            XCTAssertTrue(receivedReason as? FranticApparatusTestError == FranticApparatusTestError.ExpectedRejection, "If onRejected is not a function and promise1 is rejected, promise2 must be rejected with the same reason as promise1")
+            XCTAssertTrue(receivedReason as? TestError == TestError.ExpectedRejection, "If onRejected is not a function and promise1 is rejected, promise2 must be rejected with the same reason as promise1")
         }
     }
 }
