@@ -1,8 +1,12 @@
-# [FranticApparatus 4.0](https://github.com/jkolb/FranticApparatus)
+# [FranticApparatus 4.0.1](https://github.com/jkolb/FranticApparatus)
 
 #### A thread safe, type safe, and memory safe [Promises/A+](https://promisesaplus.com) implementation for Swift 2
 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+
+## Changes for 4.0.1
+
+* Attempting to fix problem with building usage Carthage.
 
 ## Changes for 4.0.0
 
