@@ -24,21 +24,20 @@ public enum PromiseError : ErrorType {
 }
 
 private class PendingInfo<T> {
-    private var parent: (() -> Any)?
-    var deferred: Promise<T>? = nil
+    var promiseToKeepAlive: AnyObject?
     var onFulfilled: [(T) -> Void] = []
     var onRejected: [(ErrorType) -> Void] = []
     
     private init() {
-        self.parent = nil
+        self.promiseToKeepAlive = nil
     }
 
-    private init(parent: () -> Any) {
-        self.parent = parent
+    private init<P>(waitForPromise: Promise<P>) {
+        self.promiseToKeepAlive = waitForPromise
     }
     
-    func clearParent() {
-        parent = nil
+    func waitForPromise<P>(promise: Promise<P>) {
+        self.promiseToKeepAlive = promise
     }
     
     func fulfilled(value: T) {
@@ -73,14 +72,14 @@ public class Promise<T> {
     public init(@noescape _ resolver: (fulfill: (T) -> Void, reject: (ErrorType) -> Void, isCancelled: () -> Bool) -> Void) {
         state = .Pending(PendingInfo())
         
-        let weakFulfill: (T) -> Void = { [weak self] value in
+        let weakFulfill: (T) -> Void = { [weak self] (value) -> Void in
             guard let strongSelf = self else { return }
-            Promise<T>.resolve(strongSelf)(Promise<T>(fulfill: value))
+            Promise<T>.resolve(strongSelf)(Promise<T>(value))
         }
         
-        let weakReject: (ErrorType) -> Void = { [weak self] reason in
+        let weakReject: (ErrorType) -> Void = { [weak self] (reason) -> Void in
             guard let strongSelf = self else { return }
-            Promise<T>.resolve(strongSelf)(Promise<T>(reject: reason))
+            Promise<T>.resolve(strongSelf)(Promise<T>(error: reason))
         }
 
         let isCancelled: () -> Bool = { [weak self] in
@@ -90,23 +89,16 @@ public class Promise<T> {
         resolver(fulfill: weakFulfill, reject: weakReject, isCancelled: isCancelled)
     }
     
-    public init(fulfill: T) {
-        state = .Fulfilled(fulfill)
+    public init(_ value: T) {
+        state = .Fulfilled(value)
     }
     
-    public init(reject: ErrorType) {
-        state = .Rejected(reject)
+    public init(error: ErrorType) {
+        state = .Rejected(error)
     }
     
-    private init(parent: () -> Any, @noescape resolver: ((Promise<T>) -> Void) -> Void) {
-        state = .Pending(PendingInfo(parent: parent))
-        
-        let weakResolve: (Promise<T>) -> Void = { [weak self] promise in
-            guard let strongSelf = self else { return }
-            Promise<T>.resolve(strongSelf)(promise)
-        }
-        
-        resolver(weakResolve)
+    private init<P>(waitForPromise: Promise<P>) {
+        state = .Pending(PendingInfo(waitForPromise: waitForPromise))
     }
     
     private func synchronize(@noescape synchronized: () -> Void) {
@@ -135,7 +127,7 @@ public class Promise<T> {
                 state = .Fulfilled(value)
                 info.fulfilled(value)
             default:
-                return
+                fatalError("Duplicate attempt to resolve promise")
             }
         }
     }
@@ -147,7 +139,7 @@ public class Promise<T> {
                 state = .Rejected(reason)
                 info.rejected(reason)
             default:
-                return
+                fatalError("Duplicate attempt to resolve promise")
             }
         }
     }
@@ -161,11 +153,9 @@ public class Promise<T> {
         synchronize {
             switch state {
             case .Pending(let info):
-                info.clearParent()
-                precondition(info.deferred == nil)
-                info.deferred = promise.then(
-                    onFulfilled: { [weak self] value in
-                        let fulfilled = Promise<T>(fulfill: value)
+                let waitForPromise = promise.then(
+                    onFulfilled: { [weak self] (value) throws -> Promise<T> in
+                        let fulfilled = Promise<T>(value)
                         
                         if let strongSelf = self {
                             strongSelf.resolve(fulfilled)
@@ -173,8 +163,8 @@ public class Promise<T> {
                         
                         return fulfilled
                     },
-                    onRejected: { [weak self] reason in
-                        let rejected = Promise<T>(reject: reason)
+                    onRejected: { [weak self] (reason) throws -> Promise<T> in
+                        let rejected = Promise<T>(error: reason)
                         
                         if let strongSelf = self {
                             strongSelf.resolve(rejected)
@@ -183,72 +173,100 @@ public class Promise<T> {
                         return rejected
                     }
                 )
+                
+                info.waitForPromise(waitForPromise)
             default:
-                return
+                fatalError("Attempting to wait on a promise after already being resolved")
             }
         }
     }
     
     public func then<R>(onFulfilled onFulfilled: (T) throws -> Promise<R>, onRejected: (ErrorType) throws -> Promise<R>) -> Promise<R> {
-        return Promise<R>(parent: {self}) { resolve in
-            let fulfiller: (T) -> Void = { value in
-                do {
-                    resolve(try onFulfilled(value))
-                }
-                catch {
-                    resolve(Promise<R>(reject: error))
-                }
-            }
+        let promise = Promise<R>(waitForPromise: self)
+        
+        let fulfiller: (T) -> Void = { [weak promise] (value) -> Void in
+            guard let strongPromise = promise else { return }
             
-            let rejecter: (ErrorType) -> Void = { reason in
-                do {
-                    resolve(try onRejected(reason))
-                }
-                catch {
-                    resolve(Promise<R>(reject: error))
-                }
+            do {
+                strongPromise.resolve(try onFulfilled(value))
             }
+            catch {
+                strongPromise.resolve(Promise<R>(error: error))
+            }
+        }
+        
+        let rejecter: (ErrorType) -> Void = { [weak promise] (reason) -> Void in
+            guard let strongPromise = promise else { return }
             
-            synchronize {
-                switch state {
-                case .Pending(let info):
-                    info.onFulfilled.append(fulfiller)
-                    info.onRejected.append(rejecter)
-                case .Fulfilled(let value):
-                    dispatch_async(dispatch_get_main_queue()) {
-                        fulfiller(value)
-                    }
-                case .Rejected(let reason):
-                    dispatch_async(dispatch_get_main_queue()) {
-                        rejecter(reason)
-                    }
+            do {
+                strongPromise.resolve(try onRejected(reason))
+            }
+            catch {
+                strongPromise.resolve(Promise<R>(error: error))
+            }
+        }
+        
+        synchronize {
+            switch state {
+            case .Pending(let info):
+                info.onFulfilled.append(fulfiller)
+                info.onRejected.append(rejecter)
+            case .Fulfilled(let value):
+                dispatch_async(dispatch_get_main_queue()) {
+                    fulfiller(value)
+                }
+            case .Rejected(let reason):
+                dispatch_async(dispatch_get_main_queue()) {
+                    rejecter(reason)
                 }
             }
         }
+        
+        return promise
     }
     
-    public func then(onFulfilled: (T) throws -> Void) -> Promise<T> {
+    public func then<R>(onFulfilled onFulfilled: (T) throws -> R, onRejected: (ErrorType) throws -> R) -> Promise<R> {
         return then(
-            onFulfilled: { value in
-                try onFulfilled(value)
-                return Promise<T>(fulfill: value)
+            onFulfilled: { (value) -> Promise<R> in
+                return Promise<R>(try onFulfilled(value))
             },
-            onRejected: { reason in
-                return Promise<T>(reject: reason)
+            onRejected: { (reason) -> Promise<R> in
+                return Promise<R>(try onRejected(reason))
             }
         )
     }
     
-    public func then<C: AnyObject>(context: C, _ onFulfilled: (C, T) throws -> Void) -> Promise<T> {
+    public func then(onFulfilled: (T) throws -> Void) -> Promise<T> {
         return then(
-            onFulfilled: { [weak context] value in
+            onFulfilled: { (value) -> T in
+                try onFulfilled(value)
+                return value
+            },
+            onRejected: { (reason) -> T in
+                throw reason
+            }
+        )
+    }
+    
+    public func thenWithContext<C: AnyObject>(context: C, _ onFulfilled: (C, T) throws -> Void) -> Promise<T> {
+        return then(
+            onFulfilled: { [weak context] (value) -> T in
                 if let strongContext = context {
                     try onFulfilled(strongContext, value)
                 }
                 
-                return Promise<T>(fulfill: value)
+                return value
             },
-            onRejected: { reason in
+            onRejected: { (reason) -> T in
+                throw reason
+            }
+        )
+    }
+    
+    public func then<R>(onFulfilled: (T) throws -> R) -> Promise<R> {
+        return then(
+            onFulfilled: onFulfilled,
+            onRejected: { (reason) -> R in
                 throw reason
             }
         )
@@ -257,22 +275,37 @@ public class Promise<T> {
     public func then<R>(onFulfilled: (T) throws -> Promise<R>) -> Promise<R> {
         return then(
             onFulfilled: onFulfilled,
-            onRejected: { reason in
+            onRejected: { (reason) -> Promise<R> in
                 throw reason
             }
         )
     }
     
-    public func then<C: AnyObject, R>(context: C, _ onFulfilled: (C, T) throws -> Promise<R>) -> Promise<R> {
+    public func thenWithContext<C: AnyObject, R>(context: C, _ onFulfilled: (C, T) throws -> R) -> Promise<R> {
         return then(
-            onFulfilled: { [weak context] value in
+            onFulfilled: { [weak context] (value) -> R in
                 if let strongContext = context {
                     return try onFulfilled(strongContext, value)
                 } else {
-                    return Promise<R>(reject: PromiseError.ContextUnavailable)
+                    throw PromiseError.ContextUnavailable
                 }
             },
-            onRejected: { reason in
+            onRejected: { (reason) -> R in
+                throw reason
+            }
+        )
+    }
+    
+    public func thenWithContext<C: AnyObject, R>(context: C, _ onFulfilled: (C, T) throws -> Promise<R>) -> Promise<R> {
+        return then(
+            onFulfilled: { [weak context] (value) -> Promise<R> in
+                if let strongContext = context {
+                    return try onFulfilled(strongContext, value)
+                } else {
+                    throw PromiseError.ContextUnavailable
+                }
+            },
+            onRejected: { (reason) -> Promise<R> in
                 throw reason
             }
         )
@@ -280,10 +313,10 @@ public class Promise<T> {
     
     public func handle(onRejected: (ErrorType) throws -> Void) -> Promise<T> {
         return then(
-            onFulfilled: { value in
-                return Promise<T>(fulfill: value)
+            onFulfilled: { (value) -> T in
+                return value
             },
-            onRejected: { reason in
+            onRejected: { (reason) -> T in
                 try onRejected(reason)
                 
                 throw reason
@@ -291,12 +324,12 @@ public class Promise<T> {
         )
     }
     
-    public func handle<C: AnyObject>(context: C, _ onRejected: (C, ErrorType) throws -> Void) -> Promise<T> {
+    public func handleWithContext<C: AnyObject>(context: C, _ onRejected: (C, ErrorType) throws -> Void) -> Promise<T> {
         return then(
-            onFulfilled: { value in
-                return Promise<T>(fulfill: value)
+            onFulfilled: { (value) -> T in
+                return value
             },
-            onRejected: { [weak context] reason in
+            onRejected: { [weak context] (reason) -> T in
                 if let strongContext = context {
                     try onRejected(strongContext, reason)
                 }
@@ -306,25 +339,49 @@ public class Promise<T> {
         )
     }
     
+    public func recover(onRejected: (ErrorType) throws -> T) -> Promise<T> {
+        return then(
+            onFulfilled: { (value) -> T in
+                return value
+            },
+            onRejected: onRejected
+        )
+    }
+    
     public func recover(onRejected: (ErrorType) throws -> Promise<T>) -> Promise<T> {
         return then(
-            onFulfilled: { value in
-                return Promise<T>(fulfill: value)
+            onFulfilled: { (value) -> Promise<T> in
+                return Promise<T>(value)
             },
             onRejected: onRejected
         )
     }
 
-    public func recover<C: AnyObject>(context: C, _ onRejected: (C, ErrorType) throws -> Promise<T>) -> Promise<T> {
+    public func recoverWithContext<C: AnyObject>(context: C, _ onRejected: (C, ErrorType) throws -> T) -> Promise<T> {
         return then(
-            onFulfilled: { value in
-                return Promise<T>(fulfill: value)
+            onFulfilled: { (value) -> T in
+                return value
             },
-            onRejected: { [weak context] reason in
+            onRejected: { [weak context] (reason) -> T in
                 if let strongContext = context {
                     return try onRejected(strongContext, reason)
                 } else {
-                    throw reason
+                    throw PromiseError.ContextUnavailable
+                }
+            }
+        )
+    }
+    
+    public func recoverWithContext<C: AnyObject>(context: C, _ onRejected: (C, ErrorType) throws -> Promise<T>) -> Promise<T> {
+        return then(
+            onFulfilled: { (value) -> Promise<T> in
+                return Promise<T>(value)
+            },
+            onRejected: { [weak context] (reason) -> Promise<T> in
+                if let strongContext = context {
+                    return try onRejected(strongContext, reason)
+                } else {
+                    throw PromiseError.ContextUnavailable
                 }
             }
         )
@@ -332,32 +389,32 @@ public class Promise<T> {
     
     public func finally(onFinally: () -> Void) -> Promise<T> {
         return then(
-            onFulfilled: { value in
+            onFulfilled: { (value) -> T in
                 onFinally()
-                return Promise<T>(fulfill: value)
+                return value
             },
-            onRejected: { reason in
+            onRejected: { (reason) -> T in
                 onFinally()
-                return Promise<T>(reject: reason)
+                throw reason
             }
         )
     }
     
-    public func finally<C: AnyObject>(context: C, _ onFinally: (C) -> Void) -> Promise<T> {
+    public func finallyWithContext<C: AnyObject>(context: C, _ onFinally: (C) -> Void) -> Promise<T> {
         return then(
-            onFulfilled: { [weak context] value in
+            onFulfilled: { [weak context] (value) -> T in
                 if let strongContext = context {
                     onFinally(strongContext)
                 }
                 
-                return Promise<T>(fulfill: value)
+                return value
             },
-            onRejected: { [weak context] reason in
+            onRejected: { [weak context] (reason) -> T in
                 if let strongContext = context {
                     onFinally(strongContext)
                 }
                 
-                return Promise<T>(reject: reason)
+                throw reason
             }
         )
     }
