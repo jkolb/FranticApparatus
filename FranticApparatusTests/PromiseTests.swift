@@ -427,7 +427,9 @@ class FranticApparatusTests: XCTestCase {
         }
         
         let deferred = Promise<String>() { (fulfill, reject, isCancelled) -> Void in
-            fulfill("deferred")
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.5 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+                fulfill("deferred")
+            }
         }
         
         var receivedValue: String! = nil

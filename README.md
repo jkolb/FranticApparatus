@@ -4,6 +4,11 @@
 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
+## Changes for 4.0.2
+
+* Fix dead lock when a promise returns a pending promise within `then`.
+* Updated tests to trigger this dead lock to verify it was fixed.
+
 ## Changes for 4.0.1
 
 * Attempting to fix problem with building usage Carthage.

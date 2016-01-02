@@ -114,8 +114,8 @@ public class Promise<T> {
                 fulfillWithValue(value)
             case .Rejected(let reason):
                 rejectWithReason(reason)
-            case .Pending:
-                waitForPromise(promise)
+            case .Pending(let info):
+                waitForPromise(promise, promiseInfo: info)
             }
         }
     }
@@ -144,7 +144,7 @@ public class Promise<T> {
         }
     }
     
-    private func waitForPromise(promise: Promise<T>) {
+    private func waitForPromise(promise: Promise<T>, promiseInfo: PendingInfo<T>) {
         if promise === self {
             rejectWithReason(PromiseError.CycleDetected)
             return
@@ -153,28 +153,15 @@ public class Promise<T> {
         synchronize {
             switch state {
             case .Pending(let info):
-                let waitForPromise = promise.then(
-                    onFulfilled: { [weak self] (value) throws -> Promise<T> in
-                        let fulfilled = Promise<T>(value)
-                        
-                        if let strongSelf = self {
-                            strongSelf.resolve(fulfilled)
-                        }
-                        
-                        return fulfilled
-                    },
-                    onRejected: { [weak self] (reason) throws -> Promise<T> in
-                        let rejected = Promise<T>(error: reason)
-                        
-                        if let strongSelf = self {
-                            strongSelf.resolve(rejected)
-                        }
-                        
-                        return rejected
-                    }
-                )
-                
-                info.waitForPromise(waitForPromise)
+                promiseInfo.onFulfilled.append { [weak self] (value) -> Void in
+                    guard let strongSelf = self else { return }
+                    strongSelf.resolve(Promise<T>(value))
+                }
+                promiseInfo.onRejected.append { [weak self] (reason) -> Void in
+                    guard let strongSelf = self else { return }
+                    strongSelf.resolve(Promise<T>(error: reason))
+                }
+                info.waitForPromise(promise)
             default:
                 fatalError("Attempting to wait on a promise after already being resolved")
             }
