@@ -22,7 +22,6 @@
  SOFTWARE.
  */
 
-@import Foundation;
-
-FOUNDATION_EXPORT double FranticApparatusVersionNumber;
-FOUNDATION_EXPORT const unsigned char FranticApparatusVersionString[];
+public enum PromiseError : ErrorType {
+    case ObjectUnavailable
+}

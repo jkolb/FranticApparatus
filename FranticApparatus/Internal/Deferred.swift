@@ -22,7 +22,26 @@
  SOFTWARE.
  */
 
-@import Foundation;
-
-FOUNDATION_EXPORT double FranticApparatusVersionNumber;
-FOUNDATION_EXPORT const unsigned char FranticApparatusVersionString[];
+final class Deferred<ValueType> {
+    private let pendingOn: AnyObject?
+    var onFulfilled: [(ValueType) -> Void]
+    var onRejected: [(ErrorType) -> Void]
+    
+    convenience init() {
+        self.init(pendingOn: nil, onFulfilled: [], onRejected: [])
+    }
+    
+    convenience init<P>(pendingOn: Promise<P>) {
+        self.init(pendingOn: pendingOn, onFulfilled: [], onRejected: [])
+    }
+    
+    convenience init<P>(pendingOn: Promise<P>, onFulfilled: [(ValueType) -> Void], onRejected: [(ErrorType) -> Void]) {
+        self.init(pendingOn: pendingOn, onFulfilled: onFulfilled, onRejected: onRejected)
+    }
+    
+    private init(pendingOn: AnyObject?, onFulfilled: [(ValueType) -> Void], onRejected: [(ErrorType) -> Void]) {
+        self.pendingOn = pendingOn
+        self.onFulfilled = onFulfilled
+        self.onRejected = onRejected
+    }
+}

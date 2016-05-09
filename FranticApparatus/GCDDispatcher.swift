@@ -22,7 +22,20 @@
  SOFTWARE.
  */
 
-@import Foundation;
+import Dispatch
 
-FOUNDATION_EXPORT double FranticApparatusVersionNumber;
-FOUNDATION_EXPORT const unsigned char FranticApparatusVersionString[];
+public final class GCDDispatcher : Dispatcher {
+    public let queue: dispatch_queue_t
+
+    public static func mainDispatcher() -> GCDDispatcher {
+        return GCDDispatcher(queue: dispatch_get_main_queue())
+    }
+    
+    public init(queue: dispatch_queue_t) {
+        self.queue = queue
+    }
+    
+    public func dispatch(closure: () -> Void) {
+        dispatch_async(queue, closure)
+    }
+}

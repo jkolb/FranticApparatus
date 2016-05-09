@@ -22,7 +22,7 @@
  SOFTWARE.
  */
 
-@import Foundation;
-
-FOUNDATION_EXPORT double FranticApparatusVersionNumber;
-FOUNDATION_EXPORT const unsigned char FranticApparatusVersionString[];
+public enum Result<ValueType> {
+    case Value(ValueType)
+    case Defer(Promise<ValueType>)
+}

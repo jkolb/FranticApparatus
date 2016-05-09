@@ -22,7 +22,20 @@
  SOFTWARE.
  */
 
-@import Foundation;
+import Foundation
 
-FOUNDATION_EXPORT double FranticApparatusVersionNumber;
-FOUNDATION_EXPORT const unsigned char FranticApparatusVersionString[];
+public final class OperationDispatcher : Dispatcher {
+    public let queue: NSOperationQueue
+    
+    public static func mainDispatcher() -> OperationDispatcher {
+        return OperationDispatcher(queue: NSOperationQueue.mainQueue())
+    }
+    
+    public init(queue: NSOperationQueue) {
+        self.queue = queue
+    }
+    
+    public func dispatch(closure: () -> Void) {
+        queue.addOperationWithBlock(closure)
+    }
+}

@@ -22,7 +22,34 @@
  SOFTWARE.
  */
 
-@import Foundation;
+#if os(OSX) || os(iOS)
+    import Darwin
+#elseif os(Linux)
+    import Glibc
+#endif
 
-FOUNDATION_EXPORT double FranticApparatusVersionNumber;
-FOUNDATION_EXPORT const unsigned char FranticApparatusVersionString[];
+final class Lock {
+    private var mutex = pthread_mutex_t()
+    
+    init() {
+        pthread_mutex_init(&mutex, nil)
+    }
+    
+    deinit {
+        pthread_mutex_destroy(&mutex)
+    }
+    
+    private func lock() {
+        pthread_mutex_lock(&mutex)
+    }
+    
+    private func unlock() {
+        pthread_mutex_unlock(&mutex)
+    }
+    
+    func synchronize(@noescape synchronized: () -> Void) {
+        lock()
+        defer { unlock() }
+        synchronized()
+    }
+}

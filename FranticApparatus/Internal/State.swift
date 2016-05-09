@@ -22,7 +22,8 @@
  SOFTWARE.
  */
 
-@import Foundation;
-
-FOUNDATION_EXPORT double FranticApparatusVersionNumber;
-FOUNDATION_EXPORT const unsigned char FranticApparatusVersionString[];
+enum State<ValueType> {
+    case Pending(Deferred<ValueType>)
+    case Fulfilled(ValueType)
+    case Rejected(ErrorType)
+}
