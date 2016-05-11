@@ -82,18 +82,19 @@ public final class Promise<ValueType> {
     }
     
     private func fulfill(value: ValueType) {
-        lock.synchronize {
-            switch state {
-            case .Pending(let deferred):
-                state = .Fulfilled(value)
-                
-                for onFulfilled in deferred.onFulfilled {
-                    onFulfilled(value)
-                }
-                
-            default:
-                fatalError("Duplicate attempt to resolve promise")
+        lock.lock()
+        switch state {
+        case .Pending(let deferred):
+            state = .Fulfilled(value)
+            let deferredOnFulfilled = deferred.onFulfilled
+            lock.unlock()
+            
+            for onFulfilled in deferredOnFulfilled {
+                onFulfilled(value)
             }
+            
+        default:
+            fatalError("Duplicate attempt to resolve promise")
         }
     }
     
@@ -106,34 +107,34 @@ public final class Promise<ValueType> {
     }
     
     private func reject(reason: ErrorType) {
-        lock.synchronize {
-            switch state {
-            case .Pending(let deferred):
-                state = .Rejected(reason)
-                
-                for onRejected in deferred.onRejected {
-                    onRejected(reason)
-                }
-                
-            default:
-                fatalError("Duplicate attempt to resolve promise")
+        lock.lock()
+        switch state {
+        case .Pending(let deferred):
+            state = .Rejected(reason)
+            let deferredOnRejected = deferred.onRejected
+            lock.unlock()
+            
+            for onRejected in deferredOnRejected {
+                onRejected(reason)
             }
+            
+        default:
+            fatalError("Duplicate attempt to resolve promise")
         }
     }
     
     private func pendOn(promise: Promise<ValueType>) {
         precondition(promise !== self)
 
-        lock.synchronize {
-            switch state {
-            case .Pending(let deferred):
-                state = .Pending(Deferred(pendingOn: promise, onFulfilled: deferred.onFulfilled, onRejected: deferred.onRejected))
-                
-                promise.onResolve(fulfill: weakifyFulfill(), reject: weakifyReject())
-                
-            default:
-                fatalError("Duplicate attempt to resolve promise")
-            }
+        lock.lock()
+        switch state {
+        case .Pending(let deferred):
+            state = .Pending(Deferred(pendingOn: promise, onFulfilled: deferred.onFulfilled, onRejected: deferred.onRejected))
+            lock.unlock()
+            promise.onResolve(fulfill: weakifyFulfill(), reject: weakifyReject())
+            
+        default:
+            fatalError("Duplicate attempt to resolve promise")
         }
     }
     
@@ -156,18 +157,20 @@ public final class Promise<ValueType> {
     }
     
     private func onResolve(fulfill fulfill: (ValueType) -> Void, reject: (ErrorType) -> Void) {
-        lock.synchronize {
-            switch state {
-            case .Fulfilled(let value):
-                fulfill(value)
-                
-            case .Rejected(let reason):
-                reject(reason)
-                
-            case .Pending(let deferred):
-                deferred.onFulfilled.append(fulfill)
-                deferred.onRejected.append(reject)
-            }
+        lock.lock()
+        switch state {
+        case .Fulfilled(let value):
+            lock.unlock()
+            fulfill(value)
+            
+        case .Rejected(let reason):
+            lock.unlock()
+            reject(reason)
+            
+        case .Pending(let deferred):
+            deferred.onFulfilled.append(fulfill)
+            deferred.onRejected.append(reject)
+            lock.unlock()
         }
     }
 }

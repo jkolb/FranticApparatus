@@ -39,17 +39,11 @@ final class Lock {
         pthread_mutex_destroy(&mutex)
     }
     
-    private func lock() {
+    func lock() {
         pthread_mutex_lock(&mutex)
     }
     
-    private func unlock() {
+    func unlock() {
         pthread_mutex_unlock(&mutex)
-    }
-    
-    func synchronize(@noescape synchronized: () -> Void) {
-        lock()
-        defer { unlock() }
-        synchronized()
     }
 }
