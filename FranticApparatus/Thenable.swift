@@ -22,7 +22,13 @@
  SOFTWARE.
  */
 
-public extension Promise {
+public protocol Thenable : class {
+    associatedtype ValueType
+    
+    func thenOn<ResultType>(dispatcher: Dispatcher, onFulfilled: (ValueType) throws -> Result<ResultType>, onRejected: (ErrorType) throws -> Result<ResultType>) -> Promise<ResultType>
+}
+
+public extension Thenable {
     public func thenOn<ResultType>(dispatcher: Dispatcher, _ onFulfilled: (ValueType) throws -> Result<ResultType>) -> Promise<ResultType> {
         return thenOn(
             dispatcher,

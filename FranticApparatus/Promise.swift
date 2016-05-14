@@ -22,7 +22,7 @@
  SOFTWARE.
  */
 
-public final class Promise<ValueType> {
+public final class Promise<ValueType> : Thenable {
     private let lock: Lock
     private var state: State<ValueType>
     
