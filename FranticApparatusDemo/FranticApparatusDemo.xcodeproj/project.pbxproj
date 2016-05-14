@@ -11,6 +11,8 @@
 		E5608B941CE772210040E140 /* SimpleURLSessionNetworkLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5608B931CE772210040E140 /* SimpleURLSessionNetworkLayer.swift */; };
 		E5608B961CE772E90040E140 /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5608B951CE772E90040E140 /* NetworkError.swift */; };
 		E5608B981CE7768C0040E140 /* ActivityNetworkLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5608B971CE7768C0040E140 /* ActivityNetworkLayer.swift */; };
+		E5608B9A1CE79AAC0040E140 /* NetworkActivityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5608B991CE79AAC0040E140 /* NetworkActivityIndicator.swift */; };
+		E5608B9C1CE79AF40040E140 /* ApplicationNetworkActivityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5608B9B1CE79AF40040E140 /* ApplicationNetworkActivityIndicator.swift */; };
 		E57D1B051CE5688900C0C6BE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57D1B041CE5688900C0C6BE /* AppDelegate.swift */; };
 		E57D1B071CE5688900C0C6BE /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57D1B061CE5688900C0C6BE /* MasterViewController.swift */; };
 		E57D1B091CE5688900C0C6BE /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57D1B081CE5688900C0C6BE /* DetailViewController.swift */; };
@@ -26,6 +28,8 @@
 		E5608B931CE772210040E140 /* SimpleURLSessionNetworkLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleURLSessionNetworkLayer.swift; sourceTree = "<group>"; };
 		E5608B951CE772E90040E140 /* NetworkError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
 		E5608B971CE7768C0040E140 /* ActivityNetworkLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityNetworkLayer.swift; sourceTree = "<group>"; };
+		E5608B991CE79AAC0040E140 /* NetworkActivityIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkActivityIndicator.swift; sourceTree = "<group>"; };
+		E5608B9B1CE79AF40040E140 /* ApplicationNetworkActivityIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApplicationNetworkActivityIndicator.swift; sourceTree = "<group>"; };
 		E57D1B011CE5688800C0C6BE /* FranticApparatusDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FranticApparatusDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E57D1B041CE5688900C0C6BE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E57D1B061CE5688900C0C6BE /* MasterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
@@ -78,6 +82,8 @@
 				E5608B931CE772210040E140 /* SimpleURLSessionNetworkLayer.swift */,
 				E5608B971CE7768C0040E140 /* ActivityNetworkLayer.swift */,
 				E5608B951CE772E90040E140 /* NetworkError.swift */,
+				E5608B991CE79AAC0040E140 /* NetworkActivityIndicator.swift */,
+				E5608B9B1CE79AF40040E140 /* ApplicationNetworkActivityIndicator.swift */,
 				E57D1B0A1CE5688900C0C6BE /* Main.storyboard */,
 				E57D1B0D1CE5688900C0C6BE /* Assets.xcassets */,
 				E57D1B0F1CE5688900C0C6BE /* LaunchScreen.storyboard */,
@@ -158,10 +164,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				E57D1B1B1CE5691C00C0C6BE /* NetworkAPI.swift in Sources */,
+				E5608B9A1CE79AAC0040E140 /* NetworkActivityIndicator.swift in Sources */,
 				E5608B981CE7768C0040E140 /* ActivityNetworkLayer.swift in Sources */,
 				E5608B961CE772E90040E140 /* NetworkError.swift in Sources */,
 				E5608B941CE772210040E140 /* SimpleURLSessionNetworkLayer.swift in Sources */,
 				E57D1B091CE5688900C0C6BE /* DetailViewController.swift in Sources */,
+				E5608B9C1CE79AF40040E140 /* ApplicationNetworkActivityIndicator.swift in Sources */,
 				E57D1B071CE5688900C0C6BE /* MasterViewController.swift in Sources */,
 				E5608B921CE771A30040E140 /* NetworkLayer.swift in Sources */,
 				E57D1B051CE5688900C0C6BE /* AppDelegate.swift in Sources */,

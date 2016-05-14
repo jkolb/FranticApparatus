@@ -85,7 +85,7 @@ public final class NetworkAPI {
     }
     
     private func requestData(request: NSURLRequest, allowedStatusCodes: [Int], allowedContentTypes: [String]) -> Promise<NSData> {
-        return networkLayer.requestData(request).thenOn(dispatcher, { (response, data) -> NSData in
+        return networkLayer.requestData(request).thenOn(dispatcher) { (response, data) -> NSData in
             guard let httpResponse = response as? NSHTTPURLResponse else {
                 throw NetworkError.UnexpectedResponse(response)
             }
@@ -101,6 +101,6 @@ public final class NetworkAPI {
             }
             
             return data
-        })
+        }
     }
 }

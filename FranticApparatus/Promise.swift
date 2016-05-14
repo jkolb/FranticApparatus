@@ -83,13 +83,13 @@ public final class Promise<ValueType> : Thenable {
     
     private func fulfill(value: ValueType) {
         lock.lock()
+        
         switch state {
         case .Pending(let deferred):
             state = .Fulfilled(value)
-            let deferredOnFulfilled = deferred.onFulfilled
             lock.unlock()
             
-            for onFulfilled in deferredOnFulfilled {
+            for onFulfilled in deferred.onFulfilled {
                 onFulfilled(value)
             }
             
@@ -108,13 +108,13 @@ public final class Promise<ValueType> : Thenable {
     
     private func reject(reason: ErrorType) {
         lock.lock()
+        
         switch state {
         case .Pending(let deferred):
             state = .Rejected(reason)
-            let deferredOnRejected = deferred.onRejected
             lock.unlock()
             
-            for onRejected in deferredOnRejected {
+            for onRejected in deferred.onRejected {
                 onRejected(reason)
             }
             
@@ -127,6 +127,7 @@ public final class Promise<ValueType> : Thenable {
         precondition(promise !== self)
 
         lock.lock()
+        
         switch state {
         case .Pending(let deferred):
             state = .Pending(Deferred(pendingOn: promise, onFulfilled: deferred.onFulfilled, onRejected: deferred.onRejected))
@@ -158,6 +159,7 @@ public final class Promise<ValueType> : Thenable {
     
     private func onResolve(fulfill fulfill: (ValueType) -> Void, reject: (ErrorType) -> Void) {
         lock.lock()
+        
         switch state {
         case .Fulfilled(let value):
             lock.unlock()

@@ -22,25 +22,7 @@
  SOFTWARE.
  */
 
-import Foundation
-import FranticApparatus
-
-public final class ActivityNetworkLayer : NetworkLayer {
-    private let dispatcher: Dispatcher
-    private let networkLayer: NetworkLayer
-    private let networkActivityIndicator: NetworkActivityIndicator
-    
-    public init(dispatcher: Dispatcher, networkLayer: NetworkLayer, networkActivityIndicator: NetworkActivityIndicator) {
-        self.dispatcher = dispatcher
-        self.networkLayer = networkLayer
-        self.networkActivityIndicator = networkActivityIndicator
-    }
-    
-    public func requestData(request: NSURLRequest) -> Promise<(NSURLResponse, NSData)> {
-        networkActivityIndicator.show()
-        
-        return networkLayer.requestData(request).finallyOn(dispatcher, withObject: self) { (layer) in
-            layer.networkActivityIndicator.hide()
-        }
-    }
+public protocol NetworkActivityIndicator : class {
+    func show()
+    func hide()
 }

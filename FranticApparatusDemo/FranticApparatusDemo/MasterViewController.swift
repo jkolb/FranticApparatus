@@ -43,7 +43,7 @@ class MasterViewController: UITableViewController {
             self.detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
         }
         
-        let networkLayer = ActivityNetworkLayer(dispatcher: GCDDispatcher.mainDispatcher(), networkLayer: SimpleURLSessionNetworkLayer())
+        let networkLayer = ActivityNetworkLayer(dispatcher: GCDDispatcher.mainDispatcher(), networkLayer: SimpleURLSessionNetworkLayer(), networkActivityIndicator: ApplicationNetworkActvityIndicator())
         let networkDispatcher = OperationDispatcher(queue: NSOperationQueue())
         networkAPI = NetworkAPI(dispatcher: networkDispatcher, networkLayer: networkLayer)
         
