@@ -1,8 +1,20 @@
-# [FranticApparatus 4.0.1](https://github.com/jkolb/FranticApparatus)
+# FranticApparatus 5.0.0
 
-#### A thread safe, type safe, and memory safe [Promises/A+](https://promisesaplus.com) implementation for Swift 2
+#### A thread safe, type safe, and memory safe [Promises/A+](https://promisesaplus.com) implementation for Swift 2.2
 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+
+## Changes for 5.0.0
+
+* Attempted to simplify and make the implementation as readable and consistent as possible.
+* Introduced the `Dispatcher` protocol to break the dependence on GCD.
+* Brought back the `Result` enum for returning values from promises as this better matches the spec and simplifies the `then` function and all the shortcut functions.
+* Shortcut functions have been consolidated into three varieties `then` for success, `handle` for error, and `finally` for both success & error.
+* Shortcut functions mostly eliminate the need to directly use the `Result` enum. The only case that needs to use it is when you can return a value or another promise conditionally so you must differentiate using the enum values `.Value` or `.Defer`.
+* Simplified the unit tests, they no longer need asynchronous expectations due to using a mock `Dispatcher`.
+* Moved shortcut methods into the `Thenable` protocol.
+* Created `PromiseDispatchContext` as a way to share a common `Dispatcher` in a single promise chain.
+* Added the FranticApparatusDemo workspace with an example of simple network loading and parsing of an image using promises.
 
 ## Changes for 4.0.2
 
