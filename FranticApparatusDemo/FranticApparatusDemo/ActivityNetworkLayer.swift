@@ -26,9 +26,9 @@ import Foundation
 import FranticApparatus
 
 public final class ActivityNetworkLayer : NetworkLayer {
-    private let dispatcher: Dispatcher
-    private let networkLayer: NetworkLayer
-    private let networkActivityIndicator: NetworkActivityIndicator
+    fileprivate let dispatcher: Dispatcher
+    fileprivate let networkLayer: NetworkLayer
+    fileprivate let networkActivityIndicator: NetworkActivityIndicator
     
     public init(dispatcher: Dispatcher, networkLayer: NetworkLayer, networkActivityIndicator: NetworkActivityIndicator) {
         self.dispatcher = dispatcher
@@ -36,7 +36,7 @@ public final class ActivityNetworkLayer : NetworkLayer {
         self.networkActivityIndicator = networkActivityIndicator
     }
     
-    public func requestData(request: NSURLRequest) -> Promise<(NSURLResponse, NSData)> {
+    public func requestData(_ request: URLRequest) -> Promise<(URLResponse, Data)> {
         networkActivityIndicator.show()
         
         return networkLayer.requestData(request).finallyOn(dispatcher, withObject: self) { (layer) in

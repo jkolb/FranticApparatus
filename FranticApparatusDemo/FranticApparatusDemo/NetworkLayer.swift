@@ -26,5 +26,5 @@ import Foundation
 import FranticApparatus
 
 public protocol NetworkLayer : class {
-    func requestData(request: NSURLRequest) -> Promise<(NSURLResponse, NSData)>
+    func requestData(_ request: URLRequest) -> Promise<(URLResponse, Data)>
 }

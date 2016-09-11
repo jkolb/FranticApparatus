@@ -39,24 +39,24 @@ class RootViewController : UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = UIColor.whiteColor()
-        view.contentMode = .ScaleAspectFit
+        view.backgroundColor = UIColor.white
+        view.contentMode = .scaleAspectFit
         
         activityIndicator = UIActivityIndicatorView()
-        activityIndicator.color = UIColor.blackColor()
+        activityIndicator.color = UIColor.black
         view.addSubview(activityIndicator)
         
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        activityIndicator.centerXAnchor.constraintEqualToAnchor(view.centerXAnchor).active = true
-        activityIndicator.centerYAnchor.constraintEqualToAnchor(view.centerYAnchor).active = true
+        activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         activityIndicator.hidesWhenStopped = true
         
         let networkLayer = ActivityNetworkLayer(dispatcher: GCDDispatcher.mainDispatcher(), networkLayer: SimpleURLSessionNetworkLayer(), networkActivityIndicator: ApplicationNetworkActvityIndicator())
-        let networkDispatcher = OperationDispatcher(queue: NSOperationQueue())
+        let networkDispatcher = OperationDispatcher(queue: OperationQueue())
         networkAPI = NetworkAPI(dispatcher: networkDispatcher, networkLayer: networkLayer)
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
         loadData()
@@ -66,7 +66,7 @@ class RootViewController : UIViewController {
         let width = Int(view.bounds.width)
         let height = Int(view.bounds.height)
         let urlString = "https://placekitten.com/\(width)/\(height)"
-        let dataPromise = networkAPI.requestImageForURL(NSURL(string: urlString)!)
+        let dataPromise = networkAPI.requestImageForURL(URL(string: urlString)!)
         let dataPromiseContext = OperationDispatcher.mainDispatcher().asContextFor(dataPromise)
         
         showActivity()
@@ -89,30 +89,30 @@ class RootViewController : UIViewController {
         activityIndicator.stopAnimating()
     }
     
-    func showImage(image: UIImage) {
+    func showImage(_ image: UIImage) {
         imageView.image = image
     }
     
-    func showError(error: ErrorType) {
-        let alert = UIAlertController(title: "Error", message: messageForError(error), preferredStyle: .Alert)
-        let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
+    func showError(_ error: Error) {
+        let alert = UIAlertController(title: "Error", message: messageForError(error), preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
         alert.addAction(okAction)
-        presentViewController(alert, animated: true, completion: nil)
+        present(alert, animated: true, completion: nil)
     }
     
-    func messageForError(error: ErrorType) -> String {
+    func messageForError(_ error: Error) -> String {
         switch error {
         case let networkError as NetworkError:
             switch networkError {
-            case .HighlyImprobable:
+            case .highlyImprobable:
                 return "Nothing is impossible"
-            case .UnexpectedData(let data):
+            case .unexpectedData(let data):
                 return "Unexpected Data: \(data)"
-            case .UnexpectedResponse(let response):
+            case .unexpectedResponse(let response):
                 return "Unexpected Response: \(response)"
-            case .UnexpectedStatusCode(let statusCode):
+            case .unexpectedStatusCode(let statusCode):
                 return "Unexpected Status Code: \(statusCode)"
-            case .UnexpectedContentType(let contentType):
+            case .unexpectedContentType(let contentType):
                 return "Unexpected Content Type: \(contentType)"
             }
         case let error as NSError:

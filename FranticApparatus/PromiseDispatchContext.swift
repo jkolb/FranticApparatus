@@ -23,67 +23,67 @@
  */
 
 public extension Dispatcher {
-    public func asContextFor<ValueType>(promise: Promise<ValueType>) -> PromiseDispatchContext<ValueType> {
-        return PromiseDispatchContext<ValueType>(dispatcher: self, promise: promise)
+    public func asContextFor<Value>(_ promise: Promise<Value>) -> PromiseDispatchContext<Value> {
+        return PromiseDispatchContext<Value>(dispatcher: self, promise: promise)
     }
 }
 
-public final class PromiseDispatchContext<ValueType> : Thenable {
+public final class PromiseDispatchContext<Value> : Thenable {
     public let dispatcher: Dispatcher
-    public let promise: Promise<ValueType>
+    public let promise: Promise<Value>
     
-    public init(dispatcher: Dispatcher, promise: Promise<ValueType>) {
+    public init(dispatcher: Dispatcher, promise: Promise<Value>) {
         self.dispatcher = dispatcher
         self.promise = promise
     }
     
-    public func thenOn<ResultType>(dispatcher: Dispatcher, onFulfilled: (ValueType) throws -> Result<ResultType>, onRejected: (ErrorType) throws -> Result<ResultType>) -> Promise<ResultType> {
+    public func thenOn<ResultingValue>(_ dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> Result<ResultingValue>, onRejected: @escaping (Error) throws -> Result<ResultingValue>) -> Promise<ResultingValue> {
         return promise.thenOn(dispatcher, onFulfilled: onFulfilled, onRejected: onRejected)
     }
 
-    public func then<ResultType>(onFulfilled onFulfilled: (ValueType) throws -> Result<ResultType>, onRejected: (ErrorType) throws -> Result<ResultType>) -> PromiseDispatchContext<ResultType> {
+    public func then<ResultingValue>(onFulfilled: @escaping (Value) throws -> Result<ResultingValue>, onRejected: @escaping (Error) throws -> Result<ResultingValue>) -> PromiseDispatchContext<ResultingValue> {
         let promise2 = promise.thenOn(dispatcher, onFulfilled: onFulfilled, onRejected: onRejected)
-        return PromiseDispatchContext<ResultType>(dispatcher: dispatcher, promise: promise2)
+        return PromiseDispatchContext<ResultingValue>(dispatcher: dispatcher, promise: promise2)
     }
     
-    public func then<ResultType>(onFulfilled: (ValueType) throws -> Result<ResultType>) -> PromiseDispatchContext<ResultType> {
+    public func then<ResultingValue>(_ onFulfilled: @escaping (Value) throws -> Result<ResultingValue>) -> PromiseDispatchContext<ResultingValue> {
         return then(
-            onFulfilled: { (value) throws -> Result<ResultType> in
+            onFulfilled: { (value) throws -> Result<ResultingValue> in
                 return try onFulfilled(value)
             },
-            onRejected: { (reason) throws -> Result<ResultType> in
+            onRejected: { (reason) throws -> Result<ResultingValue> in
                 throw reason
             }
         )
     }
     
-    public func then(onFulfilled: (ValueType) throws -> Void) -> PromiseDispatchContext<ValueType> {
-        return then { (value) throws -> Result<ValueType> in
+    public func then(_ onFulfilled: @escaping (Value) throws -> Void) -> PromiseDispatchContext<Value> {
+        return then { (value) throws -> Result<Value> in
             try onFulfilled(value)
             
-            return .Value(value)
+            return .value(value)
         }
     }
     
-    public func then<ResultType>(onFulfilled: (ValueType) throws -> ResultType) -> PromiseDispatchContext<ResultType> {
-        return then { (value) throws -> Result<ResultType> in
+    public func then<ResultingValue>(_ onFulfilled: @escaping (Value) throws -> ResultingValue) -> PromiseDispatchContext<ResultingValue> {
+        return then { (value) throws -> Result<ResultingValue> in
             let result = try onFulfilled(value)
             
-            return .Value(result)
+            return .value(result)
         }
     }
     
-    public func then<ResultType>(onFulfilled: (ValueType) throws -> Promise<ResultType>) -> PromiseDispatchContext<ResultType> {
-        return then { (value) throws -> Result<ResultType> in
+    public func then<ResultingValue>(_ onFulfilled: @escaping (Value) throws -> Promise<ResultingValue>) -> PromiseDispatchContext<ResultingValue> {
+        return then { (value) throws -> Result<ResultingValue> in
             let result = try onFulfilled(value)
             
-            return .Defer(result)
+            return .promise(result)
         }
     }
     
-    public func thenWithObject<Object: AnyObject, ResultType>(object: Object, _ onFulfilled: (Object, ValueType) throws -> Result<ResultType>) -> PromiseDispatchContext<ResultType> {
-        return then { [weak object] (value) -> Result<ResultType> in
-            guard let object = object else { throw PromiseError.ObjectUnavailable }
+    public func thenWithObject<Object: AnyObject, ResultingValue>(_ object: Object, _ onFulfilled: @escaping (Object, Value) throws -> Result<ResultingValue>) -> PromiseDispatchContext<ResultingValue> {
+        return then { [weak object] (value) -> Result<ResultingValue> in
+            guard let object = object else { throw PromiseError.objectDeallocated }
             
             let result = try onFulfilled(object, value)
             
@@ -91,36 +91,36 @@ public final class PromiseDispatchContext<ValueType> : Thenable {
         }
     }
     
-    public func thenWithObject<Object: AnyObject>(object: Object, _ onFulfilled: (Object, ValueType) throws -> Void) -> PromiseDispatchContext<ValueType> {
-        return thenWithObject(object) { (object, value) throws -> Result<ValueType> in
+    public func thenWithObject<Object: AnyObject>(_ object: Object, _ onFulfilled: @escaping (Object, Value) throws -> Void) -> PromiseDispatchContext<Value> {
+        return thenWithObject(object) { (object, value) throws -> Result<Value> in
             try onFulfilled(object, value)
             
-            return .Value(value)
+            return .value(value)
         }
     }
     
-    public func thenWithObject<Object: AnyObject, ResultType>(object: Object, _ onFulfilled: (Object, ValueType) throws -> ResultType) -> PromiseDispatchContext<ResultType> {
-        return thenWithObject(object) { (object, value) throws -> Result<ResultType> in
+    public func thenWithObject<Object: AnyObject, ResultingValue>(_ object: Object, _ onFulfilled: @escaping (Object, Value) throws -> ResultingValue) -> PromiseDispatchContext<ResultingValue> {
+        return thenWithObject(object) { (object, value) throws -> Result<ResultingValue> in
             let result = try onFulfilled(object, value)
             
-            return .Value(result)
+            return .value(result)
         }
     }
     
-    public func thenWithObject<Object: AnyObject, ResultType>(object: Object, _ onFulfilled: (Object, ValueType) throws -> Promise<ResultType>) -> PromiseDispatchContext<ResultType> {
-        return thenWithObject(object) { (object, value) throws -> Result<ResultType> in
+    public func thenWithObject<Object: AnyObject, ResultingValue>(_ object: Object, _ onFulfilled: @escaping (Object, Value) throws -> Promise<ResultingValue>) -> PromiseDispatchContext<ResultingValue> {
+        return thenWithObject(object) { (object, value) throws -> Result<ResultingValue> in
             let result = try onFulfilled(object, value)
             
-            return .Defer(result)
+            return .promise(result)
         }
     }
     
-    public func handle(onRejected: (ErrorType) throws -> Result<ValueType>) -> PromiseDispatchContext<ValueType> {
+    public func handle(_ onRejected: @escaping (Error) throws -> Result<Value>) -> PromiseDispatchContext<Value> {
         return then(
-            onFulfilled: { (value) throws -> Result<ValueType> in
-                return .Value(value)
+            onFulfilled: { (value) throws -> Result<Value> in
+                return .value(value)
             },
-            onRejected: { (reason) throws -> Result<ValueType> in
+            onRejected: { (reason) throws -> Result<Value> in
                 let result = try onRejected(reason)
                 
                 return result
@@ -128,33 +128,33 @@ public final class PromiseDispatchContext<ValueType> : Thenable {
         )
     }
     
-    public func handle(onRejected: (ErrorType) throws -> Void) -> PromiseDispatchContext<ValueType> {
-        return handle { (reason) throws -> Result<ValueType> in
+    public func handle(_ onRejected: @escaping (Error) throws -> Void) -> PromiseDispatchContext<Value> {
+        return handle { (reason) throws -> Result<Value> in
             try onRejected(reason)
             
             throw reason
         }
     }
     
-    public func handle(onRejected: (ErrorType) throws -> ValueType) -> PromiseDispatchContext<ValueType> {
-        return handle { (reason) throws -> Result<ValueType> in
+    public func handle(_ onRejected: @escaping (Error) throws -> Value) -> PromiseDispatchContext<Value> {
+        return handle { (reason) throws -> Result<Value> in
             let result = try onRejected(reason)
             
-            return .Value(result)
+            return .value(result)
         }
     }
     
-    public func handle(onRejected: (ErrorType) throws -> Promise<ValueType>) -> PromiseDispatchContext<ValueType> {
-        return handle { (reason) throws -> Result<ValueType> in
+    public func handle(_ onRejected: @escaping (Error) throws -> Promise<Value>) -> PromiseDispatchContext<Value> {
+        return handle { (reason) throws -> Result<Value> in
             let result = try onRejected(reason)
             
-            return .Defer(result)
+            return .promise(result)
         }
     }
     
-    public func handleWithObject<Object: AnyObject>(object: Object, _ onRejected: (Object, ErrorType) throws -> Result<ValueType>) -> PromiseDispatchContext<ValueType> {
-        return handle { [weak object] (reason) -> Result<ValueType> in
-            guard let object = object else { throw PromiseError.ObjectUnavailable }
+    public func handleWithObject<Object: AnyObject>(_ object: Object, _ onRejected: @escaping (Object, Error) throws -> Result<Value>) -> PromiseDispatchContext<Value> {
+        return handle { [weak object] (reason) -> Result<Value> in
+            guard let object = object else { throw PromiseError.objectDeallocated }
             
             let result = try onRejected(object, reason)
             
@@ -162,38 +162,38 @@ public final class PromiseDispatchContext<ValueType> : Thenable {
         }
     }
     
-    public func handleWithObject<Object: AnyObject>(object: Object, _ onRejected: (Object, ErrorType) throws -> Void) -> PromiseDispatchContext<ValueType> {
-        return handleWithObject(object) { (object, reason) throws -> Result<ValueType> in
+    public func handleWithObject<Object: AnyObject>(_ object: Object, _ onRejected: @escaping (Object, Error) throws -> Void) -> PromiseDispatchContext<Value> {
+        return handleWithObject(object) { (object, reason) throws -> Result<Value> in
             try onRejected(object, reason)
             
             throw reason
         }
     }
     
-    public func handleWithObject<Object: AnyObject>(object: Object, _ onRejected: (Object, ErrorType) throws -> ValueType) -> PromiseDispatchContext<ValueType> {
-        return handleWithObject(object) { (object, reason) throws -> Result<ValueType> in
+    public func handleWithObject<Object: AnyObject>(_ object: Object, _ onRejected: @escaping (Object, Error) throws -> Value) -> PromiseDispatchContext<Value> {
+        return handleWithObject(object) { (object, reason) throws -> Result<Value> in
             let result = try onRejected(object, reason)
             
-            return .Value(result)
+            return .value(result)
         }
     }
     
-    public func handleWithObject<Object: AnyObject>(object: Object, _ onRejected: (Object, ErrorType) throws -> Promise<ValueType>) -> PromiseDispatchContext<ValueType> {
-        return handleWithObject(object) { (object, reason) throws -> Result<ValueType> in
+    public func handleWithObject<Object: AnyObject>(_ object: Object, _ onRejected: @escaping (Object, Error) throws -> Promise<Value>) -> PromiseDispatchContext<Value> {
+        return handleWithObject(object) { (object, reason) throws -> Result<Value> in
             let result = try onRejected(object, reason)
             
-            return .Defer(result)
+            return .promise(result)
         }
     }
     
-    public func finally(onFinally: () -> Void) -> PromiseDispatchContext<ValueType> {
+    public func finally(_ onFinally: @escaping () -> Void) -> PromiseDispatchContext<Value> {
         return then(
-            onFulfilled: { (value) throws -> Result<ValueType> in
+            onFulfilled: { (value) throws -> Result<Value> in
                 onFinally()
                 
-                return .Value(value)
+                return .value(value)
             },
-            onRejected: { (reason) throws -> Result<ValueType> in
+            onRejected: { (reason) throws -> Result<Value> in
                 onFinally()
                 
                 throw reason
@@ -201,7 +201,7 @@ public final class PromiseDispatchContext<ValueType> : Thenable {
         )
     }
     
-    public func finallyWithObject<Object: AnyObject>(object: Object, _ onFinally: (Object) -> Void) -> PromiseDispatchContext<ValueType> {
+    public func finallyWithObject<Object: AnyObject>(_ object: Object, _ onFinally: @escaping (Object) -> Void) -> PromiseDispatchContext<Value> {
         return finally { [weak object] in
             guard let object = object else { return }
             

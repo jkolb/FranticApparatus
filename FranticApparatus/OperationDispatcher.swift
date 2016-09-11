@@ -25,17 +25,17 @@
 import Foundation
 
 public final class OperationDispatcher : Dispatcher {
-    public let queue: NSOperationQueue
+    public let queue: OperationQueue
     
     public static func mainDispatcher() -> OperationDispatcher {
-        return OperationDispatcher(queue: NSOperationQueue.mainQueue())
+        return OperationDispatcher(queue: OperationQueue.main)
     }
     
-    public init(queue: NSOperationQueue) {
+    public init(queue: OperationQueue) {
         self.queue = queue
     }
     
-    public func dispatch(closure: () -> Void) {
-        queue.addOperationWithBlock(closure)
+    public func dispatch(_ closure: @escaping () -> Void) {
+        queue.addOperation(closure)
     }
 }

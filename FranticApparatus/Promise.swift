@@ -22,23 +22,23 @@
  SOFTWARE.
  */
 
-public final class Promise<ValueType> : Thenable {
-    private let lock: Lock
-    private var state: State<ValueType>
+public final class Promise<Value> : Thenable {
+    fileprivate let lock: Lock
+    fileprivate var state: State<Value>
     
-    public init(@noescape _ promise: (fulfill: (ValueType) -> Void, reject: (ErrorType) -> Void, isCancelled: () -> Bool) -> Void) {
+    public init(_ promise: (_ fulfill: @escaping (Value) -> Void, _ reject: @escaping (Error) -> Void, _ isCancelled: @escaping () -> Bool) -> Void) {
         self.lock = Lock()
-        self.state = .Pending(Deferred())
+        self.state = .pending(Deferred())
 
         let isCancelled: () -> Bool = { [weak self] in
             return self == nil
         }
         
-        promise(fulfill: weakifyFulfill(), reject: weakifyReject(), isCancelled: isCancelled)
+        promise(weakifyFulfill(), weakifyReject(), isCancelled)
     }
     
-    public func thenOn<ResultType>(dispatcher: Dispatcher, onFulfilled: (ValueType) throws -> Result<ResultType>, onRejected: (ErrorType) throws -> Result<ResultType>) -> Promise<ResultType> {
-        return Promise<ResultType>(pendingOn: self) { (resolve, reject) in
+    public func thenOn<ResultingValue>(_ dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> Result<ResultingValue>, onRejected: @escaping (Error) throws -> Result<ResultingValue>) -> Promise<ResultingValue> {
+        return Promise<ResultingValue>(pendingOn: self) { (resolve, reject) in
             self.onResolve(
                 fulfill: { (value) in
                     dispatcher.dispatch {
@@ -66,14 +66,14 @@ public final class Promise<ValueType> : Thenable {
         }
     }
 
-    private init<R>(pendingOn: Promise<R>, @noescape _ resolver: (resolve: (Result<ValueType>) -> Void, reject: (ErrorType) -> Void) -> Void) {
+    fileprivate init<PendingValue>(pendingOn: Promise<PendingValue>, _ resolver: (_ resolve: @escaping (Result<Value>) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
         self.lock = Lock()
-        self.state = .Pending(Deferred(pendingOn: pendingOn))
+        self.state = .pending(Deferred(pendingOn: pendingOn))
         
-        resolver(resolve: weakifyResolve(), reject: weakifyReject())
+        resolver(weakifyResolve(), weakifyReject())
     }
     
-    private func weakifyFulfill() -> (ValueType) -> Void {
+    fileprivate func weakifyFulfill() -> (Value) -> Void {
         return { [weak self] (value) in
             guard let strongSelf = self else { return }
             
@@ -81,12 +81,12 @@ public final class Promise<ValueType> : Thenable {
         }
     }
     
-    private func fulfill(value: ValueType) {
+    fileprivate func fulfill(_ value: Value) {
         lock.lock()
         
         switch state {
-        case .Pending(let deferred):
-            state = .Fulfilled(value)
+        case .pending(let deferred):
+            state = .fulfilled(value)
             lock.unlock()
             
             for onFulfilled in deferred.onFulfilled {
@@ -98,7 +98,7 @@ public final class Promise<ValueType> : Thenable {
         }
     }
     
-    private func weakifyReject() -> (ErrorType) -> Void {
+    fileprivate func weakifyReject() -> (Error) -> Void {
         return { [weak self] (reason) in
             guard let strongSelf = self else { return }
             
@@ -106,12 +106,12 @@ public final class Promise<ValueType> : Thenable {
         }
     }
     
-    private func reject(reason: ErrorType) {
+    fileprivate func reject(_ reason: Error) {
         lock.lock()
         
         switch state {
-        case .Pending(let deferred):
-            state = .Rejected(reason)
+        case .pending(let deferred):
+            state = .rejected(reason)
             lock.unlock()
             
             for onRejected in deferred.onRejected {
@@ -123,14 +123,14 @@ public final class Promise<ValueType> : Thenable {
         }
     }
     
-    private func pendOn(promise: Promise<ValueType>) {
+    fileprivate func pendOn(_ promise: Promise<Value>) {
         precondition(promise !== self)
 
         lock.lock()
         
         switch state {
-        case .Pending(let deferred):
-            state = .Pending(Deferred(pendingOn: promise, onFulfilled: deferred.onFulfilled, onRejected: deferred.onRejected))
+        case .pending(let deferred):
+            state = .pending(Deferred(pendingOn: promise, onFulfilled: deferred.onFulfilled, onRejected: deferred.onRejected))
             lock.unlock()
             promise.onResolve(fulfill: weakifyFulfill(), reject: weakifyReject())
             
@@ -139,7 +139,7 @@ public final class Promise<ValueType> : Thenable {
         }
     }
     
-    private func weakifyResolve() -> (Result<ValueType>) -> Void {
+    fileprivate func weakifyResolve() -> (Result<Value>) -> Void {
         return { [weak self] (result) in
             guard let strongSelf = self else { return }
             
@@ -147,29 +147,29 @@ public final class Promise<ValueType> : Thenable {
         }
     }
 
-    private func resolve(result: Result<ValueType>) {
+    fileprivate func resolve(_ result: Result<Value>) {
         switch result {
-        case .Value(let value):
+        case .value(let value):
             fulfill(value)
             
-        case .Defer(let promise):
+        case .promise(let promise):
             pendOn(promise)
         }
     }
     
-    private func onResolve(fulfill fulfill: (ValueType) -> Void, reject: (ErrorType) -> Void) {
+    fileprivate func onResolve(fulfill: @escaping (Value) -> Void, reject: @escaping (Error) -> Void) {
         lock.lock()
         
         switch state {
-        case .Fulfilled(let value):
+        case .fulfilled(let value):
             lock.unlock()
             fulfill(value)
             
-        case .Rejected(let reason):
+        case .rejected(let reason):
             lock.unlock()
             reject(reason)
             
-        case .Pending(let deferred):
+        case .pending(let deferred):
             deferred.onFulfilled.append(fulfill)
             deferred.onRejected.append(reject)
             lock.unlock()

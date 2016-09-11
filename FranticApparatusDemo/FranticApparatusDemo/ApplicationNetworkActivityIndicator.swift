@@ -25,8 +25,8 @@
 import UIKit
 
 public final class ApplicationNetworkActvityIndicator : NetworkActivityIndicator {
-    private let lock: NSLock
-    private var activityVisibleCount: Int
+    fileprivate let lock: NSLock
+    fileprivate var activityVisibleCount: Int
 
     public init() {
         self.lock = NSLock()
@@ -34,14 +34,14 @@ public final class ApplicationNetworkActvityIndicator : NetworkActivityIndicator
     }
     
     deinit {
-        UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+        UIApplication.shared.isNetworkActivityIndicatorVisible = false
     }
 
     public func show() {
         lock.lock()
         
         if activityVisibleCount == 0 {
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
             activityVisibleCount = 1
         }
         else if activityVisibleCount < Int.max {
@@ -55,7 +55,7 @@ public final class ApplicationNetworkActvityIndicator : NetworkActivityIndicator
         lock.lock()
         
         if activityVisibleCount == 1 {
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
             activityVisibleCount = 0
         }
         else if activityVisibleCount > 0 {

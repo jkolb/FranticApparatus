@@ -22,6 +22,6 @@
  SOFTWARE.
  */
 
-public enum PromiseError : ErrorType {
-    case ObjectUnavailable
+public enum PromiseError : Error {
+    case objectDeallocated
 }

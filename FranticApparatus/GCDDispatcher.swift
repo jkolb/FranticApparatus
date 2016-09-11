@@ -25,17 +25,17 @@
 import Dispatch
 
 public final class GCDDispatcher : Dispatcher {
-    public let queue: dispatch_queue_t
+    public let queue: DispatchQueue
 
     public static func mainDispatcher() -> GCDDispatcher {
-        return GCDDispatcher(queue: dispatch_get_main_queue())
+        return GCDDispatcher(queue: DispatchQueue.main)
     }
     
-    public init(queue: dispatch_queue_t) {
+    public init(queue: DispatchQueue) {
         self.queue = queue
     }
     
-    public func dispatch(closure: () -> Void) {
-        dispatch_async(queue, closure)
+    public func dispatch(_ closure: @escaping () -> Void) {
+        queue.async(execute: closure)
     }
 }

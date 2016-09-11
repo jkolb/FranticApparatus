@@ -23,5 +23,5 @@
  */
 
 public protocol Dispatcher : class {
-    func dispatch(closure: () -> Void)
+    func dispatch(_ closure: @escaping () -> Void)
 }

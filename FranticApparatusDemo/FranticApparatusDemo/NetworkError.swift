@@ -24,10 +24,10 @@
 
 import Foundation
 
-public enum NetworkError : ErrorType {
-    case HighlyImprobable
-    case UnexpectedData(NSData)
-    case UnexpectedResponse(NSURLResponse)
-    case UnexpectedStatusCode(Int)
-    case UnexpectedContentType(String)
+public enum NetworkError : Error {
+    case highlyImprobable
+    case unexpectedData(Data)
+    case unexpectedResponse(URLResponse)
+    case unexpectedStatusCode(Int)
+    case unexpectedContentType(String)
 }

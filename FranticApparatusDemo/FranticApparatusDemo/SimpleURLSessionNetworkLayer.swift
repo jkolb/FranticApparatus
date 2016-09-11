@@ -26,30 +26,30 @@ import Foundation
 import FranticApparatus
 
 public final class SimpleURLSessionNetworkLayer : NetworkLayer {
-    private let session: NSURLSession
+    fileprivate let session: URLSession
     
     public init() {
-        let sessionConfiguration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        self.session = NSURLSession(configuration: sessionConfiguration)
+        let sessionConfiguration = URLSessionConfiguration.default
+        self.session = URLSession(configuration: sessionConfiguration)
     }
     
     deinit {
         session.invalidateAndCancel()
     }
     
-    public func requestData(request: NSURLRequest) -> Promise<(NSURLResponse, NSData)> {
-        return Promise<(NSURLResponse, NSData)> { (fulfill, reject, isCancelled) in
-            let dataTask = session.dataTaskWithRequest(request) { (data, response, error) in
+    public func requestData(_ request: URLRequest) -> Promise<(URLResponse, Data)> {
+        return Promise<(URLResponse, Data)> { (fulfill, reject, isCancelled) in
+            let dataTask = session.dataTask(with: request, completionHandler: { (data, response, error) in
                 if let error = error {
                     reject(error)
                 }
-                else if let data = data, response = response {
+                else if let data = data, let response = response {
                     fulfill((response, data))
                 }
                 else {
-                    reject(NetworkError.HighlyImprobable)
+                    reject(NetworkError.highlyImprobable)
                 }
-            }
+            }) 
             
             dataTask.resume()
         }

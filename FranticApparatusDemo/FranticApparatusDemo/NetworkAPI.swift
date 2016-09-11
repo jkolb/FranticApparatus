@@ -27,36 +27,36 @@ import FranticApparatus
 import UIKit
 
 public final class NetworkAPI {
-    private let networkLayer: NetworkLayer
-    private let dispatcher: Dispatcher
+    fileprivate let networkLayer: NetworkLayer
+    fileprivate let dispatcher: Dispatcher
     
     public init(dispatcher: Dispatcher, networkLayer: NetworkLayer) {
         self.dispatcher = dispatcher
         self.networkLayer = networkLayer
     }
     
-    public func requestJSONObjectForURL(url: NSURL) -> Promise<NSDictionary> {
-        return requestJSON(NSURLRequest(URL: url)).thenOn(dispatcher, withObject: self) { (api, data) -> Promise<NSDictionary> in
+    public func requestJSONObjectForURL(_ url: URL) -> Promise<NSDictionary> {
+        return requestJSON(URLRequest(url: url)).thenOn(dispatcher, withObject: self) { (api, data) -> Promise<NSDictionary> in
             return api.parseJSONData(data)
         }
     }
     
-    public func requestImageForURL(url: NSURL) -> Promise<UIImage> {
-        return requestImage(NSURLRequest(URL: url)).thenOn(dispatcher, withObject: self) { (api, data) -> Promise<UIImage> in
+    public func requestImageForURL(_ url: URL) -> Promise<UIImage> {
+        return requestImage(URLRequest(url: url)).thenOn(dispatcher, withObject: self) { (api, data) -> Promise<UIImage> in
             return api.parseImageData(data)
         }
     }
 
-    private func parseJSONData(data: NSData) -> Promise<NSDictionary> {
+    fileprivate func parseJSONData(_ data: Data) -> Promise<NSDictionary> {
         return Promise<NSDictionary> { (fulfill, reject, isCancelled) in
             do {
-                let object = try NSJSONSerialization.JSONObjectWithData(data, options: [])
+                let object = try JSONSerialization.jsonObject(with: data, options: [])
                 
                 if let dictionary = object as? NSDictionary {
                     fulfill(dictionary)
                 }
                 else {
-                    reject(NetworkError.UnexpectedData(data))
+                    reject(NetworkError.unexpectedData(data))
                 }
             }
             catch {
@@ -65,39 +65,39 @@ public final class NetworkAPI {
         }
     }
     
-    private func parseImageData(data: NSData) -> Promise<UIImage> {
+    fileprivate func parseImageData(_ data: Data) -> Promise<UIImage> {
         return Promise<UIImage> { (fulfill, reject, isCancelled) in
             if let image = UIImage(data: data) {
                 fulfill(image)
             }
             else {
-                reject(NetworkError.UnexpectedData(data))
+                reject(NetworkError.unexpectedData(data))
             }
         }
     }
     
-    private func requestJSON(request: NSURLRequest) -> Promise<NSData> {
+    fileprivate func requestJSON(_ request: URLRequest) -> Promise<Data> {
         return requestData(request, allowedStatusCodes: [200], allowedContentTypes: ["application/json"])
     }
 
-    private func requestImage(request: NSURLRequest) -> Promise<NSData> {
+    fileprivate func requestImage(_ request: URLRequest) -> Promise<Data> {
         return requestData(request, allowedStatusCodes: [200], allowedContentTypes: ["image/jpeg", "image/png"])
     }
     
-    private func requestData(request: NSURLRequest, allowedStatusCodes: [Int], allowedContentTypes: [String]) -> Promise<NSData> {
-        return networkLayer.requestData(request).thenOn(dispatcher) { (response, data) -> NSData in
-            guard let httpResponse = response as? NSHTTPURLResponse else {
-                throw NetworkError.UnexpectedResponse(response)
+    fileprivate func requestData(_ request: URLRequest, allowedStatusCodes: [Int], allowedContentTypes: [String]) -> Promise<Data> {
+        return networkLayer.requestData(request).thenOn(dispatcher) { (response, data) -> Data in
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw NetworkError.unexpectedResponse(response)
             }
             
             guard Set<Int>(allowedStatusCodes).contains(httpResponse.statusCode) else {
-                throw NetworkError.UnexpectedStatusCode(httpResponse.statusCode)
+                throw NetworkError.unexpectedStatusCode(httpResponse.statusCode)
             }
             
-            let contentType = httpResponse.MIMEType ?? ""
+            let contentType = httpResponse.mimeType ?? ""
             
             guard Set<String>(allowedContentTypes).contains(contentType) else {
-                throw NetworkError.UnexpectedContentType(contentType)
+                throw NetworkError.unexpectedContentType(contentType)
             }
             
             return data

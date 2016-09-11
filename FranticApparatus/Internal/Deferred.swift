@@ -22,10 +22,10 @@
  SOFTWARE.
  */
 
-final class Deferred<ValueType> {
-    private let pendingPromise: AnyObject?
-    var onFulfilled: [(ValueType) -> Void]
-    var onRejected: [(ErrorType) -> Void]
+final class Deferred<Value> {
+    fileprivate let pendingPromise: AnyObject?
+    var onFulfilled: [(Value) -> Void]
+    var onRejected: [(Error) -> Void]
     
     convenience init() {
         self.init(pendingPromise: nil, onFulfilled: [], onRejected: [])
@@ -35,11 +35,11 @@ final class Deferred<ValueType> {
         self.init(pendingPromise: pendingOn, onFulfilled: [], onRejected: [])
     }
     
-    convenience init<P>(pendingOn: Promise<P>, onFulfilled: [(ValueType) -> Void], onRejected: [(ErrorType) -> Void]) {
+    convenience init<P>(pendingOn: Promise<P>, onFulfilled: [(Value) -> Void], onRejected: [(Error) -> Void]) {
         self.init(pendingPromise: pendingOn, onFulfilled: onFulfilled, onRejected: onRejected)
     }
     
-    private init(pendingPromise: AnyObject?, onFulfilled: [(ValueType) -> Void], onRejected: [(ErrorType) -> Void]) {
+    fileprivate init(pendingPromise: AnyObject?, onFulfilled: [(Value) -> Void], onRejected: [(Error) -> Void]) {
         self.pendingPromise = pendingPromise
         self.onFulfilled = onFulfilled
         self.onRejected = onRejected

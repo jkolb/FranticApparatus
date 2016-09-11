@@ -22,8 +22,8 @@
  SOFTWARE.
  */
 
-enum State<ValueType> {
-    case Pending(Deferred<ValueType>)
-    case Fulfilled(ValueType)
-    case Rejected(ErrorType)
+enum State<Value> {
+    case pending(Deferred<Value>)
+    case fulfilled(Value)
+    case rejected(Error)
 }

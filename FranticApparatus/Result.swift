@@ -22,7 +22,7 @@
  SOFTWARE.
  */
 
-public enum Result<ValueType> {
-    case Value(ValueType)
-    case Defer(Promise<ValueType>)
+public enum Result<Value> {
+    case value(Value)
+    case promise(Promise<Value>)
 }
