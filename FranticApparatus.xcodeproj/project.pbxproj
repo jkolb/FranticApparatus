@@ -11,6 +11,7 @@
 		E55CA21719C676DC00E66980 /* FranticApparatus.h in Headers */ = {isa = PBXBuildFile; fileRef = E55CA21619C676DC00E66980 /* FranticApparatus.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E55CA21D19C676DC00E66980 /* FranticApparatus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55CA21119C676DC00E66980 /* FranticApparatus.framework */; };
 		E55CA22419C676DC00E66980 /* PromiseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55CA22319C676DC00E66980 /* PromiseTests.swift */; };
+		E5D7DF011D865C02008F6B72 /* PromiseMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5D7DF001D865C02008F6B72 /* PromiseMaker.swift */; };
 		E5DDB9971CDE4A2E0058FADE /* Dispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DDB9961CDE4A2E0058FADE /* Dispatcher.swift */; };
 		E5DDB9A31CDFDE1E0058FADE /* PromiseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DDB9A21CDFDE1E0058FADE /* PromiseError.swift */; };
 		E5DDB9A51CDFDE4A0058FADE /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DDB9A41CDFDE4A0058FADE /* Result.swift */; };
@@ -19,7 +20,6 @@
 		E5DDB9AC1CDFE1E80058FADE /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DDB9A91CDFE1E80058FADE /* State.swift */; };
 		E5DDB9AE1CDFED430058FADE /* GCDDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DDB9AD1CDFED430058FADE /* GCDDispatcher.swift */; };
 		E5DDB9B01CDFEDE40058FADE /* OperationDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DDB9AF1CDFEDE40058FADE /* OperationDispatcher.swift */; };
-		E5EA67A11D85BF66001ABD1D /* PromiseDispatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5608B8D1CE763A30040E140 /* PromiseDispatchContext.swift */; };
 		E5EA67A21D85BF69001ABD1D /* Thenable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5608B8F1CE76D380040E140 /* Thenable.swift */; };
 /* End PBXBuildFile section */
 
@@ -41,10 +41,10 @@
 		E55CA21C19C676DC00E66980 /* FranticApparatusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FranticApparatusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E55CA22219C676DC00E66980 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E55CA22319C676DC00E66980 /* PromiseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromiseTests.swift; sourceTree = "<group>"; };
-		E5608B8D1CE763A30040E140 /* PromiseDispatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseDispatchContext.swift; sourceTree = "<group>"; };
 		E5608B8F1CE76D380040E140 /* Thenable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Thenable.swift; sourceTree = "<group>"; };
 		E5C64A9B1C35E1DA00A3402D /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = SOURCE_ROOT; };
 		E5C64A9C1C35E1DA00A3402D /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
+		E5D7DF001D865C02008F6B72 /* PromiseMaker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseMaker.swift; sourceTree = "<group>"; };
 		E5DDB9961CDE4A2E0058FADE /* Dispatcher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dispatcher.swift; sourceTree = "<group>"; };
 		E5DDB9A21CDFDE1E0058FADE /* PromiseError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseError.swift; sourceTree = "<group>"; };
 		E5DDB9A41CDFDE4A0058FADE /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
@@ -106,8 +106,8 @@
 				E5DDB9A41CDFDE4A0058FADE /* Result.swift */,
 				E5DDB9AD1CDFED430058FADE /* GCDDispatcher.swift */,
 				E5DDB9AF1CDFEDE40058FADE /* OperationDispatcher.swift */,
-				E5608B8D1CE763A30040E140 /* PromiseDispatchContext.swift */,
 				E5608B8F1CE76D380040E140 /* Thenable.swift */,
+				E5D7DF001D865C02008F6B72 /* PromiseMaker.swift */,
 			);
 			path = FranticApparatus;
 			sourceTree = "<group>";
@@ -265,7 +265,7 @@
 				E5DDB9AA1CDFE1E80058FADE /* Lock.swift in Sources */,
 				E5DDB9B01CDFEDE40058FADE /* OperationDispatcher.swift in Sources */,
 				E5DDB9A51CDFDE4A0058FADE /* Result.swift in Sources */,
-				E5EA67A11D85BF66001ABD1D /* PromiseDispatchContext.swift in Sources */,
+				E5D7DF011D865C02008F6B72 /* PromiseMaker.swift in Sources */,
 				E5DDB9AC1CDFE1E80058FADE /* State.swift in Sources */,
 				E5DDB9AE1CDFED430058FADE /* GCDDispatcher.swift in Sources */,
 			);

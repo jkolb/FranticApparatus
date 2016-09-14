@@ -27,7 +27,7 @@ import Foundation
 public final class OperationDispatcher : Dispatcher {
     public let queue: OperationQueue
     
-    public static func mainDispatcher() -> OperationDispatcher {
+    public static var main: OperationDispatcher {
         return OperationDispatcher(queue: OperationQueue.main)
     }
     

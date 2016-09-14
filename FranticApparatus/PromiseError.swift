@@ -24,4 +24,5 @@
 
 public enum PromiseError : Error {
     case objectDeallocated
+    case contextDeallocated
 }

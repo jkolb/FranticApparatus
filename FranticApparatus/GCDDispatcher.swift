@@ -27,7 +27,7 @@ import Dispatch
 public final class GCDDispatcher : Dispatcher {
     public let queue: DispatchQueue
 
-    public static func mainDispatcher() -> GCDDispatcher {
+    public static var main: GCDDispatcher {
         return GCDDispatcher(queue: DispatchQueue.main)
     }
     

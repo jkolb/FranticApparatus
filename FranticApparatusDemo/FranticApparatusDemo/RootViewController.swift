@@ -51,7 +51,7 @@ class RootViewController : UIViewController {
         activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         activityIndicator.hidesWhenStopped = true
         
-        let networkLayer = ActivityNetworkLayer(dispatcher: GCDDispatcher.mainDispatcher(), networkLayer: SimpleURLSessionNetworkLayer(), networkActivityIndicator: ApplicationNetworkActvityIndicator())
+        let networkLayer = ActivityNetworkLayer(dispatcher: GCDDispatcher.main, networkLayer: SimpleURLSessionNetworkLayer(), networkActivityIndicator: ApplicationNetworkActvityIndicator())
         let networkDispatcher = OperationDispatcher(queue: OperationQueue())
         networkAPI = NetworkAPI(dispatcher: networkDispatcher, networkLayer: networkLayer)
     }
@@ -66,19 +66,20 @@ class RootViewController : UIViewController {
         let width = Int(view.bounds.width)
         let height = Int(view.bounds.height)
         let urlString = "https://placekitten.com/\(width)/\(height)"
-        let dataPromise = networkAPI.requestImageForURL(URL(string: urlString)!)
-        let dataPromiseContext = OperationDispatcher.mainDispatcher().asContextFor(dataPromise)
         
-        showActivity()
-        
-        promise = dataPromiseContext.thenWithObject(self, { (viewController, image) -> Void in
-            viewController.showImage(image)
-        }).handleWithObject(self, { (viewController, reason) -> Void in
-            viewController.showError(reason)
-        }).finallyWithObject(self, { (viewController) in
-            viewController.promise = nil
-            viewController.hideActivity()
-        }).promise
+        promise = PromiseMaker<UIImage>.makeUsing(dispatcher: OperationDispatcher.main) { (make) in
+            make {
+                self.showActivity()
+                return self.networkAPI.requestImageForURL(URL(string: urlString)!)
+            }.then { (image) in
+                self.showImage(image)
+            }.handle { (error) in
+                self.showError(error)
+            }.finally {
+                self.promise = nil
+                self.hideActivity()
+            }
+        }
     }
     
     func showActivity() {

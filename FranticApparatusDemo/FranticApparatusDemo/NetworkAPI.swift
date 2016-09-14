@@ -42,8 +42,12 @@ public final class NetworkAPI {
     }
     
     public func requestImageForURL(_ url: URL) -> Promise<UIImage> {
-        return requestImage(URLRequest(url: url)).thenOn(dispatcher, withObject: self) { (api, data) -> Promise<UIImage> in
-            return api.parseImageData(data)
+        return PromiseMaker<UIImage>.makeUsing(dispatcher: dispatcher) { (make) in
+            make {
+                return self.requestImage(URLRequest(url: url))
+            }.then { (data) in
+                return self.parseImageData(data)
+            }
         }
     }
 
