@@ -22,19 +22,20 @@
  SOFTWARE.
  */
 
-public final class PromiseMaker<Value> {
-    // Now I am become Death, the destroyer of worlds.
-    public static func makeUsing<InitialValue>(dispatcher: Dispatcher, builder: ((() -> Promise<InitialValue>) -> PromiseMaker<InitialValue>) -> PromiseMaker<Value>) -> Promise<Value> {
+public final class PromiseMaker<Context: AnyObject, Value> {
+    public static func makeUsing<InitialValue>(dispatcher: Dispatcher, context: Context, builder: (((Context) -> Promise<InitialValue>) -> PromiseMaker<Context, InitialValue>) -> PromiseMaker<Context, Value>) -> Promise<Value> {
         return builder { (initialBuilder) in
-            return PromiseMaker<InitialValue>(dispatcher: dispatcher, promise: initialBuilder())
+            return PromiseMaker<Context, InitialValue>(dispatcher: dispatcher, context: context, promise: initialBuilder(context))
         }.promise
     }
     
-    public let dispatcher: Dispatcher
-    public let promise: Promise<Value>
+    fileprivate let dispatcher: Dispatcher
+    fileprivate let context: Context
+    fileprivate let promise: Promise<Value>
     
-    public init(dispatcher: Dispatcher, promise: Promise<Value>) {
+    fileprivate init(dispatcher: Dispatcher, context: Context, promise: Promise<Value>) {
         self.dispatcher = dispatcher
+        self.context = context
         self.promise = promise
     }
     
@@ -42,15 +43,19 @@ public final class PromiseMaker<Value> {
         return promise.thenOn(dispatcher, onFulfilled: onFulfilled, onRejected: onRejected)
     }
     
-    fileprivate func then<ResultingValue>(onFulfilled: @escaping (Value) throws -> Result<ResultingValue>, onRejected: @escaping (Error) throws -> Result<ResultingValue>) -> PromiseMaker<ResultingValue> {
+    fileprivate func then<ResultingValue>(onFulfilled: @escaping (Value) throws -> Result<ResultingValue>, onRejected: @escaping (Error) throws -> Result<ResultingValue>) -> PromiseMaker<Context, ResultingValue> {
         let promise2 = promise.thenOn(dispatcher, onFulfilled: onFulfilled, onRejected: onRejected)
-        return PromiseMaker<ResultingValue>(dispatcher: dispatcher, promise: promise2)
+        return PromiseMaker<Context, ResultingValue>(dispatcher: dispatcher, context: context, promise: promise2)
     }
     
-    fileprivate func then<ResultingValue>(_ onFulfilled: @escaping (Value) throws -> Result<ResultingValue>) -> PromiseMaker<ResultingValue> {
+    public func then<ResultingValue>(_ onFulfilled: @escaping (Context, Value) throws -> Result<ResultingValue>) -> PromiseMaker<Context, ResultingValue> {
+        weak var context = self.context
+        
         return then(
             onFulfilled: { (value) throws -> Result<ResultingValue> in
-                return try onFulfilled(value)
+                guard let context = context else { throw PromiseError.contextDeallocated }
+                
+                return try onFulfilled(context, value)
             },
             onRejected: { (reason) throws -> Result<ResultingValue> in
                 throw reason
@@ -58,31 +63,31 @@ public final class PromiseMaker<Value> {
         )
     }
     
-    public func then(_ onFulfilled: @escaping (Value) throws -> Void) -> PromiseMaker<Value> {
-        return then { (value) throws -> Result<Value> in
-            try onFulfilled(value)
+    public func then(_ onFulfilled: @escaping (Context, Value) throws -> Void) -> PromiseMaker<Context, Value> {
+        return then { (context, value) throws -> Result<Value> in
+            try onFulfilled(context, value)
             
             return .value(value)
         }
     }
     
-    public func then<ResultingValue>(_ onFulfilled: @escaping (Value) throws -> ResultingValue) -> PromiseMaker<ResultingValue> {
-        return then { (value) throws -> Result<ResultingValue> in
-            let result = try onFulfilled(value)
+    public func then<ResultingValue>(_ onFulfilled: @escaping (Context, Value) throws -> ResultingValue) -> PromiseMaker<Context, ResultingValue> {
+        return then { (context, value) throws -> Result<ResultingValue> in
+            let result = try onFulfilled(context, value)
             
             return .value(result)
         }
     }
 
-    public func then<ResultingValue>(_ onFulfilled: @escaping (Value) throws -> Promise<ResultingValue>) -> PromiseMaker<ResultingValue> {
-        return then { (value) throws -> Result<ResultingValue> in
-            let result = try onFulfilled(value)
+    public func then<ResultingValue>(_ onFulfilled: @escaping (Context, Value) throws -> Promise<ResultingValue>) -> PromiseMaker<Context, ResultingValue> {
+        return then { (context, value) throws -> Result<ResultingValue> in
+            let result = try onFulfilled(context, value)
             
             return .promise(result)
         }
     }
     
-    fileprivate func handle(_ onRejected: @escaping (Error) throws -> Result<Value>) -> PromiseMaker<Value> {
+    fileprivate func handle(_ onRejected: @escaping (Error) throws -> Result<Value>) -> PromiseMaker<Context, Value> {
         return then(
             onFulfilled: { (value) throws -> Result<Value> in
                 return .value(value)
@@ -95,7 +100,7 @@ public final class PromiseMaker<Value> {
         )
     }
     
-    public func handle(_ onRejected: @escaping (Error) throws -> Void) -> PromiseMaker<Value> {
+    public func handle(_ onRejected: @escaping (Error) throws -> Void) -> PromiseMaker<Context, Value> {
         return handle { (reason) throws -> Result<Value> in
             try onRejected(reason)
             
@@ -103,7 +108,7 @@ public final class PromiseMaker<Value> {
         }
     }
     
-    public func handle(_ onRejected: @escaping (Error) throws -> Value) -> PromiseMaker<Value> {
+    public func handle(_ onRejected: @escaping (Error) throws -> Value) -> PromiseMaker<Context, Value> {
         return handle { (reason) throws -> Result<Value> in
             let result = try onRejected(reason)
             
@@ -111,7 +116,7 @@ public final class PromiseMaker<Value> {
         }
     }
     
-    public func handle(_ onRejected: @escaping (Error) throws -> Promise<Value>) -> PromiseMaker<Value> {
+    public func handle(_ onRejected: @escaping (Error) throws -> Promise<Value>) -> PromiseMaker<Context, Value> {
         return handle { (reason) throws -> Result<Value> in
             let result = try onRejected(reason)
             
@@ -119,7 +124,7 @@ public final class PromiseMaker<Value> {
         }
     }
     
-    public func finally(_ onFinally: @escaping () -> Void) -> PromiseMaker<Value> {
+    public func finally(_ onFinally: @escaping () -> Void) -> PromiseMaker<Context, Value> {
         return then(
             onFulfilled: { (value) throws -> Result<Value> in
                 onFinally()

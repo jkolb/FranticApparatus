@@ -67,12 +67,12 @@ class RootViewController : UIViewController {
         let height = Int(view.bounds.height)
         let urlString = "https://placekitten.com/\(width)/\(height)"
         
-        promise = PromiseMaker<UIImage>.makeUsing(dispatcher: OperationDispatcher.main) { (make) in
-            make {
-                self.showActivity()
-                return self.networkAPI.requestImageForURL(URL(string: urlString)!)
-            }.then { (image) in
-                self.showImage(image)
+        promise = PromiseMaker<RootViewController, UIImage>.makeUsing(dispatcher: OperationDispatcher.main, context: self) { (make) in
+            make { (context) in
+                context.showActivity()
+                return context.networkAPI.requestImageForURL(URL(string: urlString)!)
+            }.then { (context, image) in
+                context.showImage(image)
             }.handle { (error) in
                 self.showError(error)
             }.finally {
