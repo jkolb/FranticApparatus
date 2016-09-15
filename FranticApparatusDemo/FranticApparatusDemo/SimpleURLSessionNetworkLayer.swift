@@ -37,14 +37,14 @@ public final class SimpleURLSessionNetworkLayer : NetworkLayer {
         session.invalidateAndCancel()
     }
     
-    public func requestData(_ request: URLRequest) -> Promise<(URLResponse, Data)> {
-        return Promise<(URLResponse, Data)> { (fulfill, reject, isCancelled) in
+    public func requestData(_ request: URLRequest) -> Promise<NetworkResult> {
+        return Promise<NetworkResult> { (fulfill, reject, isCancelled) in
             let dataTask = session.dataTask(with: request, completionHandler: { (data, response, error) in
                 if let error = error {
                     reject(error)
                 }
                 else if let data = data, let response = response {
-                    fulfill((response, data))
+                    fulfill(NetworkResult(response: response, data: data))
                 }
                 else {
                     reject(NetworkError.highlyImprobable)

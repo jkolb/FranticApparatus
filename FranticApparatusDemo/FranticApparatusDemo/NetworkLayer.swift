@@ -25,6 +25,11 @@
 import Foundation
 import FranticApparatus
 
+public struct NetworkResult {
+    public let response: URLResponse
+    public let data: Data
+}
+
 public protocol NetworkLayer : class {
-    func requestData(_ request: URLRequest) -> Promise<(URLResponse, Data)>
+    func requestData(_ request: URLRequest) -> Promise<NetworkResult>
 }

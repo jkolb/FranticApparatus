@@ -36,16 +36,20 @@ public final class NetworkAPI {
     }
     
     public func requestJSONObjectForURL(_ url: URL) -> Promise<NSDictionary> {
-        return requestJSON(URLRequest(url: url)).thenOn(dispatcher, withObject: self) { (api, data) -> Promise<NSDictionary> in
-            return api.parseJSONData(data)
+        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (make) in
+            make { (context) in
+               return context.requestJSON(URLRequest(url: url))
+            }.thenPromise { (context, data) in
+                return context.parseJSONData(data)
+            }
         }
     }
     
     public func requestImageForURL(_ url: URL) -> Promise<UIImage> {
-        return PromiseMaker<NetworkAPI, UIImage>.makeUsing(dispatcher: dispatcher, context: self) { (make) in
+        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (make) in
             make { (context) in
                 return context.requestImage(URLRequest(url: url))
-            }.then { (context, data) in
+            }.thenPromise { (context, data) in
                 return context.parseImageData(data)
             }
         }
@@ -89,22 +93,26 @@ public final class NetworkAPI {
     }
     
     fileprivate func requestData(_ request: URLRequest, allowedStatusCodes: [Int], allowedContentTypes: [String]) -> Promise<Data> {
-        return networkLayer.requestData(request).thenOn(dispatcher) { (response, data) -> Data in
-            guard let httpResponse = response as? HTTPURLResponse else {
-                throw NetworkError.unexpectedResponse(response)
+        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (make) in
+            make { (context) in
+                return context.networkLayer.requestData(request)
+            }.thenTransform { (context, result) in
+                guard let httpResponse = result.response as? HTTPURLResponse else {
+                    throw NetworkError.unexpectedResponse(result.response)
+                }
+                
+                guard Set<Int>(allowedStatusCodes).contains(httpResponse.statusCode) else {
+                    throw NetworkError.unexpectedStatusCode(httpResponse.statusCode)
+                }
+                
+                let contentType = httpResponse.mimeType ?? ""
+                
+                guard Set<String>(allowedContentTypes).contains(contentType) else {
+                    throw NetworkError.unexpectedContentType(contentType)
+                }
+                
+                return result.data
             }
-            
-            guard Set<Int>(allowedStatusCodes).contains(httpResponse.statusCode) else {
-                throw NetworkError.unexpectedStatusCode(httpResponse.statusCode)
-            }
-            
-            let contentType = httpResponse.mimeType ?? ""
-            
-            guard Set<String>(allowedContentTypes).contains(contentType) else {
-                throw NetworkError.unexpectedContentType(contentType)
-            }
-            
-            return data
         }
     }
 }

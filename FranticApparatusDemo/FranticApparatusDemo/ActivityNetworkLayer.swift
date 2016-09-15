@@ -36,11 +36,14 @@ public final class ActivityNetworkLayer : NetworkLayer {
         self.networkActivityIndicator = networkActivityIndicator
     }
     
-    public func requestData(_ request: URLRequest) -> Promise<(URLResponse, Data)> {
-        networkActivityIndicator.show()
-        
-        return networkLayer.requestData(request).finallyOn(dispatcher, withObject: self) { (layer) in
-            layer.networkActivityIndicator.hide()
+    public func requestData(_ request: URLRequest) -> Promise<NetworkResult> {
+        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (make) in
+            make { (context) in
+                context.networkActivityIndicator.show()
+                return context.networkLayer.requestData(request)
+            }.finally { (context) in
+                context.networkActivityIndicator.hide()
+            }
         }
     }
 }

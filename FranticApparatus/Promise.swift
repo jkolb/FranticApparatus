@@ -37,7 +37,7 @@ public final class Promise<Value> : Thenable {
         promise(weakifyFulfill(), weakifyReject(), isCancelled)
     }
     
-    public func thenOn<ResultingValue>(_ dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> Result<ResultingValue>, onRejected: @escaping (Error) throws -> Result<ResultingValue>) -> Promise<ResultingValue> {
+    public func then<ResultingValue>(on dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> Result<ResultingValue>, onRejected: @escaping (Error) throws -> Result<ResultingValue>) -> Promise<ResultingValue> {
         return Promise<ResultingValue>(pendingOn: self) { (resolve, reject) in
             self.onResolve(
                 fulfill: { (value) in
