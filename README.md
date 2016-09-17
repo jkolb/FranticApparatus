@@ -4,6 +4,14 @@
 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
+## Changes for 6.0.0
+
+* Syntax updated for Swift 3.
+* Replaced `PromiseDispatchContext` with `PromiseMaker`.
+* Renamed all of the promise helper methods. This was done partly to appease the Swift compiler and partly to make creating promises easier to read.
+* Updated the demo to load multiple images into a collection view using promises.
+* See documentation below for more details on the changes.
+
 ## Changes for 5.0.0
 
 * Attempted to simplify and make the implementation as readable and consistent as possible.
@@ -119,27 +127,36 @@ Then the usage would look something like this:
 Here is the same example assuming that there are three methods that return promises to download, parse, and map the data similar to the above methods that just take callbacks:
 
     func fetch(url: NSURL) -> Promise<DataModel> {
-        return self.download(url).thenWithContext(self, { (strongSelf, data) -> Promise<NSDictionary> in
-            return strongSelf.parseJSON(data)
-        }).thenWithContext(self, { (strongSelf, json) -> Promise<DataModel> in
-            return strongSelf.mapDataModel(json)
-        })
+        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (makePromise) in
+            makePromise { (context) in
+                return context.download(url)
+            }.whenFulfilledThenPromise { (context, data) in
+                return context.parseJSONData(data)
+            }.whenFulfilledThenPromise { (context, json) in
+                return context.mapDataModel(json)
+            }
+        }
     }
 
 And again how it would be used:
 
-    self.showActivityIndicator()
-        
-    self.promise = self.fetch(NSURL(string: "http://example.com/datamodel.json")).thenWithContext(self, { (strongSelf, dataModel) -> Void in
-		strongSelf.displayDataModel(dataModel)
-    }).handleWithContext(self, { (strongSelf, error) -> Void in
-		strongSelf.displayError(error)
-    }).finallyWithContext(self, { (strongSelf) -> Void in
-        strongSelf.hideActivityIndicator()
-        strongSelf.promise = nil
-    })
+    let url = NSURL(string: "http://example.com/datamodel.json")!
 
-Note the missing rightward drift of the nested callbacks and also the small amount of error handling code. Also as a convenience to aid in thread safety most of the methods in FranticApparatus have a special form that turns the first parameter into a weak reference and then when the block is executed provides you with a strong reference inside the closure. If the reference becomes nil the body of the closure will not execute preventing a common source of bugs. Additionally this saves you from writing extra boiler plate memory management code in all of your closures.
+    self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+        makePromise { (context) in
+            context.showActivityIndicator()
+            return context.fetch(url: url)
+        }.whenFulfilled { (context, dataModel) in
+            context.displayDataModel(dataModel)
+        }.whenRejected { (context, reason) in
+            context.displayError(reason)
+        }.whenComplete { (context) in
+            context.hideActivityIndicator()
+            context.promise = nil
+        }
+    }
+
+Note the missing rightward drift of the nested callbacks and also the small amount of error handling code. Also as a convenience to aid in thread safety PromiseMaker takes a context parameter, turns it into a weak reference, and then when the blocks are executed a strong reference is passed into them as the first paramter. If the context reference becomes nil the body of the closure will not execute preventing a common source of bugs. Additionally this saves you from writing extra boiler plate memory management code in all of your closures.
 
 ## What is going on here?
 
@@ -147,7 +164,7 @@ The `fetch` method is building a promise that represents a `DataModel` value tha
 
 In the same vein, if there is a problem calculating the value, the promise will be rejected and the `onRejected` callback will be triggered instead. Once a promise is rejected it will stay that way and also multiple objects can receive the same rejection notice as long as each object calls `then` on the same promise instance*.
 
-In the example above a shortcut `then` method is used in place of `then`. This version of the `then` method is a convenience that calls the normal `then` behind the scenes and allows you to just provide a callback for `onFulfilled`. It also creates an `onRejected` callback but its implementation effectively just forwards any errors on to the next promise in the chain of promises (if any). The `handle` method does the opposite, as it allows you to provide an `onRejected` callback while forwarding on any fulfilled values to the next promise in the chain. Lastly the `finally` method generates implementations of both `onFulfilled` and `onRejected` that foward on the values but also gives you a way to execute the same block no matter if the promise is rejected or fulfilled.
+In the example above a shortcut `whenFulfilled` method is used in place of `then`. This version of the `then` method is a convenience that calls the normal `then` behind the scenes and allows you to just provide a callback for `onFulfilled`. It also creates an `onRejected` callback but its implementation effectively just forwards any errors on to the next promise in the chain of promises (if any). The `whenRejected` method does the opposite, as it allows you to provide an `onRejected` callback while forwarding on any fulfilled values to the next promise in the chain. Lastly the `whenComplete` method generates implementations of both `onFulfilled` and `onRejected` that foward on the values but also gives you a way to execute the same block no matter if the promise is rejected or fulfilled.
 
 **There are some details of the memory management this entails that will be covered later*
 
@@ -159,43 +176,132 @@ On that note, for multiple objects to call `then` on the same promise, they all 
 
 ## Is there more to it than this?
 
-Not covered yet is how a chain of promises, that each return a specific data type, work together to generate a final different data type value. This can be seen in the `fetch` example above where the initial promise returns `NSData`, which then becomes `NSDictionary`, and then finally an instance of `DataModel`. The trick to this is the type of result that is returned from inside the `onFulfilled` or `onRejected` callback. No matter if a promise is fulfilled or rejected, three types of results can be returned which are then passed on to the next promise in the chain. Having all three types available in both callbacks allows you to transform the result from one promise before it is passed to the next.
+Not covered yet is how a chain of promises, that each return a specific data type, work together to generate a final different data type value. This can be seen in the `fetch` example above where the initial promise returns `Data`, which then becomes `Dictionary`, and then finally an instance of `DataModel`. The trick to this is the type of result that is returned from inside the `onFulfilled` or `onRejected` callback. No matter if a promise is fulfilled or rejected, three types of results can be generated (a value, a promise, or a thrown error) which are then passed on to the next promise in the chain. Having all three types available in both callbacks allows you to transform the result from one promise before it is passed to the next.
 
-For example in an `onRejected` callback you could check the error that was generated, and if it matches a certain type of error return a result that represents a valid default value, otherwise just return the original error result. The next promise will either fulfill if the default value is returned or reject if the original error is returned. Another example is taking the original value passed into `onFulfilled` and then extracting one part of it or mapping it to another type of object and then returning that instead. Additionally you could determine that a certain range of values could be considered an error and return an error result instead which would cause any chained promises to reject with that error.
+For example in an `onRejected` callback you could check the error that was thrown, and if it matches a certain type of error return a result that represents a valid default value, otherwise just rethrow the original error. The next promise will either fulfill if the default value is returned or reject if the original error is thrown. Another example is taking the original value passed into `onFulfilled` and then extracting one part of it or mapping it to another type of object and then returning that instead. Additionally you could determine that a certain range of values could be considered an error and throw instead which would cause any chained promises to reject with that error.
 
-Lastly we come to the most powerful type of result, instead of returning a value or an error, returning a promise instead. When you return a promise in the `onFulfilled` or `onRejected` callbacks you are saying that the chain of promises will not be fulfilled until this new promise is fulfilled. Then when it does fulfill the result it generates (value, error, or proimse) will be used to continue the chain. This is exactly how the `fetch` method is implemented.
+Lastly we come to the most powerful type of result, instead of returning a value or an throwing an error, returning a promise instead. When you return a promise in the `onFulfilled` or `onRejected` callbacks you are saying that the chain of promises will not be fulfilled until this new promise is fulfilled. Then when it does fulfill the result it generates (value, error, or proimse) will be used to continue the chain. This is exactly how the `fetch` method is implemented.
 
 
 ## How do I make my own promises?
 
-#### A promise that returns an NSDictionary from JSON data.
+#### A promise that parse JSON data on a background queue. 
 
-    enum ParseError : ErrorType {
-		case UnexpectedJSON
-	}
-	
-	func parseJSON(data: NSData, options: NSJSONReadingOptions = []) -> Promise<NSDictionary> {
-        return Promise<NSDictionary> { (fulfill, reject, isCancelled) -> Void in
-			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-				do {
-					let value: AnyObject? = try NSJSONSerialization.JSONObjectWithData(data, options: options)
-					
-					if let dictionary = value as? NSDictionary {
-						fulfill(dictionary)
-					} else {
-						reject(ParseError.UnexpectedJSON)
-					}
-				}
-				catch {
-					reject(error)
-				}
-        	}
-		}
+    func parseJSONData(_ data: Data) -> Promise<NSDictionary> {
+        return Promise<NSDictionary> { (fulfill, reject, isCancelled) in
+            queue.async {
+                do {
+                    let object = try JSONSerialization.jsonObject(with: data, options: [])
+
+                    if let dictionary = object as? NSDictionary {
+                        fulfill(dictionary)
+                    }
+                    else {
+                        reject(NetworkError.unexpectedData(data))
+                    }
+                }
+                catch {
+                    reject(error)
+                }
+            }
+        }
     }
 
-When you make a promise you pass in a closure to the initiailizer representing the work required to generate the promise's value. At the end of the promise initiaizer it will execute this closure and pass in three closures to it as parameters: `fulfill`, `reject`, and `isCancelled`. These parameters allow the closure doing the work to safely interact with the promise without worrying about memory management or keeping up with a separate reference to the promise instance. To be most useful any work required to calculate the result of the promise should be done on a separate thread. In this case we are using Grand Central Dispatch to execute a block on a global queue using a helper class from FranticApparatus.
+When you make a promise you pass in a closure to the initiailizer representing the work required to generate the promise's value. At the end of the promise initiaizer it will execute this closure and pass in three closures to it as parameters: `fulfill`, `reject`, and `isCancelled`. These parameters allow the closure doing the work to safely interact with the promise without worrying about memory management or keeping up with a separate reference to the promise instance. To be most useful any work required to calculate the result of the promise should be done on a separate thread.
 
 When the work to calculate the value is complete the original promise can be fulfilled by calling `fulfill` and passing in the generated value. If there is an error whie generating the value you can call `reject` instead passing in an instance of an object that coforms to the Swift 2 protocol `ErrorType`. If the work required to do the calculation is long and has multiple sections of complex logic you can intersperse that logic with calls to `isCancelled()` so you can detect as early as you can if the promise associated with the work has been deinitialized and exit early if it makes sense to do so. If the promise has already been deinitialized it is still safe to call `fulfill`, `reject`, and `isCancelled` as they are written to be safe in this use case.
+
+## PromiseMaker
+
+#### Using `PromiseMaker` to simplify chaining promises together to form more powerful promises.
+
+`PromiseMaker` was designed to make writing and reading promises easier. It helps simplify the calls to chain promises using the `then` method by keeping track of a common `Dispatcher` that will be used by the entire chain and by keeping a context variable around that can be safely used in each of the chained promises. There is also the `Thenable` protocol which provides some helper methods when not making use of `PromiseMaker`. So a chain of promises just using `then` would look like this:
+
+    self.promise = promiseSomething().then(
+        on: GCDDispatcher.main,
+        onFulfilled: { [weak self] (value) in
+            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
+            
+            strongSelf.displayValue(value)
+            return .value(value) // Manually continue the chain
+        }
+        onRejected: { [weak self] (reason) in
+            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
+            
+            strongSelf.displayError(reason)
+            throw reason // Manually continue the chain
+        }
+    ).then(
+        on: GCDDispatcher.main,
+        onFulfilled: { [weak self] (value) in
+            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
+
+            strongSelf.promise = nil
+            return .value(value) // Manually continue the chain
+        }
+        onRejected: { [weak self] (reason) in
+            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
+
+            strongSelf.promise = nil
+            throw reason // Manually continue the chain
+        }
+    )
+
+When using `Thenable` helpers would look like this:
+
+        self.promise = promiseSomething().whenFulfilled(on: GCDDispatcher.main) { [weak self] (value) in
+            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
+
+            strongSelf.displayValue(value)
+        }.whenRejected(on: GCDDispatcher.main) { [weak self] (value) in
+            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
+
+            strongSelf.displayError(reason)
+        }.whenComplete(on: GCDDispatcher.main) { [weak self] in
+            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
+
+            strongSelf.promise = nil
+        }
+
+When using `PromiseMaker` would look like this:
+
+    self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+        makeProimise { (context) in
+            return context.promiseSomething()
+        }.whenFullfilled { (context, value) in
+            context.displayValue(value)
+        }.whenRejected { (context, reason) in
+            context.displayError(reason)
+        }.whenComplete { (context) in
+            context.promise = nil
+        }
+    }
+
+`PromiseMaker.makeUsing` takes a `dispatcher` parameter as its first argument but defaults to `GCDDispatcher.main` when not specified.
+
+The helpers in `Thenable` and `PromiseMaker` both follow the same naming scheme. The only real difference between them is that `Thenable` requires the `Dispatcher` to be specified and does not provide a `context`. The names also help the Swift compiler diferentiate between them, if they were named the same (as they were in the past) the return value would be the only distinguishing item and is usually not enough for the compiler to pick one which generates a compile error. The naming of the methods and what they are useful for is as follows:
+
+`whenFulfilled` - Use this when you would like to perform an action when a promise succeeds. Any error thrown will cause the next promise in the chain to be rejected, otherwise the original value will be automatically passed along for you.
+
+`whenFulfilledThenTransform` - Use this when you would like to transform the value of a successful promise before passing it onto the next part of the promise chain. Any error thrown will cause the next promise in the chain to be rejected.
+
+`whenFulfilledThenPromise` - Use this when you would like to wait for a promise to complete and then use the value in creating another promise. Any error thrown will cause the next promise in the chain to be rejected.
+
+`whenFulfilledThenMap` - Lastly use this to either transform the value into another value or to generate a promise from the value. To indicate you are returning a value use `return .value(transformedValue)` otherwise to indicate you are returning a promise use `return .promise(yourGeneratedPromise)`. Any error thrown will cause the next promise in the chain to be rejected.
+
+`whenRejected` - Use this when you would like to perform an action when a promise fails. The error will be automatically passed on to the next promise in the chain.
+
+`whenRejectedThenTransform` - Use this when you would like to transform the error of a failed promise into a value before passing onto the next part of the promise chain. You can also rethrow the original or a new error to continue the chain.
+
+`whenRejectedThenPromise` - Use this when you would like to make a different promise when the promise fails. You can also rethrow the original or a new error to continue the chain.
+
+`whenFulfilledThenMap` - Lastly use this to either transform the error into a value or to generate a promise to handle the error. To indicate you are returning a value use `return .value(transformedValue)` otherwise to indicate you are returning a promise use `return .promise(yourGeneratedPromise)`. You can also rethrow the original or a new error to continue the chain.
+
+`whenComplete` - Use this when you don't care if the prevous promise succeeded or failed but you want to perform an action either way. The original value or error will be passed along to the next promise in the chain.
+
+#### A note on the ordering of methods.
+
+Generally you want `whenRejected` to always be after a call to `whenFulfilled`, this is because `whenFulfilled` can throw errors and they will be silently passed along the chain unless there is another `whenRejected` later on to catch it. Also it is preferable to not throw errors from `whenComplete` and to make it the last in the chain. It will perform an action on both success and failure but will not gain access to the reason for failure. The demo does use a `whenComplete` in the middle of a chain, but any errors it could generate will be caught by the `whenRejected` handler that comes later on in the `RootViewController`.
 
 ## Contact
 

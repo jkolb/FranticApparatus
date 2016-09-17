@@ -57,29 +57,33 @@ public final class NetworkAPI {
 
     fileprivate func parseJSONData(_ data: Data) -> Promise<NSDictionary> {
         return Promise<NSDictionary> { (fulfill, reject, isCancelled) in
-            do {
-                let object = try JSONSerialization.jsonObject(with: data, options: [])
-                
-                if let dictionary = object as? NSDictionary {
-                    fulfill(dictionary)
+            dispatcher.dispatch {
+                do {
+                    let object = try JSONSerialization.jsonObject(with: data, options: [])
+                    
+                    if let dictionary = object as? NSDictionary {
+                        fulfill(dictionary)
+                    }
+                    else {
+                        reject(NetworkError.unexpectedData(data))
+                    }
                 }
-                else {
-                    reject(NetworkError.unexpectedData(data))
+                catch {
+                    reject(error)
                 }
-            }
-            catch {
-                reject(error)
             }
         }
     }
     
     fileprivate func parseImageData(_ data: Data) -> Promise<UIImage> {
         return Promise<UIImage> { (fulfill, reject, isCancelled) in
-            if let image = UIImage(data: data) {
-                fulfill(image)
-            }
-            else {
-                reject(NetworkError.unexpectedData(data))
+            dispatcher.dispatch {
+                if let image = UIImage(data: data) {
+                    fulfill(image)
+                }
+                else {
+                    reject(NetworkError.unexpectedData(data))
+                }
             }
         }
     }
