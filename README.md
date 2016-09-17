@@ -1,12 +1,32 @@
-# FranticApparatus 5.0.0
-
-#### A thread safe, type safe, and memory safe [Promises/A+](https://promisesaplus.com) implementation for Swift 2.2
-
+# FranticApparatus 6.0.0 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+
+#### A thread safe, type safe, and memory safe [Promises/A+](https://promisesaplus.com) implementation for Swift 3
+
+Promises provide a way to make it easier to read and write chains of dependent asynchronous code. Here is a simple example of how much better asynchronous code looks using FranticApparatus:
+
+    let url = NSURL(string: "http://example.com/image.png")!
+
+    self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+        makePromise { (context) in
+            context.showActivityIndicator()
+            return context.fetchImage(url: url)
+        }.whenFulfilled { (context, image) in
+            context.showImage(image)
+        }.whenRejected { (context, reason) in
+            context.showPlaceholderImage()
+        }.whenComplete { (context) in
+            context.hideActivityIndicator()
+            context.promise = nil
+        }
+    }
+
+See the Demo for examples of how to make promises to fetch a set of images over the network using promises and display them in a `UICollectionView`.
 
 ## Changes for 6.0.0
 
 * Syntax updated for Swift 3.
+* Initial Swift Package Manager support.
 * Replaced `PromiseDispatchContext` with `PromiseMaker`.
 * Renamed all of the promise helper methods. This was done partly to appease the Swift compiler and partly to make creating promises easier to read.
 * Updated the demo to load multiple images into a collection view using promises.
@@ -156,7 +176,7 @@ And again how it would be used:
         }
     }
 
-Note the missing rightward drift of the nested callbacks and also the small amount of error handling code. Also as a convenience to aid in thread safety PromiseMaker takes a context parameter, turns it into a weak reference, and then when the blocks are executed a strong reference is passed into them as the first paramter. If the context reference becomes nil the body of the closure will not execute preventing a common source of bugs. Additionally this saves you from writing extra boiler plate memory management code in all of your closures.
+Note the missing rightward drift of the nested callbacks and also the small amount of error handling code. Also as a convenience to aid in thread safety `PromiseMaker` takes a context parameter, turns it into a weak reference, and then when the blocks are executed a strong reference is passed into them as the first paramter. If the context reference becomes nil the body of the closure will not execute preventing a common source of bugs. Additionally this saves you from writing extra boiler plate memory management code in all of your closures.
 
 ## What is going on here?
 
