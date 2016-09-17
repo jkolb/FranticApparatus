@@ -25,83 +25,85 @@
 import UIKit
 import FranticApparatus
 
-class RootViewController : UIViewController {
+class RootViewController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     var networkAPI: NetworkAPI!
-    var promise: Promise<UIImage>!
-    var imageView: UIImageView!
-    var activityIndicator: UIActivityIndicatorView!
-    
-    override func loadView() {
-        imageView = UIImageView()
-        view = imageView
-    }
+    var collectionView: UICollectionView!
+    var models = [
+        ImageModel(width: 125, height: 100, url: URL(string: "https://placekitten.com/100/100")!),
+        ImageModel(width: 125, height: 100, url: URL(string: "https://placebear.com/100/100")!),
+        ImageModel(width: 125, height: 100, url: URL(string: "https://placekitten.com/AA/BB")!),
+        ImageModel(width: 125, height: 100, url: URL(string: "https://google.com")!),
+        ImageModel(width: 125, height: 100, url: URL(string: "https://placehold.it/100x100")!),
+        ImageModel(width: 125, height: 125, url: URL(string: "https://placekitten.com/125/125")!),
+        ImageModel(width: 125, height: 125, url: URL(string: "https://placebear.com/125/125")!),
+        ImageModel(width: 125, height: 100, url: URL(string: "https://upload.wikimedia.org/wikipedia/commons/d/d0/Test_animation.gif")!),
+    ]
+    var images = [IndexPath : UIImage](minimumCapacity: 8)
+    var errors = [IndexPath : Error](minimumCapacity: 8)
+    var promises = [IndexPath : Promise<UIImage>](minimumCapacity: 8)
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = UIColor.white
-        view.contentMode = .scaleAspectFit
         
-        activityIndicator = UIActivityIndicatorView()
-        activityIndicator.color = UIColor.black
-        view.addSubview(activityIndicator)
-        
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        activityIndicator.hidesWhenStopped = true
+        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: UICollectionViewFlowLayout())
+        collectionView.backgroundColor = view.backgroundColor
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(ImageCell.self, forCellWithReuseIdentifier: "imageCell")
+
+        view.addSubview(collectionView)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor).isActive = true
+        collectionView.bottomAnchor.constraint(equalTo: bottomLayoutGuide.topAnchor).isActive = true
+        collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         
         let networkLayer = ActivityNetworkLayer(dispatcher: GCDDispatcher.main, networkLayer: SimpleURLSessionNetworkLayer(), networkActivityIndicator: ApplicationNetworkActvityIndicator())
         let networkDispatcher = OperationDispatcher(queue: OperationQueue())
         networkAPI = NetworkAPI(dispatcher: networkDispatcher, networkLayer: networkLayer)
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    func loadImage(at indexPath: IndexPath) {
+        let model = models[indexPath.item]
         
-        loadData()
-    }
-    
-    func loadData() {
-        let width = Int(view.bounds.width)
-        let height = Int(view.bounds.height)
-        let urlString = "https://placekitten.com/\(width)/\(height)"
-        
-        promise = PromiseMaker.makeUsing(dispatcher: OperationDispatcher.main, context: self) { (make) in
-            make { (context) in
-                context.showActivity()
-                return context.networkAPI.requestImageForURL(URL(string: urlString)!)
-            }.then { (context, image) in
-                context.showImage(image)
-            }.catch { (context, error) in
-                context.showError(error)
-            }.finally { (context) in
-                context.promise = nil
-                context.hideActivity()
+        promises[indexPath] = PromiseMaker.makeUsing(context: self) { (makePromise) in
+            makePromise { (context) in
+                return context.networkAPI.requestImageForURL(model.url)
+            }.whenFulfilled { (context, image) in
+                context.images[indexPath] = image
+                context.showImage(at: indexPath)
+            }.whenRejected { (context, reason) in
+                context.errors[indexPath] = reason
+                context.showError(at: indexPath)
+            }.whenComplete { (context) in
+                context.promises[indexPath] = nil
             }
         }
     }
     
-    func showActivity() {
-        activityIndicator.startAnimating()
+    func showImage(at indexPath: IndexPath) {
+        if let cell = collectionView.cellForItem(at: indexPath) as? ImageCell {
+            cell.hideActivity()
+            cell.image = images[indexPath]
+        }
     }
     
-    func hideActivity() {
-        activityIndicator.stopAnimating()
+    func showError(at indexPath: IndexPath) {
+        if let cell = collectionView.cellForItem(at: indexPath) as? ImageCell {
+            cell.hideActivity()
+            
+            if let error = errors[indexPath] {
+                cell.error = messageFor(error: error)
+            }
+            else {
+                cell.error = nil
+            }
+        }
     }
     
-    func showImage(_ image: UIImage) {
-        imageView.image = image
-    }
-    
-    func showError(_ error: Error) {
-        let alert = UIAlertController(title: "Error", message: messageForError(error), preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-        alert.addAction(okAction)
-        present(alert, animated: true, completion: nil)
-    }
-    
-    func messageForError(_ error: Error) -> String {
+    func messageFor(error: Error) -> String {
         switch error {
         case let networkError as NetworkError:
             switch networkError {
@@ -121,5 +123,40 @@ class RootViewController : UIViewController {
         default:
             return "Unknown error"
         }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return models.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "imageCell", for: indexPath) as? ImageCell {
+            if let image = images[indexPath] {
+                cell.hideActivity()
+                cell.image = image
+            }
+            else if let error = errors[indexPath] {
+                cell.hideActivity()
+                cell.error = messageFor(error: error)
+            }
+            else {
+                cell.showActivity()
+                
+                if promises[indexPath] == nil {
+                    loadImage(at: indexPath)
+                }
+            }
+            
+            return cell
+        }
+        else {
+            fatalError("No cell to display")
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let model = models[indexPath.item]
+        
+        return CGSize(width: model.width, height: model.height)
     }
 }

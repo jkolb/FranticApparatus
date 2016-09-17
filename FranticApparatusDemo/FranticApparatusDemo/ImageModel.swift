@@ -23,27 +23,15 @@
  */
 
 import Foundation
-import FranticApparatus
 
-public final class ActivityNetworkLayer : NetworkLayer {
-    fileprivate let dispatcher: Dispatcher
-    fileprivate let networkLayer: NetworkLayer
-    fileprivate let networkActivityIndicator: NetworkActivityIndicator
+public struct ImageModel {
+    public let width: Int
+    public let height: Int
+    public let url: URL
     
-    public init(dispatcher: Dispatcher, networkLayer: NetworkLayer, networkActivityIndicator: NetworkActivityIndicator) {
-        self.dispatcher = dispatcher
-        self.networkLayer = networkLayer
-        self.networkActivityIndicator = networkActivityIndicator
-    }
-    
-    public func requestData(_ request: URLRequest) -> Promise<NetworkResult> {
-        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (makePromise) in
-            makePromise { (context) in
-                context.networkActivityIndicator.show()
-                return context.networkLayer.requestData(request)
-            }.whenComplete { (context) in
-                context.networkActivityIndicator.hide()
-            }
-        }
+    public init(width: Int, height: Int, url: URL) {
+        self.width = width
+        self.height = height
+        self.url = url
     }
 }

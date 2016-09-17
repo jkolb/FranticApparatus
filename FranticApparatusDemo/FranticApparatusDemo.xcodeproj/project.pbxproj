@@ -19,6 +19,8 @@
 		E57D1B111CE5688900C0C6BE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E57D1B0F1CE5688900C0C6BE /* LaunchScreen.storyboard */; };
 		E57D1B191CE5689700C0C6BE /* FranticApparatus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E57D1B181CE5689700C0C6BE /* FranticApparatus.framework */; };
 		E57D1B1B1CE5691C00C0C6BE /* NetworkAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57D1B1A1CE5691C00C0C6BE /* NetworkAPI.swift */; };
+		E57F6CD41D8D9348006807C4 /* ImageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57F6CD31D8D9348006807C4 /* ImageCell.swift */; };
+		E57F6CD61D8D9777006807C4 /* ImageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57F6CD51D8D9777006807C4 /* ImageModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +38,8 @@
 		E57D1B121CE5688900C0C6BE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E57D1B181CE5689700C0C6BE /* FranticApparatus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FranticApparatus.framework; path = "../../../Library/Developer/Xcode/DerivedData/FranticApparatus-fxwcljrehuhdrhchowixzsetazyq/Build/Products/Debug-iphonesimulator/FranticApparatus.framework"; sourceTree = "<group>"; };
 		E57D1B1A1CE5691C00C0C6BE /* NetworkAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkAPI.swift; sourceTree = "<group>"; };
+		E57F6CD31D8D9348006807C4 /* ImageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageCell.swift; sourceTree = "<group>"; };
+		E57F6CD51D8D9777006807C4 /* ImageModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +76,8 @@
 			children = (
 				E57D1B041CE5688900C0C6BE /* AppDelegate.swift */,
 				E57D1B061CE5688900C0C6BE /* RootViewController.swift */,
+				E57F6CD51D8D9777006807C4 /* ImageModel.swift */,
+				E57F6CD31D8D9348006807C4 /* ImageCell.swift */,
 				E57D1B1A1CE5691C00C0C6BE /* NetworkAPI.swift */,
 				E5608B911CE771A30040E140 /* NetworkLayer.swift */,
 				E5608B931CE772210040E140 /* SimpleURLSessionNetworkLayer.swift */,
@@ -157,6 +163,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E57F6CD61D8D9777006807C4 /* ImageModel.swift in Sources */,
 				E57D1B1B1CE5691C00C0C6BE /* NetworkAPI.swift in Sources */,
 				E5608B9A1CE79AAC0040E140 /* NetworkActivityIndicator.swift in Sources */,
 				E5608B981CE7768C0040E140 /* ActivityNetworkLayer.swift in Sources */,
@@ -166,6 +173,7 @@
 				E57D1B071CE5688900C0C6BE /* RootViewController.swift in Sources */,
 				E5608B921CE771A30040E140 /* NetworkLayer.swift in Sources */,
 				E57D1B051CE5688900C0C6BE /* AppDelegate.swift in Sources */,
+				E57F6CD41D8D9348006807C4 /* ImageCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

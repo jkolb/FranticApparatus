@@ -39,7 +39,7 @@ public final class SimpleURLSessionNetworkLayer : NetworkLayer {
     
     public func requestData(_ request: URLRequest) -> Promise<NetworkResult> {
         return Promise<NetworkResult> { (fulfill, reject, isCancelled) in
-            let dataTask = session.dataTask(with: request, completionHandler: { (data, response, error) in
+            session.dataTask(with: request) { (data, response, error) in
                 if let error = error {
                     reject(error)
                 }
@@ -49,9 +49,7 @@ public final class SimpleURLSessionNetworkLayer : NetworkLayer {
                 else {
                     reject(NetworkError.highlyImprobable)
                 }
-            }) 
-            
-            dataTask.resume()
+            }.resume()
         }
     }
 }

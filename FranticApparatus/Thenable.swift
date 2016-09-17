@@ -29,11 +29,11 @@ public protocol Thenable : class {
 }
 
 public extension Thenable {
-    public func then<ResultingValue>(on dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> Result<ResultingValue>) -> Promise<ResultingValue> {
+    public func whenFulfilledThenMap<ResultingValue>(on dispatcher: Dispatcher, map: @escaping (Value) throws -> Result<ResultingValue>) -> Promise<ResultingValue> {
         return then(
             on: dispatcher,
             onFulfilled: { (value) throws -> Result<ResultingValue> in
-                return try onFulfilled(value)
+                return try map(value)
             },
             onRejected: { (reason) throws -> Result<ResultingValue> in
                 throw reason
@@ -41,78 +41,78 @@ public extension Thenable {
         )
     }
     
-    public func then(on dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> Void) -> Promise<Value> {
-        return then(on: dispatcher) { (value) throws -> Result<Value> in
-            try onFulfilled(value)
+    public func whenFulfilled(on dispatcher: Dispatcher, thenDo: @escaping (Value) throws -> Void) -> Promise<Value> {
+        return whenFulfilledThenMap(on: dispatcher) { (value) throws -> Result<Value> in
+            try thenDo(value)
             
             return .value(value)
         }
     }
     
-    public func thenTransform<ResultingValue>(on dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> ResultingValue) -> Promise<ResultingValue> {
-        return then(on: dispatcher) { (value) throws -> Result<ResultingValue> in
-            let result = try onFulfilled(value)
+    public func whenFulfilledThenTransform<ResultingValue>(on dispatcher: Dispatcher, transform: @escaping (Value) throws -> ResultingValue) -> Promise<ResultingValue> {
+        return whenFulfilledThenMap(on: dispatcher) { (value) throws -> Result<ResultingValue> in
+            let result = try transform(value)
             
             return .value(result)
         }
     }
     
-    public func thenPromise<ResultingValue>(on dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> Promise<ResultingValue>) -> Promise<ResultingValue> {
-        return then(on: dispatcher) { (value) throws -> Result<ResultingValue> in
-            let result = try onFulfilled(value)
+    public func whenFulfilledThenPromise<ResultingValue>(on dispatcher: Dispatcher, promise: @escaping (Value) throws -> Promise<ResultingValue>) -> Promise<ResultingValue> {
+        return whenFulfilledThenMap(on: dispatcher) { (value) throws -> Result<ResultingValue> in
+            let result = try promise(value)
             
             return .promise(result)
         }
     }
     
-    public func handle(on dispatcher: Dispatcher, onRejected: @escaping (Error) throws -> Result<Value>) -> Promise<Value> {
+    public func whenRejectedThenMap(on dispatcher: Dispatcher, map: @escaping (Error) throws -> Result<Value>) -> Promise<Value> {
         return then(
             on: dispatcher,
             onFulfilled: { (value) throws -> Result<Value> in
                 return .value(value)
             },
             onRejected: { (reason) throws -> Result<Value> in
-                let result = try onRejected(reason)
+                let result = try map(reason)
                 
                 return result
             }
         )
     }
     
-    public func handle(on dispatcher: Dispatcher, _ onRejected: @escaping (Error) throws -> Void) -> Promise<Value> {
-        return handle(on: dispatcher) { (reason) throws -> Result<Value> in
-            try onRejected(reason)
+    public func whenRejected(on dispatcher: Dispatcher, thenDo: @escaping (Error) throws -> Void) -> Promise<Value> {
+        return whenRejectedThenMap(on: dispatcher) { (reason) throws -> Result<Value> in
+            try thenDo(reason)
             
             throw reason
         }
     }
     
-    public func handle(on dispatcher: Dispatcher, _ onRejected: @escaping (Error) throws -> Value) -> Promise<Value> {
-        return handle(on: dispatcher) { (reason) throws -> Result<Value> in
-            let result = try onRejected(reason)
+    public func whenRejectedThenTransform(on dispatcher: Dispatcher, transform: @escaping (Error) throws -> Value) -> Promise<Value> {
+        return whenRejectedThenMap(on: dispatcher) { (reason) throws -> Result<Value> in
+            let result = try transform(reason)
             
             return .value(result)
         }
     }
     
-    public func handle(on dispatcher: Dispatcher, _ onRejected: @escaping (Error) throws -> Promise<Value>) -> Promise<Value> {
-        return handle(on: dispatcher) { (reason) throws -> Result<Value> in
-            let result = try onRejected(reason)
+    public func whenRejectedThenPromise(on dispatcher: Dispatcher, promise: @escaping (Error) throws -> Promise<Value>) -> Promise<Value> {
+        return whenRejectedThenMap(on: dispatcher) { (reason) throws -> Result<Value> in
+            let result = try promise(reason)
             
             return .promise(result)
         }
     }
     
-    public func finally(on dispatcher: Dispatcher, _ onFinally: @escaping () -> Void) -> Promise<Value> {
+    public func whenComplete(on dispatcher: Dispatcher, thenDo: @escaping () -> Void) -> Promise<Value> {
         return then(
             on: dispatcher,
             onFulfilled: { (value) throws -> Result<Value> in
-                onFinally()
+                thenDo()
                 
                 return .value(value)
             },
             onRejected: { (reason) throws -> Result<Value> in
-                onFinally()
+                thenDo()
                 
                 throw reason
             }

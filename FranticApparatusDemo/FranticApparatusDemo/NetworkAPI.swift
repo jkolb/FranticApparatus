@@ -36,20 +36,20 @@ public final class NetworkAPI {
     }
     
     public func requestJSONObjectForURL(_ url: URL) -> Promise<NSDictionary> {
-        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (make) in
-            make { (context) in
+        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (makePromise) in
+            makePromise { (context) in
                return context.requestJSON(URLRequest(url: url))
-            }.thenPromise { (context, data) in
+            }.whenFulfilledThenPromise { (context, data) in
                 return context.parseJSONData(data)
             }
         }
     }
     
     public func requestImageForURL(_ url: URL) -> Promise<UIImage> {
-        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (make) in
-            make { (context) in
+        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (makePromise) in
+            makePromise { (context) in
                 return context.requestImage(URLRequest(url: url))
-            }.thenPromise { (context, data) in
+            }.whenFulfilledThenPromise { (context, data) in
                 return context.parseImageData(data)
             }
         }
@@ -93,10 +93,10 @@ public final class NetworkAPI {
     }
     
     fileprivate func requestData(_ request: URLRequest, allowedStatusCodes: [Int], allowedContentTypes: [String]) -> Promise<Data> {
-        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (make) in
-            make { (context) in
+        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (makePromise) in
+            makePromise { (context) in
                 return context.networkLayer.requestData(request)
-            }.thenTransform { (context, result) in
+            }.whenFulfilledThenTransform { (context, result) in
                 guard let httpResponse = result.response as? HTTPURLResponse else {
                     throw NetworkError.unexpectedResponse(result.response)
                 }
