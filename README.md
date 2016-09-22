@@ -4,24 +4,29 @@
 #### A thread safe, type safe, and memory safe [Promises/A+](https://promisesaplus.com) implementation for Swift 3
 
 Promises provide a way to make it easier to read and write chains of dependent asynchronous code. Here is a simple example of how much better asynchronous code looks using FranticApparatus:
+```swift
+let url = NSURL(string: "http://example.com/image.png")!
 
-    let url = NSURL(string: "http://example.com/image.png")!
-
-    self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
-        makePromise { (context) in
-            context.showActivityIndicator()
-            return context.fetchImage(url: url)
-        }.whenFulfilled { (context, image) in
-            context.showImage(image)
-        }.whenRejected { (context, reason) in
-            context.showPlaceholderImage()
-        }.whenComplete { (context) in
-            context.hideActivityIndicator()
-            context.promise = nil
-        }
+self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+    makePromise { (context) in
+        context.showActivityIndicator()
+        return context.fetchImage(url: url)
+    }.whenFulfilled { (context, image) in
+        context.showImage(image)
+    }.whenRejected { (context, reason) in
+        context.showPlaceholderImage()
+    }.whenComplete { (context) in
+        context.hideActivityIndicator()
+        context.promise = nil
     }
-
+}
+```
 See the Demo for examples of how to make promises to fetch a set of images over the network using promises and display them in a `UICollectionView`.
+
+## Changes for 6.0.1
+
+* [Multiplatform, Single-scheme](http://promisekit.org/news/2016/08/Multiplatform-Single-Scheme-Xcode-Projects/).
+* Removed FranticApparatus.swift that was added by the Swift Package Manager.
 
 ## Changes for 6.0.0
 
@@ -97,85 +102,84 @@ A promise, at its most simple definition, is a proxy for a value that has not be
 **Parallel promises are more tricky in a strongly typed language, and I am still working out a good way to implement it.*
 
 You may be thinking to yourself that this sounds like it could be done just as well with normal asynchronous callbacks, and you would not be wrong. While you can do something similar using everyday blocks they quickly become ugly nests of callbacks and make error handling more difficult. As a simple example imagine you would like to download some data from a remote web service, parse that data as JSON, and then map that JSON into a data model object (also imagine you can not use your favorite networking library). It might look like the following (thread safe memory management included, strong error handling not included):
+```swift
+func fetch(url: NSURL, completion: (dataModel: DataModel?, error: NSError?) -> ()) {
+    self.download(url) { [weak self] (data: NSData?, error: NSError?) in
+        if let downloadSelf = self {
+            if error != nil {
+                completion(nil, error)
+                return
+            }
 
-	func fetch(url: NSURL, completion: (dataModel: DataModel?, error: NSError?) -> ()) {
-		self.download(url) { [weak self] (data: NSData?, error: NSError?) in
-			if let downloadSelf = self {
-				if error != nil {
-					completion(nil, error)
-					return
-				}
-			
-				downloadSelf.parseJSON(data!) { [weak downloadSelf] (json: NSDictionary?, error: NSError?) in
-					if let parseSelf = downloadSelf {
-						if error != nil {
-							completion(nil, error)
-							return
-						}
-						
-						parseSelf.mapDataModel(json!) { (dataModel: DataModel?, error: NSError?) in
-							if error == nil {
-								completion(nil, error)
-								return
-							}
-							
-							completion(dataModel!, nil)
-						}
-					}
-				}
-			}
-		}
-	}
-	
+            downloadSelf.parseJSON(data!) { [weak downloadSelf] (json: NSDictionary?, error: NSError?) in
+                if let parseSelf = downloadSelf {
+                    if error != nil {
+                        completion(nil, error)
+                        return
+                    }
 
-Then the usage would look something like this:
+                    parseSelf.mapDataModel(json!) { (dataModel: DataModel?, error: NSError?) in
+                        if error == nil {
+                            completion(nil, error)
+                            return
+                        }
 
-    self.showActivityIndicator()
-	
-	self.fetch(NSURL(string: "http://example.com/datamodel.json")) { [weak self] (dataModel: DataModel?, error: NSError?) in
-		if let strongSelf = self {
-			if error != nil {
-				strongSelf.displayError(error!)
-			} else {
-				strongSelf.displayDataModel(dataModel!)
-			}
-			
-			strongSelf.hideActivityIndicator()
-		}
-	}
-
-Here is the same example assuming that there are three methods that return promises to download, parse, and map the data similar to the above methods that just take callbacks:
-
-    func fetch(url: NSURL) -> Promise<DataModel> {
-        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (makePromise) in
-            makePromise { (context) in
-                return context.download(url)
-            }.whenFulfilledThenPromise { (context, data) in
-                return context.parseJSONData(data)
-            }.whenFulfilledThenPromise { (context, json) in
-                return context.mapDataModel(json)
+                        completion(dataModel!, nil)
+                    }
+                }
             }
         }
     }
+}
+```	
+Then the usage would look something like this:
+```swift
+self.showActivityIndicator()
 
-And again how it would be used:
+self.fetch(NSURL(string: "http://example.com/datamodel.json")) { [weak self] (dataModel: DataModel?, error: NSError?) in
+    if let strongSelf = self {
+        if error != nil {
+            strongSelf.displayError(error!)
+        } else {
+            strongSelf.displayDataModel(dataModel!)
+        }
 
-    let url = NSURL(string: "http://example.com/datamodel.json")!
-
-    self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+        strongSelf.hideActivityIndicator()
+    }
+}
+```
+Here is the same example assuming that there are three methods that return promises to download, parse, and map the data similar to the above methods that just take callbacks:
+```swift
+func fetch(url: NSURL) -> Promise<DataModel> {
+    return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (makePromise) in
         makePromise { (context) in
-            context.showActivityIndicator()
-            return context.fetch(url: url)
-        }.whenFulfilled { (context, dataModel) in
-            context.displayDataModel(dataModel)
-        }.whenRejected { (context, reason) in
-            context.displayError(reason)
-        }.whenComplete { (context) in
-            context.hideActivityIndicator()
-            context.promise = nil
+            return context.download(url)
+        }.whenFulfilledThenPromise { (context, data) in
+            return context.parseJSONData(data)
+        }.whenFulfilledThenPromise { (context, json) in
+            return context.mapDataModel(json)
         }
     }
+}
+```
+And again how it would be used:
+```swift
+let url = NSURL(string: "http://example.com/datamodel.json")!
 
+self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+    makePromise { (context) in
+        context.showActivityIndicator()
+        return context.fetch(url: url)
+    }.whenFulfilled { (context, dataModel) in
+        context.displayDataModel(dataModel)
+    }.whenRejected { (context, reason) in
+        context.displayError(reason)
+    }.whenComplete { (context) in
+        context.hideActivityIndicator()
+        context.promise = nil
+    }
+}
+```
 Note the missing rightward drift of the nested callbacks and also the small amount of error handling code. Also as a convenience to aid in thread safety `PromiseMaker` takes a context parameter, turns it into a weak reference, and then when the blocks are executed a strong reference is passed into them as the first paramter. If the context reference becomes nil the body of the closure will not execute preventing a common source of bugs. Additionally this saves you from writing extra boiler plate memory management code in all of your closures.
 
 ## What is going on here?
@@ -206,27 +210,27 @@ Lastly we come to the most powerful type of result, instead of returning a value
 ## How do I make my own promises?
 
 #### A promise that parse JSON data on a background queue. 
+```swift
+func parseJSONData(_ data: Data) -> Promise<NSDictionary> {
+    return Promise<NSDictionary> { (fulfill, reject, isCancelled) in
+        queue.async {
+            do {
+                let object = try JSONSerialization.jsonObject(with: data, options: [])
 
-    func parseJSONData(_ data: Data) -> Promise<NSDictionary> {
-        return Promise<NSDictionary> { (fulfill, reject, isCancelled) in
-            queue.async {
-                do {
-                    let object = try JSONSerialization.jsonObject(with: data, options: [])
-
-                    if let dictionary = object as? NSDictionary {
-                        fulfill(dictionary)
-                    }
-                    else {
-                        reject(NetworkError.unexpectedData(data))
-                    }
+                if let dictionary = object as? NSDictionary {
+                    fulfill(dictionary)
                 }
-                catch {
-                    reject(error)
+                else {
+                    reject(NetworkError.unexpectedData(data))
                 }
+            }
+            catch {
+                reject(error)
             }
         }
     }
-
+}
+```
 When you make a promise you pass in a closure to the initiailizer representing the work required to generate the promise's value. At the end of the promise initiaizer it will execute this closure and pass in three closures to it as parameters: `fulfill`, `reject`, and `isCancelled`. These parameters allow the closure doing the work to safely interact with the promise without worrying about memory management or keeping up with a separate reference to the promise instance. To be most useful any work required to calculate the result of the promise should be done on a separate thread.
 
 When the work to calculate the value is complete the original promise can be fulfilled by calling `fulfill` and passing in the generated value. If there is an error whie generating the value you can call `reject` instead passing in an instance of an object that coforms to the Swift 2 protocol `ErrorType`. If the work required to do the calculation is long and has multiple sections of complex logic you can intersperse that logic with calls to `isCancelled()` so you can detect as early as you can if the promise associated with the work has been deinitialized and exit early if it makes sense to do so. If the promise has already been deinitialized it is still safe to call `fulfill`, `reject`, and `isCancelled` as they are written to be safe in this use case.
@@ -236,67 +240,67 @@ When the work to calculate the value is complete the original promise can be ful
 #### Using `PromiseMaker` to simplify chaining promises together to form more powerful promises.
 
 `PromiseMaker` was designed to make writing and reading promises easier. It helps simplify the calls to chain promises using the `then` method by keeping track of a common `Dispatcher` that will be used by the entire chain and by keeping a context variable around that can be safely used in each of the chained promises. There is also the `Thenable` protocol which provides some helper methods when not making use of `PromiseMaker`. So a chain of promises just using `then` would look like this:
+```swift
+self.promise = promiseSomething().then(
+    on: GCDDispatcher.main,
+    onFulfilled: { [weak self] (value) in
+        guard let strongSelf = self else { throw PromiseError.contextDeallocated }
 
-    self.promise = promiseSomething().then(
-        on: GCDDispatcher.main,
-        onFulfilled: { [weak self] (value) in
-            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
-            
-            strongSelf.displayValue(value)
-            return .value(value) // Manually continue the chain
-        }
-        onRejected: { [weak self] (reason) in
-            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
-            
-            strongSelf.displayError(reason)
-            throw reason // Manually continue the chain
-        }
-    ).then(
-        on: GCDDispatcher.main,
-        onFulfilled: { [weak self] (value) in
-            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
-
-            strongSelf.promise = nil
-            return .value(value) // Manually continue the chain
-        }
-        onRejected: { [weak self] (reason) in
-            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
-
-            strongSelf.promise = nil
-            throw reason // Manually continue the chain
-        }
-    )
-
-When using `Thenable` helpers would look like this:
-
-        self.promise = promiseSomething().whenFulfilled(on: GCDDispatcher.main) { [weak self] (value) in
-            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
-
-            strongSelf.displayValue(value)
-        }.whenRejected(on: GCDDispatcher.main) { [weak self] (value) in
-            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
-
-            strongSelf.displayError(reason)
-        }.whenComplete(on: GCDDispatcher.main) { [weak self] in
-            guard let strongSelf = self else { throw PromiseError.contextDeallocated }
-
-            strongSelf.promise = nil
-        }
-
-When using `PromiseMaker` would look like this:
-
-    self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
-        makeProimise { (context) in
-            return context.promiseSomething()
-        }.whenFullfilled { (context, value) in
-            context.displayValue(value)
-        }.whenRejected { (context, reason) in
-            context.displayError(reason)
-        }.whenComplete { (context) in
-            context.promise = nil
-        }
+        strongSelf.displayValue(value)
+        return .value(value) // Manually continue the chain
     }
+    onRejected: { [weak self] (reason) in
+        guard let strongSelf = self else { throw PromiseError.contextDeallocated }
 
+        strongSelf.displayError(reason)
+        throw reason // Manually continue the chain
+    }
+).then(
+    on: GCDDispatcher.main,
+    onFulfilled: { [weak self] (value) in
+        guard let strongSelf = self else { throw PromiseError.contextDeallocated }
+
+        strongSelf.promise = nil
+        return .value(value) // Manually continue the chain
+    }
+    onRejected: { [weak self] (reason) in
+        guard let strongSelf = self else { throw PromiseError.contextDeallocated }
+
+        strongSelf.promise = nil
+        throw reason // Manually continue the chain
+    }
+)
+```
+When using `Thenable` helpers would look like this:
+```swift
+self.promise = promiseSomething().whenFulfilled(on: GCDDispatcher.main) { [weak self] (value) in
+    guard let strongSelf = self else { throw PromiseError.contextDeallocated }
+
+    strongSelf.displayValue(value)
+}.whenRejected(on: GCDDispatcher.main) { [weak self] (value) in
+    guard let strongSelf = self else { throw PromiseError.contextDeallocated }
+
+    strongSelf.displayError(reason)
+}.whenComplete(on: GCDDispatcher.main) { [weak self] in
+    guard let strongSelf = self else { throw PromiseError.contextDeallocated }
+
+    strongSelf.promise = nil
+}
+```
+When using `PromiseMaker` would look like this:
+```swift
+self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+    makeProimise { (context) in
+        return context.promiseSomething()
+    }.whenFullfilled { (context, value) in
+        context.displayValue(value)
+    }.whenRejected { (context, reason) in
+        context.displayError(reason)
+    }.whenComplete { (context) in
+        context.promise = nil
+    }
+}
+```
 `PromiseMaker.makeUsing` takes a `dispatcher` parameter as its first argument but defaults to `GCDDispatcher.main` when not specified.
 
 The helpers in `Thenable` and `PromiseMaker` both follow the same naming scheme. The only real difference between them is that `Thenable` requires the `Dispatcher` to be specified and does not provide a `context`. The names also help the Swift compiler diferentiate between them, if they were named the same (as they were in the past) the return value would be the only distinguishing item and is usually not enough for the compiler to pick one which generates a compile error. The naming of the methods and what they are useful for is as follows:
@@ -325,7 +329,7 @@ Generally you want `whenRejected` to always be after a call to `whenFulfilled`, 
 
 ## Contact
 
-[Justin Kolb](mailto:justin.kolb@franticapparatus.net)  
+[Justin Kolb](mailto:franticapparatus@gmail.com)  
 [@nabobnick](https://twitter.com/nabobnick)
 
 ## License
