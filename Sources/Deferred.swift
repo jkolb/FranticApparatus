@@ -23,24 +23,28 @@
  */
 
 final class Deferred<Value> {
-    fileprivate let pendingPromise: AnyObject?
+    fileprivate let pending: Any?
     var onFulfilled: [(Value) -> Void]
     var onRejected: [(Error) -> Void]
     
     convenience init() {
-        self.init(pendingPromise: nil, onFulfilled: [], onRejected: [])
+        self.init(pending: nil, onFulfilled: [], onRejected: [])
     }
     
-    convenience init<P>(pendingOn: Promise<P>) {
-        self.init(pendingPromise: pendingOn, onFulfilled: [], onRejected: [])
+    convenience init(pending: Any) {
+        self.init(pending: pending, onFulfilled: [], onRejected: [])
     }
     
-    convenience init<P>(pendingOn: Promise<P>, onFulfilled: [(Value) -> Void], onRejected: [(Error) -> Void]) {
-        self.init(pendingPromise: pendingOn, onFulfilled: onFulfilled, onRejected: onRejected)
+    convenience init<P>(pendingPromise: Promise<P>?) {
+        self.init(pending: pendingPromise, onFulfilled: [], onRejected: [])
     }
     
-    fileprivate init(pendingPromise: AnyObject?, onFulfilled: [(Value) -> Void], onRejected: [(Error) -> Void]) {
-        self.pendingPromise = pendingPromise
+    convenience init<P>(pendingPromise: Promise<P>, onFulfilled: [(Value) -> Void], onRejected: [(Error) -> Void]) {
+        self.init(pending: pendingPromise, onFulfilled: onFulfilled, onRejected: onRejected)
+    }
+    
+    fileprivate init(pending: Any?, onFulfilled: [(Value) -> Void], onRejected: [(Error) -> Void]) {
+        self.pending = pending
         self.onFulfilled = onFulfilled
         self.onRejected = onRejected
     }

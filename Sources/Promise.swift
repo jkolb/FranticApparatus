@@ -38,7 +38,7 @@ public final class Promise<Value> : Thenable {
     }
     
     public func then<ResultingValue>(on dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> Result<ResultingValue>, onRejected: @escaping (Error) throws -> Result<ResultingValue>) -> Promise<ResultingValue> {
-        return Promise<ResultingValue>(pendingOn: self) { (resolve, reject) in
+        return Promise<ResultingValue>(pendingPromise: self) { (resolve, reject) in
             self.onResolve(
                 fulfill: { (value) in
                     dispatcher.dispatch {
@@ -65,10 +65,17 @@ public final class Promise<Value> : Thenable {
             )
         }
     }
-
-    fileprivate init<PendingValue>(pendingOn: Promise<PendingValue>, _ resolver: (_ resolve: @escaping (Result<Value>) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
+    
+    init(pending: Any, _ resolver: (_ fulfill: @escaping (Value) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
         self.lock = Lock()
-        self.state = .pending(Deferred(pendingOn: pendingOn))
+        self.state = .pending(Deferred(pending: pending))
+        
+        resolver(weakifyFulfill(), weakifyReject())
+    }
+
+    fileprivate init<PendingValue>(pendingPromise: Promise<PendingValue>, _ resolver: (_ resolve: @escaping (Result<Value>) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
+        self.lock = Lock()
+        self.state = .pending(Deferred(pendingPromise: pendingPromise))
         
         resolver(weakifyResolve(), weakifyReject())
     }
@@ -130,7 +137,7 @@ public final class Promise<Value> : Thenable {
         
         switch state {
         case .pending(let deferred):
-            state = .pending(Deferred(pendingOn: promise, onFulfilled: deferred.onFulfilled, onRejected: deferred.onRejected))
+            state = .pending(Deferred(pendingPromise: promise, onFulfilled: deferred.onFulfilled, onRejected: deferred.onRejected))
             lock.unlock()
             promise.onResolve(fulfill: weakifyFulfill(), reject: weakifyReject())
             
@@ -157,7 +164,7 @@ public final class Promise<Value> : Thenable {
         }
     }
     
-    fileprivate func onResolve(fulfill: @escaping (Value) -> Void, reject: @escaping (Error) -> Void) {
+    func onResolve(fulfill: @escaping (Value) -> Void, reject: @escaping (Error) -> Void) {
         lock.lock()
         
         switch state {
