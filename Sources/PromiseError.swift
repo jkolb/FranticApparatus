@@ -24,4 +24,29 @@
 
 public enum PromiseError : Error {
     case contextDeallocated
+    case unknownReason
+}
+
+public struct ErrorArray : Error, CustomStringConvertible {
+    public let errors: [Error]
+    
+    public init(errors: [Error]) {
+        self.errors = errors
+    }
+    
+    public var description: String {
+        return self.errors.description
+    }
+}
+
+public struct ErrorDictionary<Key : Hashable> : Error, CustomStringConvertible {
+    public let errors: [Key:Error]
+    
+    public init(errors: [Key:Error]) {
+        self.errors = errors
+    }
+    
+    public var description: String {
+        return self.errors.description
+    }
 }

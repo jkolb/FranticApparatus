@@ -25,6 +25,10 @@
 import UIKit
 import FranticApparatus
 
+enum JSONError : Error {
+    case unexpectedJSON
+}
+
 class RootViewController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     var networkAPI: NetworkAPI!
     var collectionView: UICollectionView!
@@ -41,6 +45,8 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
     var images = [IndexPath : UIImage](minimumCapacity: 8)
     var errors = [IndexPath : Error](minimumCapacity: 8)
     var promises = [IndexPath : Promise<UIImage>](minimumCapacity: 8)
+    var thumbnailsPromise: Promise<[UIImage]>?
+    var thumbnails = [UIImage]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,12 +71,58 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
         networkAPI = NetworkAPI(dispatcher: networkDispatcher, networkLayer: networkLayer)
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if thumbnailsPromise == nil {
+            thumbnailsPromise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+                makePromise { (context) -> Promise<NSDictionary> in
+                    context.networkAPI.requestJSONObjectForURL(URL(string: "https://reddit.com/.json")!)
+                }.whenFulfilledThenPromise { (context, object) -> Promise<[UIImage]> in
+                    let thumbnailURLs = try context.thumbnailsFromJSON(object: object)
+                    let thumbnailPromises = thumbnailURLs.map({ context.networkAPI.requestImageForURL($0) })
+                    return all(thumbnailPromises)
+                }.whenFulfilled { (context, thumbnails) in
+                    context.thumbnails = thumbnails
+                    context.collectionView.reloadData()
+                }.whenRejected { (context, reason) in
+                    NSLog("\(reason)")
+                }.whenComplete { (context) in
+                    context.thumbnailsPromise = nil
+                }
+            }
+        }
+    }
+    
+    func thumbnailsFromJSON(object: NSDictionary) throws -> [URL] {
+        guard let data = object["data"] as? NSDictionary else { throw JSONError.unexpectedJSON }
+        guard let children = data["children"] as? NSArray else { throw JSONError.unexpectedJSON }
+        var thumbnailURLs = [URL]()
+        thumbnailURLs.reserveCapacity(children.count)
+        
+        for child in children {
+            if let childObject = child as? NSDictionary {
+                if let childData = childObject["data"] as? NSDictionary {
+                    if let thumbnail = childData["thumbnail"] as? NSString {
+                        if thumbnail.hasPrefix("http") {
+                            if let thumbnailURL = URL(string: thumbnail as String) {
+                                thumbnailURLs.append(thumbnailURL)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return thumbnailURLs
+    }
+    
     func loadImage(at indexPath: IndexPath) {
         let model = models[indexPath.item]
         
         promises[indexPath] = PromiseMaker.makeUsing(context: self) { (makePromise) in
-            makePromise { (context) in
-                return context.networkAPI.requestImageForURL(model.url)
+            makePromise { (context) -> Promise<UIImage> in
+                context.networkAPI.requestImageForURL(model.url)
             }.whenFulfilled { (context, image) in
                 context.images[indexPath] = image
                 context.showImage(at: indexPath)
@@ -125,38 +177,77 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
         }
     }
     
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        if thumbnails.count == 0 {
+            return 1
+        }
+        else {
+            return 2
+        }
+    }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return models.count
+        if section == 0 {
+            return models.count
+        }
+        else if section == 1 {
+            return thumbnails.count
+        }
+        
+        return 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "imageCell", for: indexPath) as? ImageCell {
-            if let image = images[indexPath] {
-                cell.hideActivity()
-                cell.image = image
-            }
-            else if let error = errors[indexPath] {
-                cell.hideActivity()
-                cell.error = messageFor(error: error)
+        if indexPath.section == 0 {
+            if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "imageCell", for: indexPath) as? ImageCell {
+                if let image = images[indexPath] {
+                    cell.hideActivity()
+                    cell.image = image
+                }
+                else if let error = errors[indexPath] {
+                    cell.hideActivity()
+                    cell.error = messageFor(error: error)
+                }
+                else {
+                    cell.showActivity()
+                    
+                    if promises[indexPath] == nil {
+                        loadImage(at: indexPath)
+                    }
+                }
+                
+                return cell
             }
             else {
-                cell.showActivity()
-                
-                if promises[indexPath] == nil {
-                    loadImage(at: indexPath)
-                }
+                fatalError("No cell to display")
             }
-            
-            return cell
         }
-        else {
-            fatalError("No cell to display")
+        else if indexPath.section == 1 {
+            if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "imageCell", for: indexPath) as? ImageCell {
+                let thumbnail = thumbnails[indexPath.item]
+                cell.hideActivity()
+                cell.image = thumbnail
+                
+                return cell
+            }
+            else {
+                fatalError("No cell to display")
+            }
         }
+        
+        fatalError("Unexpected indexPath \(indexPath)")
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let model = models[indexPath.item]
+        if indexPath.section == 0 {
+            let model = models[indexPath.item]
+            
+            return CGSize(width: model.width, height: model.height)
+        }
+        else if indexPath.section == 1 {
+            return thumbnails[indexPath.item].size
+        }
         
-        return CGSize(width: model.width, height: model.height)
+        return CGSize.zero
     }
 }

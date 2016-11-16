@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E540D8691DDC78B700907960 /* AllPromises.swift in Sources */ = {isa = PBXBuildFile; fileRef = E540D8671DDC78B700907960 /* AllPromises.swift */; };
+		E540D86A1DDC78B700907960 /* AnyPromises.swift in Sources */ = {isa = PBXBuildFile; fileRef = E540D8681DDC78B700907960 /* AnyPromises.swift */; };
+		E540D86C1DDC78BE00907960 /* RacePromises.swift in Sources */ = {isa = PBXBuildFile; fileRef = E540D86B1DDC78BE00907960 /* RacePromises.swift */; };
 		E55CA21719C676DC00E66980 /* FranticApparatus.h in Headers */ = {isa = PBXBuildFile; fileRef = E55CA21619C676DC00E66980 /* FranticApparatus.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E55CA21D19C676DC00E66980 /* FranticApparatus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55CA21119C676DC00E66980 /* FranticApparatus.framework */; };
 		E57F6CE41D8DDA49006807C4 /* Deferred.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57F6CD81D8DDA49006807C4 /* Deferred.swift */; };
@@ -34,6 +37,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E540D8671DDC78B700907960 /* AllPromises.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AllPromises.swift; sourceTree = "<group>"; };
+		E540D8681DDC78B700907960 /* AnyPromises.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyPromises.swift; sourceTree = "<group>"; };
+		E540D86B1DDC78BE00907960 /* RacePromises.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RacePromises.swift; sourceTree = "<group>"; };
 		E55CA21119C676DC00E66980 /* FranticApparatus.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FranticApparatus.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E55CA21519C676DC00E66980 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E55CA21619C676DC00E66980 /* FranticApparatus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FranticApparatus.h; sourceTree = "<group>"; };
@@ -132,6 +138,8 @@
 		E57F6CD71D8DDA49006807C4 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				E540D8671DDC78B700907960 /* AllPromises.swift */,
+				E540D8681DDC78B700907960 /* AnyPromises.swift */,
 				E57F6CD81D8DDA49006807C4 /* Deferred.swift */,
 				E57F6CD91D8DDA49006807C4 /* Dispatcher.swift */,
 				E57F6CDB1D8DDA49006807C4 /* GCDDispatcher.swift */,
@@ -140,6 +148,7 @@
 				E57F6CDE1D8DDA49006807C4 /* Promise.swift */,
 				E57F6CDF1D8DDA49006807C4 /* PromiseError.swift */,
 				E57F6CE01D8DDA49006807C4 /* PromiseMaker.swift */,
+				E540D86B1DDC78BE00907960 /* RacePromises.swift */,
 				E57F6CE11D8DDA49006807C4 /* Result.swift */,
 				E57F6CE21D8DDA49006807C4 /* State.swift */,
 				E57F6CE31D8DDA49006807C4 /* Thenable.swift */,
@@ -266,7 +275,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E540D86C1DDC78BE00907960 /* RacePromises.swift in Sources */,
 				E57F6CEF1D8DDA49006807C4 /* Thenable.swift in Sources */,
+				E540D86A1DDC78B700907960 /* AnyPromises.swift in Sources */,
 				E57F6CE81D8DDA49006807C4 /* Lock.swift in Sources */,
 				E57F6CEA1D8DDA49006807C4 /* Promise.swift in Sources */,
 				E57F6CEE1D8DDA49006807C4 /* State.swift in Sources */,
@@ -277,6 +288,7 @@
 				E57F6CEB1D8DDA49006807C4 /* PromiseError.swift in Sources */,
 				E57F6CE71D8DDA49006807C4 /* GCDDispatcher.swift in Sources */,
 				E57F6CEC1D8DDA49006807C4 /* PromiseMaker.swift in Sources */,
+				E540D8691DDC78B700907960 /* AllPromises.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

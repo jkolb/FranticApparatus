@@ -5,12 +5,13 @@
 
 Promises provide a way to make it easier to read and write chains of dependent asynchronous code. Here is a simple example of how much better asynchronous code looks using FranticApparatus:
 ```swift
-let url = NSURL(string: "http://example.com/image.png")!
+func fetchImage(at url: URL) -> Promise<UIImage> { ... }
+let url: URL = ...
 
 self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
-    makePromise { (context) in
+    makePromise { (context) -> Promise<UIImage> in
         context.showActivityIndicator()
-        return context.fetchImage(url: url)
+        return context.fetchImage(at: url)
     }.whenFulfilled { (context, image) in
         context.showImage(image)
     }.whenRejected { (context, reason) in
@@ -21,7 +22,33 @@ self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
     }
 }
 ```
+
+You can also wait for multiple promises to complete before continuing on like this:
+```swift
+func fetchURL(_ url: URL) -> Promise<Data> { ... }
+let urls: [URL] = ...
+
+self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+    makePromise { (context) -> Promise<[Data]> in
+        context.showActivityIndicator()
+        let promises = urls.map({ context.fetchURL($0) }) 
+        return all(promises)
+    }.whenFulfilled { (context, dataArray) in
+        context.processData(dataArray)
+    }.whenRejected { (context, reason) in
+        context.showError(reason)
+    }.whenComplete { (context) in
+        context.hideActivityIndicator()
+        context.promise = nil
+    }
+}
+```
+When the promise is fulfilled you will get an array of all the combined promised values. If any of the promises are rejected then the entire combined promise will also be rejected.
+
 See the Demo for examples of how to make promises to fetch a set of images over the network using promises and display them in a `UICollectionView`.
+
+## Changes for 6.1.0
+* New functions `all`, `any`, and `race`, that can turn multiple parallel promises into one promise.
 
 ## Changes for 6.0.1
 
@@ -97,9 +124,7 @@ See the Demo for examples of how to make promises to fetch a set of images over 
 
 ## What is a promise?
 
-A promise, at its most simple definition, is a proxy for a value that has not been calculated yet. This [blog](http://andyshora.com/promises-angularjs-explained-as-cartoon.html) provides a good high level overview of how they work. Unfortunately that does not give much insight into the usefulness they provide. The utility of promises arises because they are recursively composable, which makes for easily defining complex combinations of asynchronous functionality. Promises can be combined so they execute serially or in parallel*, but no matter which way you compose them they still effectively read like a serialized order of steps. Being able to write code that looks (as best it can) like it executes from top to bottom while actually wrapping multiple asynchronous calls is where the true power of promises lies.
-
-**Parallel promises are more tricky in a strongly typed language, and I am still working out a good way to implement it.*
+A promise, at its most simple definition, is a proxy for a value that has not been calculated yet. This [blog](http://andyshora.com/promises-angularjs-explained-as-cartoon.html) provides a good high level overview of how they work. Unfortunately that does not give much insight into the usefulness they provide. The utility of promises arises because they are recursively composable, which makes for easily defining complex combinations of asynchronous functionality. Promises can be combined so they execute serially or in parallel, but no matter which way you compose them they still effectively read like a serialized order of steps. Being able to write code that looks (as best it can) like it executes from top to bottom while actually wrapping multiple asynchronous calls is where the true power of promises lies.
 
 You may be thinking to yourself that this sounds like it could be done just as well with normal asynchronous callbacks, and you would not be wrong. While you can do something similar using everyday blocks they quickly become ugly nests of callbacks and make error handling more difficult. As a simple example imagine you would like to download some data from a remote web service, parse that data as JSON, and then map that JSON into a data model object (also imagine you can not use your favorite networking library). It might look like the following (thread safe memory management included, strong error handling not included):
 ```swift
@@ -326,6 +351,104 @@ The helpers in `Thenable` and `PromiseMaker` both follow the same naming scheme.
 #### A note on the ordering of methods.
 
 Generally you want `whenRejected` to always be after a call to `whenFulfilled`, this is because `whenFulfilled` can throw errors and they will be silently passed along the chain unless there is another `whenRejected` later on to catch it. Also it is preferable to not throw errors from `whenComplete` and to make it the last in the chain. It will perform an action on both success and failure but will not gain access to the reason for failure. The demo does use a `whenComplete` in the middle of a chain, but any errors it could generate will be caught by the `whenRejected` handler that comes later on in the `RootViewController`.
+
+
+#### Parallel promises
+
+Starting with version 6.1 you can now use the `all`, `any`, and `race` global functions to generate parallel promises. These work by wraping up multiple promises for the same type of object and run them all at the same time concurrently.
+
+When you use `all` then all promises must complete successfully for the promise to fulfill, otherwise it will be rejected with the error from the first wrapped promise that fails. There are two versions of the `all` function. The first takes a collection of promises and the result will be an array of values. The second takes a dictionary of promises, where each promise has a unique key. The final result will be a dictionary of keys to values so you can grab the specific value for each specific promise. The dictionary form is useful for bundling up promises that return different types of values, which is discussed below.
+
+The `any` function takes a dictionary of promises and will fulfill if at least one of the wrapped promises complete successfully. When this happens you will get back an `AnyResult` object that contains a dictionary of values for the promises that were successfull and also a dictionary of all the errors for the failed promises. If all of them fail then the promise wil reject with ErrorDictionary which wraps up all the errors and their keys into one Error object. The `AnyResult` object has a helper method called `requiredValue(for:)` that provides a shortcut for extracting out any values that have to be successful no matter what, it will throw an error if the value is missing. Otherwise just access the `values` and `reasons` dictionaries directly to determine the actual results.
+
+Finaly there is the `race` function. It only takes a collection of promises and not a dictionary because you only get back one value, the one that finished first. If all of the wrapped promises happen to fail then it will be rejeceted with ErrorArray which wraps up all the errors into one Error object.
+
+#### Parallel promises with differing value types
+
+A shortcoming of having a strongly typed system is that when you have a collection of objects of different types you must use the least common denominator type that describes all of them. In the worst case this is `Any` or `AnyObject`, but even in the best case you lose the exact type of the object you are working with. The dictionary key in `any` or `all` helps to figure out what type you expect the returned value to have even if the returned type is something like `Any`. A more typesafe way to have multiple typed promises when using `any` or `all` is to create an `enum` where each case indicates which type is being returned and the associated value will contain the value of that type. For example:
+
+```swift
+enum ReturnResults {
+    case image(UIImage)
+    case text(String)
+    case number(Int)
+}
+
+func promiseThumbnail() -> Promise<UIImage> ...
+func promiseTitle() -> Promise<String> ...
+func promiseAge() -> Promise<Int> ...
+
+struct ActualResult {
+    let thumbnail: UIImage
+    let title: String
+    let age: Int
+}
+
+let thumbnailPromise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+    makePromise { (context) -> Promise<UIImage> in
+        context.promiseThumbnail()
+    }.whenFulfilledThenTransform { (context, thumbnail) -> ReturnResults in
+        return .image(thumbnail)
+    }
+}
+
+let titlePromise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+    makePromise { (context) -> Promise<String> in
+        context.promiseTitle()
+    }.whenFulfilledThenTransform { (context, title) -> ReturnResults in
+        return .text(title)
+    }
+}
+
+let agePromise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+    makePromise { (context) -> Promise<Int> in
+        context.promiseAge()
+    }.whenFulfilledThenTransform { (context, age) -> ReturnResults in
+        return .number(age)
+    }
+}
+
+self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+    makePromise { (context) -> Promise<[String:ReturnResults]> in
+        all(["thumbnail": thumbnailPromise, "title": titlePromise, "age": agePromise]) 
+    }.whenFulfilledThenTransform { (context, results) -> ActualResult in
+        // With the "all" function getting here means all the keys are present so using "!" should be OK
+        let thumbnailResult = results["thumbnail"]!
+        let titleResult = results["title"]!
+        let ageResult = results["age"]!
+
+        let thumbnail: UIImage
+        let title: String
+        let age: Int
+
+        switch thumbnailResult {
+        case .image(let image):
+            thumbnail = image
+        default:
+            fatalError("Programmer Error: If this happens thumbnailPromise was created incorrectly"
+        }
+
+        switch titleResult {
+        case .text(let text):
+            title = text
+        default:
+            fatalError("Programmer Error: If this happens titlePromise was created incorrectly"
+        }
+
+        switch ageResult {
+        case .number(let number):
+            age = number
+        default:
+            fatalError("Programmer Error: If this happens agePromise was created incorrectly"
+        }
+
+        return ActualResult(thumbnail: thumbnail, title: title, age: age)
+    }.whenComplete { (context) in
+        context.promise = nil
+    }
+}
+
+```
 
 ## Contact
 
