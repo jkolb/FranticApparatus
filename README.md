@@ -1,4 +1,4 @@
-# FranticApparatus 6.0.0 
+# FranticApparatus 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
 #### A thread safe, type safe, and memory safe [Promises/A+](https://promisesaplus.com) implementation for Swift 3
@@ -46,6 +46,9 @@ self.promise = PromiseMaker.makeUsing(context: self) { (makePromise) in
 When the promise is fulfilled you will get an array of all the combined promised values. If any of the promises are rejected then the entire combined promise will also be rejected.
 
 See the Demo for examples of how to make promises to fetch a set of images over the network using promises and display them in a `UICollectionView`.
+
+## Changes for 7.0.0
+* Swift 4 support
 
 ## Changes for 6.1.0
 * New functions `all`, `any`, and `race`, that can turn multiple parallel promises into one promise.
