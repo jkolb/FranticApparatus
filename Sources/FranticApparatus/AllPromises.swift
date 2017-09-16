@@ -47,7 +47,7 @@ public func all<Value, Promises : Collection>(_ promises: Promises) -> Promise<[
     }
 }
 
-public func all<Key : Hashable, Value>(_ promises: [Key:Promise<Value>]) -> Promise<[Key:Value]> {
+public func all<Key, Value>(_ promises: [Key:Promise<Value>]) -> Promise<[Key:Value]> {
     return Promise<[Key:Value]>(pending: promises) { (fulfill, reject) in
         let all = AllPromises<Key, Value>(
             count: numericCast(promises.count),

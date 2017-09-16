@@ -285,4 +285,15 @@ class FranticApparatusTests: XCTestCase, Dispatcher {
         let closure = pendingDispatch.removeFirst()
         closure()
     }
+
+    static var allTests = [
+        ("testFulfill", testFulfill),
+        ("testReject", testReject),
+        ("testThenMayBeCalledMultipleTimesOnTheSamePromiseAndFulfilledInOrder", testThenMayBeCalledMultipleTimesOnTheSamePromiseAndFulfilledInOrder),
+        ("testThenMayBeCalledMultipleTimesOnTheSamePromiseAndRejectedInOrder", testThenMayBeCalledMultipleTimesOnTheSamePromiseAndRejectedInOrder),
+        ("testWhenPromiseResolvedWithAPromiseThenPromise2WillFulfillWithValueOfThatPromise", testWhenPromiseResolvedWithAPromiseThenPromise2WillFulfillWithValueOfThatPromise),
+        ("testWhenPromiseResolvedWithAPromiseThenPromise2WillRejectWithReasonOfThatPromise", testWhenPromiseResolvedWithAPromiseThenPromise2WillRejectWithReasonOfThatPromise),
+        ("testPromise1OnFulfilledThrowsErrorPromise2MustBeRejectedWithSameReason", testPromise1OnFulfilledThrowsErrorPromise2MustBeRejectedWithSameReason),
+        ("testPromise1OnRejectedThrowsErrorPromise2MustBeRejectedWithSameReason", testPromise1OnRejectedThrowsErrorPromise2MustBeRejectedWithSameReason),
+    ]
 }

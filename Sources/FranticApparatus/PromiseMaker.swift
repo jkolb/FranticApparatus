@@ -23,7 +23,7 @@
  */
 
 public final class PromiseMaker {
-    public static func makeUsing<Context : AnyObject, Value, InitialValue>(dispatcher: Dispatcher = GCDDispatcher.main, context: Context, builder: (((Context) -> Promise<InitialValue>) -> PromiseMakerHelper<Context, InitialValue>) -> PromiseMakerHelper<Context, Value>) -> Promise<Value> {
+    public static func makeUsing<Context, Value, InitialValue>(dispatcher: Dispatcher = GCDDispatcher.main, context: Context, builder: (((Context) -> Promise<InitialValue>) -> PromiseMakerHelper<Context, InitialValue>) -> PromiseMakerHelper<Context, Value>) -> Promise<Value> {
         return builder { (initialBuilder) in
             return PromiseMakerHelper<Context, InitialValue>(dispatcher: dispatcher, context: context, promise: initialBuilder(context))
         }.promise

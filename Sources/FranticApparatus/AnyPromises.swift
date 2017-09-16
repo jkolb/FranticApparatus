@@ -44,7 +44,7 @@ public struct AnyResult<Key : Hashable, Value> {
     }
 }
 
-public func any<Key : Hashable, Value>(_ promises: [Key:Promise<Value>]) -> Promise<AnyResult<Key, Value>> {
+public func any<Key, Value>(_ promises: [Key:Promise<Value>]) -> Promise<AnyResult<Key, Value>> {
     return Promise<AnyResult<Key, Value>>(pending: promises) { (fulfill, reject) in
         let any = AnyPromises<Key, Value>(
             count: promises.count,
