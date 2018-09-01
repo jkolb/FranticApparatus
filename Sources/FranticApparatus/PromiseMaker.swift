@@ -1,7 +1,7 @@
 /*
  The MIT License (MIT)
  
- Copyright (c) 2016 Justin Kolb
+ Copyright (c) 2018 Justin Kolb
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -31,8 +31,8 @@ public final class PromiseMaker {
 }
 
 public final class PromiseMakerHelper<Context: AnyObject, Value> {
-    fileprivate let dispatcher: Dispatcher
-    fileprivate let context: Context
+    private let dispatcher: Dispatcher
+    private let context: Context
     fileprivate let promise: Promise<Value>
     
     fileprivate init(dispatcher: Dispatcher, context: Context, promise: Promise<Value>) {

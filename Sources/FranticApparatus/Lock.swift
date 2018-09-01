@@ -1,7 +1,7 @@
 /*
  The MIT License (MIT)
  
- Copyright (c) 2016 Justin Kolb
+ Copyright (c) 2018 Justin Kolb
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@
 #endif
 
 final class Lock {
-    fileprivate var mutex = pthread_mutex_t()
+    private var mutex = pthread_mutex_t()
     
     init() {
         pthread_mutex_init(&mutex, nil)

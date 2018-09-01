@@ -1,7 +1,7 @@
 /*
  The MIT License (MIT)
  
- Copyright (c) 2016 Justin Kolb
+ Copyright (c) 2018 Justin Kolb
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
  */
 
 final class Deferred<Value> {
-    fileprivate let pending: Any?
+    private let pending: Any?
     var onFulfilled: [(Value) -> Void]
     var onRejected: [(Error) -> Void]
     
@@ -43,7 +43,7 @@ final class Deferred<Value> {
         self.init(pending: pendingPromise, onFulfilled: onFulfilled, onRejected: onRejected)
     }
     
-    fileprivate init(pending: Any?, onFulfilled: [(Value) -> Void], onRejected: [(Error) -> Void]) {
+    private init(pending: Any?, onFulfilled: [(Value) -> Void], onRejected: [(Error) -> Void]) {
         self.pending = pending
         self.onFulfilled = onFulfilled
         self.onRejected = onRejected

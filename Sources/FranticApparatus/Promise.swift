@@ -1,7 +1,7 @@
 /*
  The MIT License (MIT)
  
- Copyright (c) 2016 Justin Kolb
+ Copyright (c) 2018 Justin Kolb
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,8 @@
  */
 
 public final class Promise<Value> : Thenable {
-    fileprivate let lock: Lock
-    fileprivate var state: State<Value>
+    private let lock: Lock
+    private var state: State<Value>
     
     public init(_ promise: (_ fulfill: @escaping (Value) -> Void, _ reject: @escaping (Error) -> Void, _ isCancelled: @escaping () -> Bool) -> Void) {
         self.lock = Lock()
@@ -73,14 +73,14 @@ public final class Promise<Value> : Thenable {
         resolver(weakifyFulfill(), weakifyReject())
     }
 
-    fileprivate init<PendingValue>(pendingPromise: Promise<PendingValue>, _ resolver: (_ resolve: @escaping (Result<Value>) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
+    private init<PendingValue>(pendingPromise: Promise<PendingValue>, _ resolver: (_ resolve: @escaping (Result<Value>) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
         self.lock = Lock()
         self.state = .pending(Deferred(pendingPromise: pendingPromise))
         
         resolver(weakifyResolve(), weakifyReject())
     }
     
-    fileprivate func weakifyFulfill() -> (Value) -> Void {
+    private func weakifyFulfill() -> (Value) -> Void {
         return { [weak self] (value) in
             guard let strongSelf = self else { return }
             
@@ -88,7 +88,7 @@ public final class Promise<Value> : Thenable {
         }
     }
     
-    fileprivate func fulfill(_ value: Value) {
+    private func fulfill(_ value: Value) {
         lock.lock()
         
         switch state {
@@ -105,7 +105,7 @@ public final class Promise<Value> : Thenable {
         }
     }
     
-    fileprivate func weakifyReject() -> (Error) -> Void {
+    private func weakifyReject() -> (Error) -> Void {
         return { [weak self] (reason) in
             guard let strongSelf = self else { return }
             
@@ -113,7 +113,7 @@ public final class Promise<Value> : Thenable {
         }
     }
     
-    fileprivate func reject(_ reason: Error) {
+    private func reject(_ reason: Error) {
         lock.lock()
         
         switch state {
@@ -130,7 +130,7 @@ public final class Promise<Value> : Thenable {
         }
     }
     
-    fileprivate func pendOn(_ promise: Promise<Value>) {
+    private func pendOn(_ promise: Promise<Value>) {
         precondition(promise !== self)
 
         lock.lock()
@@ -146,7 +146,7 @@ public final class Promise<Value> : Thenable {
         }
     }
     
-    fileprivate func weakifyResolve() -> (Result<Value>) -> Void {
+    private func weakifyResolve() -> (Result<Value>) -> Void {
         return { [weak self] (result) in
             guard let strongSelf = self else { return }
             
@@ -154,7 +154,7 @@ public final class Promise<Value> : Thenable {
         }
     }
 
-    fileprivate func resolve(_ result: Result<Value>) {
+    private func resolve(_ result: Result<Value>) {
         switch result {
         case .value(let value):
             fulfill(value)

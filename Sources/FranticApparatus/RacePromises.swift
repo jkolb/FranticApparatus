@@ -1,7 +1,7 @@
 /*
  The MIT License (MIT)
  
- Copyright (c) 2016 Justin Kolb
+ Copyright (c) 2018 Justin Kolb
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -45,13 +45,13 @@ public func race<Value, Promises : Collection>(_ promises: Promises) -> Promise<
     }
 }
 
-fileprivate final class RacePromises<Value> {
-    fileprivate let lock: Lock
-    fileprivate let count: Int
-    fileprivate let fulfill: (Value) -> Void
-    fileprivate let reject: ([Error]) -> Void
-    fileprivate var values: [Value]
-    fileprivate var reasons: [Error]
+private final class RacePromises<Value> {
+    private let lock: Lock
+    private let count: Int
+    private let fulfill: (Value) -> Void
+    private let reject: ([Error]) -> Void
+    private var values: [Value]
+    private var reasons: [Error]
     
     fileprivate init(count: Int, fulfill: @escaping (Value) -> Void, reject: @escaping ([Error]) -> Void) {
         self.lock = Lock()

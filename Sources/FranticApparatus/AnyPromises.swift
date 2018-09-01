@@ -1,7 +1,7 @@
 /*
  The MIT License (MIT)
  
- Copyright (c) 2016 Justin Kolb
+ Copyright (c) 2018 Justin Kolb
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -67,13 +67,13 @@ public func any<Key, Value>(_ promises: [Key:Promise<Value>]) -> Promise<AnyResu
     }
 }
 
-fileprivate final class AnyPromises<Key : Hashable, Value> {
-    fileprivate let lock: Lock
-    fileprivate let count: Int
-    fileprivate let fulfill: (AnyResult<Key, Value>) -> Void
-    fileprivate let reject: ([Key:Error]) -> Void
-    fileprivate var values: [Key:Value]
-    fileprivate var reasons: [Key:Error]
+private final class AnyPromises<Key : Hashable, Value> {
+    private let lock: Lock
+    private let count: Int
+    private let fulfill: (AnyResult<Key, Value>) -> Void
+    private let reject: ([Key:Error]) -> Void
+    private var values: [Key:Value]
+    private var reasons: [Key:Error]
     
     fileprivate init(count: Int, fulfill: @escaping (AnyResult<Key, Value>) -> Void, reject: @escaping ([Key:Error]) -> Void) {
         self.lock = Lock()
