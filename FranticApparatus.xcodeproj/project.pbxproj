@@ -59,7 +59,7 @@
 
 /* Begin PBXFileReference section */
 		"FranticApparatus::FranticApparatus::Product" /* FranticApparatus.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = FranticApparatus.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		"FranticApparatus::FranticApparatusTests::Product" /* FranticApparatusTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = FranticApparatusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		"FranticApparatus::FranticApparatusTests::Product" /* FranticApparatusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = FranticApparatusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		OBJ_10 /* AnyPromises.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyPromises.swift; sourceTree = "<group>"; };
 		OBJ_11 /* Deferred.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deferred.swift; sourceTree = "<group>"; };
 		OBJ_12 /* Dispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dispatcher.swift; sourceTree = "<group>"; };
@@ -127,7 +127,7 @@
 			name = Products;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -139,7 +139,6 @@
 				OBJ_29 /* FranticApparatus */,
 				OBJ_30 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_7 /* Sources */ = {
@@ -229,15 +228,24 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 9999;
+				TargetAttributes = {
+					"FranticApparatus::FranticApparatus" = {
+						LastSwiftMigration = 1020;
+					};
+					"FranticApparatus::FranticApparatusTests" = {
+						LastSwiftMigration = 1020;
+					};
+				};
 			};
 			buildConfigurationList = OBJ_2 /* Build configuration list for PBXProject "FranticApparatus" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_30 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -331,7 +339,7 @@
 			buildSettings = {
 				LD = /usr/bin/true;
 				OTHER_SWIFT_FLAGS = "-swift-version 4 -I /home/jkolb/swift-4.0.0/usr/lib/swift/pm/4 -sdk /";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -340,7 +348,7 @@
 			buildSettings = {
 				LD = /usr/bin/true;
 				OTHER_SWIFT_FLAGS = "-swift-version 4 -I /home/jkolb/swift-4.0.0/usr/lib/swift/pm/4 -sdk /";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -377,7 +385,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGET_NAME = FranticApparatusTests;
 			};
 			name = Debug;
@@ -395,7 +403,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGET_NAME = FranticApparatusTests;
 			};
 			name = Release;
@@ -417,7 +425,7 @@
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGET_NAME = FranticApparatus;
 			};
 			name = Debug;
@@ -439,7 +447,7 @@
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGET_NAME = FranticApparatus;
 			};
 			name = Release;

@@ -32,7 +32,7 @@ public class ImageCell : UICollectionViewCell {
     public override init(frame: CGRect) {
         self.imageView = UIImageView()
         self.errorLabel = UILabel()
-        self.activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        self.activityIndicator = UIActivityIndicatorView(style: .gray)
         super.init(frame: frame)
         commonInit()
     }
@@ -40,7 +40,7 @@ public class ImageCell : UICollectionViewCell {
     public required init?(coder aDecoder: NSCoder) {
         self.imageView = UIImageView()
         self.errorLabel = UILabel()
-        self.activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        self.activityIndicator = UIActivityIndicatorView(style: .gray)
         super.init(coder: aDecoder)
         commonInit()
     }
