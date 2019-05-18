@@ -41,17 +41,17 @@ public final class PromiseMakerHelper<Context: AnyObject, Value> {
         self.promise = promise
     }
     
-    public func then<ResultingValue>(onFulfilled: @escaping (Context, Value) throws -> Fulfilled<ResultingValue>, onRejected: @escaping (Context, Error) throws -> Fulfilled<ResultingValue>) -> PromiseMakerHelper<Context, ResultingValue> {
+    public func then<ResultingValue>(onFulfilled: @escaping (Context, Value) throws -> Promised<ResultingValue>, onRejected: @escaping (Context, Error) throws -> Promised<ResultingValue>) -> PromiseMakerHelper<Context, ResultingValue> {
         weak var weakContext = self.context
 
         let promise2 = promise.then(
             on: dispatcher,
-            onFulfilled: { (value) throws -> Fulfilled<ResultingValue> in
+            onFulfilled: { (value) throws -> Promised<ResultingValue> in
                 guard let context = weakContext else { throw PromiseError.contextDeallocated }
                 
                 return try onFulfilled(context, value)
             },
-            onRejected: { (reason) throws -> Fulfilled<ResultingValue> in
+            onRejected: { (reason) throws -> Promised<ResultingValue> in
                 guard let context = weakContext else { throw PromiseError.contextDeallocated }
                 
                 return try onRejected(context, reason)
@@ -60,19 +60,19 @@ public final class PromiseMakerHelper<Context: AnyObject, Value> {
         return PromiseMakerHelper<Context, ResultingValue>(dispatcher: dispatcher, context: context, promise: promise2)
     }
     
-    public func whenFulfilledThenMap<ResultingValue>(_ map: @escaping (Context, Value) throws -> Fulfilled<ResultingValue>) -> PromiseMakerHelper<Context, ResultingValue> {
+    public func whenFulfilledThenMap<ResultingValue>(_ map: @escaping (Context, Value) throws -> Promised<ResultingValue>) -> PromiseMakerHelper<Context, ResultingValue> {
         return then(
-            onFulfilled: { (context, value) throws -> Fulfilled<ResultingValue> in
+            onFulfilled: { (context, value) throws -> Promised<ResultingValue> in
                 return try map(context, value)
             },
-            onRejected: { (context, reason) throws -> Fulfilled<ResultingValue> in
+            onRejected: { (context, reason) throws -> Promised<ResultingValue> in
                 throw reason
             }
         )
     }
     
     public func whenFulfilled(_ thenDo: @escaping (Context, Value) throws -> Void) -> PromiseMakerHelper<Context, Value> {
-        return whenFulfilledThenMap { (context, value) throws -> Fulfilled<Value> in
+        return whenFulfilledThenMap { (context, value) throws -> Promised<Value> in
             try thenDo(context, value)
             
             return .value(value)
@@ -80,7 +80,7 @@ public final class PromiseMakerHelper<Context: AnyObject, Value> {
     }
     
     public func whenFulfilledThenTransform<ResultingValue>(_ transform: @escaping (Context, Value) throws -> ResultingValue) -> PromiseMakerHelper<Context, ResultingValue> {
-        return whenFulfilledThenMap { (context, value) throws -> Fulfilled<ResultingValue> in
+        return whenFulfilledThenMap { (context, value) throws -> Promised<ResultingValue> in
             let result = try transform(context, value)
             
             return .value(result)
@@ -88,19 +88,19 @@ public final class PromiseMakerHelper<Context: AnyObject, Value> {
     }
     
     public func whenFulfilledThenPromise<ResultingValue>(_ promise: @escaping (Context, Value) throws -> Promise<ResultingValue>) -> PromiseMakerHelper<Context, ResultingValue> {
-        return whenFulfilledThenMap { (context, value) throws -> Fulfilled<ResultingValue> in
+        return whenFulfilledThenMap { (context, value) throws -> Promised<ResultingValue> in
             let result = try promise(context, value)
             
             return .promise(result)
         }
     }
     
-    public func whenRejectedThenMap(_ map: @escaping (Context, Error) throws -> Fulfilled<Value>) -> PromiseMakerHelper<Context, Value> {
+    public func whenRejectedThenMap(_ map: @escaping (Context, Error) throws -> Promised<Value>) -> PromiseMakerHelper<Context, Value> {
         return then(
-            onFulfilled: { (context, value) throws -> Fulfilled<Value> in
+            onFulfilled: { (context, value) throws -> Promised<Value> in
                 return .value(value)
             },
-            onRejected: { (context, reason) throws -> Fulfilled<Value> in
+            onRejected: { (context, reason) throws -> Promised<Value> in
                 let result = try map(context, reason)
                 
                 return result
@@ -109,7 +109,7 @@ public final class PromiseMakerHelper<Context: AnyObject, Value> {
     }
     
     public func whenRejected(_ thenDo: @escaping (Context, Error) throws -> Void) -> PromiseMakerHelper<Context, Value> {
-        return whenRejectedThenMap { (context, reason) throws -> Fulfilled<Value> in
+        return whenRejectedThenMap { (context, reason) throws -> Promised<Value> in
             try thenDo(context, reason)
             
             throw reason
@@ -117,7 +117,7 @@ public final class PromiseMakerHelper<Context: AnyObject, Value> {
     }
     
     public func whenRejectedThenTransform(_ transform: @escaping (Context, Error) throws -> Value) -> PromiseMakerHelper<Context, Value> {
-        return whenRejectedThenMap { (context, reason) throws -> Fulfilled<Value> in
+        return whenRejectedThenMap { (context, reason) throws -> Promised<Value> in
             let result = try transform(context, reason)
             
             return .value(result)
@@ -125,7 +125,7 @@ public final class PromiseMakerHelper<Context: AnyObject, Value> {
     }
     
     public func whenRejectedThenPromise(_ promise: @escaping (Context, Error) throws -> Promise<Value>) -> PromiseMakerHelper<Context, Value> {
-        return whenRejectedThenMap { (context, reason) throws -> Fulfilled<Value> in
+        return whenRejectedThenMap { (context, reason) throws -> Promised<Value> in
             let result = try promise(context, reason)
             
             return .promise(result)
@@ -134,12 +134,12 @@ public final class PromiseMakerHelper<Context: AnyObject, Value> {
     
     public func whenComplete(_ thenDo: @escaping (Context) -> Void) -> PromiseMakerHelper<Context, Value> {
         return then(
-            onFulfilled: { (context, value) throws -> Fulfilled<Value> in
+            onFulfilled: { (context, value) throws -> Promised<Value> in
                 thenDo(context)
                 
                 return .value(value)
             },
-            onRejected: { (context, reason) throws -> Fulfilled<Value> in
+            onRejected: { (context, reason) throws -> Promised<Value> in
                 thenDo(context)
                 
                 throw reason

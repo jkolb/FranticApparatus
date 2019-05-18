@@ -35,7 +35,7 @@
 		OBJ_61 /* PromiseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* PromiseError.swift */; };
 		OBJ_62 /* PromiseMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* PromiseMaker.swift */; };
 		OBJ_63 /* RacePromises.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* RacePromises.swift */; };
-		OBJ_64 /* Fulfilled.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* Fulfilled.swift */; };
+		OBJ_64 /* Promised.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* Promised.swift */; };
 		OBJ_65 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* State.swift */; };
 		OBJ_66 /* Thenable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_22 /* Thenable.swift */; };
 /* End PBXBuildFile section */
@@ -70,7 +70,7 @@
 		OBJ_17 /* PromiseError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromiseError.swift; sourceTree = "<group>"; };
 		OBJ_18 /* PromiseMaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromiseMaker.swift; sourceTree = "<group>"; };
 		OBJ_19 /* RacePromises.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RacePromises.swift; sourceTree = "<group>"; };
-		OBJ_20 /* Fulfilled.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fulfilled.swift; sourceTree = "<group>"; };
+		OBJ_20 /* Promised.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Promised.swift; sourceTree = "<group>"; };
 		OBJ_21 /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
 		OBJ_22 /* Thenable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thenable.swift; sourceTree = "<group>"; };
 		OBJ_25 /* FranticApparatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FranticApparatusTests.swift; sourceTree = "<group>"; };
@@ -163,7 +163,7 @@
 				OBJ_17 /* PromiseError.swift */,
 				OBJ_18 /* PromiseMaker.swift */,
 				OBJ_19 /* RacePromises.swift */,
-				OBJ_20 /* Fulfilled.swift */,
+				OBJ_20 /* Promised.swift */,
 				OBJ_21 /* State.swift */,
 				OBJ_22 /* Thenable.swift */,
 			);
@@ -290,7 +290,7 @@
 				OBJ_61 /* PromiseError.swift in Sources */,
 				OBJ_62 /* PromiseMaker.swift in Sources */,
 				OBJ_63 /* RacePromises.swift in Sources */,
-				OBJ_64 /* Fulfilled.swift in Sources */,
+				OBJ_64 /* Promised.swift in Sources */,
 				OBJ_65 /* State.swift in Sources */,
 				OBJ_66 /* Thenable.swift in Sources */,
 			);

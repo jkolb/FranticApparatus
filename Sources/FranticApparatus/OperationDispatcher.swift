@@ -35,7 +35,7 @@ public final class OperationDispatcher : Dispatcher {
         self.queue = queue
     }
     
-    public func dispatch(_ closure: @escaping () -> Void) {
+    public func async(_ closure: @escaping () -> Void) {
         queue.addOperation(closure)
     }
 }

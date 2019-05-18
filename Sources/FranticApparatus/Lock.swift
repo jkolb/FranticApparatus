@@ -22,11 +22,22 @@
  SOFTWARE.
  */
 
-#if os(OSX) || os(iOS)
-    import Darwin
+#if os(OSX) || os(iOS) || os(tvOS) || os(watchOS)
+import Darwin
+
+final class Lock {
+    private var unfairLock = os_unfair_lock()
+    
+    func lock() {
+        os_unfair_lock_lock(&unfairLock)
+    }
+    
+    func unlock() {
+        os_unfair_lock_unlock(&unfairLock)
+    }
+}
 #elseif os(Linux)
-    import Glibc
-#endif
+import Glibc
 
 final class Lock {
     private var mutex = pthread_mutex_t()
@@ -47,3 +58,4 @@ final class Lock {
         pthread_mutex_unlock(&mutex)
     }
 }
+#endif

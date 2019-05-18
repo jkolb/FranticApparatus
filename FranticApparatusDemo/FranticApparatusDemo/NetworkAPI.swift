@@ -57,7 +57,7 @@ public final class NetworkAPI {
 
     fileprivate func parseJSONData(_ data: Data) -> Promise<NSDictionary> {
         return Promise<NSDictionary> { (fulfill, reject, isCancelled) in
-            dispatcher.dispatch {
+            dispatcher.async {
                 do {
                     let object = try JSONSerialization.jsonObject(with: data, options: [])
                     
@@ -77,7 +77,7 @@ public final class NetworkAPI {
     
     fileprivate func parseImageData(_ data: Data) -> Promise<UIImage> {
         return Promise<UIImage> { (fulfill, reject, isCancelled) in
-            dispatcher.dispatch {
+            dispatcher.async {
                 if let image = UIImage(data: data) {
                     fulfill(image)
                 }

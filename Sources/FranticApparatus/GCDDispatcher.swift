@@ -35,7 +35,7 @@ public final class GCDDispatcher : Dispatcher {
         self.queue = queue
     }
     
-    public func dispatch(_ closure: @escaping () -> Void) {
+    public func async(_ closure: @escaping () -> Void) {
         queue.async(execute: closure)
     }
 }

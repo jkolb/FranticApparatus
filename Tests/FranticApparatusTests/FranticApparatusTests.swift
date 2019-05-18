@@ -50,11 +50,11 @@ class FranticApparatusTests: XCTestCase, Dispatcher {
         
         promiseIntA = Promise<Int> { (fulfill, reject, isCancelled) in fulfill(1) }.then(
             on: self,
-            onFulfilled: { (value) -> Fulfilled<Int> in
+            onFulfilled: { (value) -> Promised<Int> in
                 promisedValue = value
                 return .value(value)
             },
-            onRejected: { (reason) -> Fulfilled<Int> in
+            onRejected: { (reason) -> Promised<Int> in
                 throw reason
             }
         )
@@ -69,10 +69,10 @@ class FranticApparatusTests: XCTestCase, Dispatcher {
         
         promiseIntA = Promise<Int> { (fulfill, reject, isCancelled) in reject(TestError.expectedRejection) }.then(
             on: self,
-            onFulfilled: { (value) -> Fulfilled<Int> in
+            onFulfilled: { (value) -> Promised<Int> in
                 return .value(value)
             },
-            onRejected: { (reason) -> Fulfilled<Int> in
+            onRejected: { (reason) -> Promised<Int> in
                 promisedReason = reason as! TestError
                 throw reason
             }
@@ -91,24 +91,24 @@ class FranticApparatusTests: XCTestCase, Dispatcher {
         
         promiseIntA = promise.then(
             on: self,
-            onFulfilled: { (value) -> Fulfilled<Int> in
+            onFulfilled: { (value) -> Promised<Int> in
                 promisedOrder += 1
                 promisedOrders.append(promisedOrder)
                 return .value(value)
             },
-            onRejected: { (reason) -> Fulfilled<Int> in
+            onRejected: { (reason) -> Promised<Int> in
                 throw reason
             }
         )
 
         promiseIntB = promise.then(
             on: self,
-            onFulfilled: { (value) -> Fulfilled<Int> in
+            onFulfilled: { (value) -> Promised<Int> in
                 promisedOrder += 1
                 promisedOrders.append(promisedOrder)
                 return .value(value)
             },
-            onRejected: { (reason) -> Fulfilled<Int> in
+            onRejected: { (reason) -> Promised<Int> in
                 throw reason
             }
         )
@@ -127,10 +127,10 @@ class FranticApparatusTests: XCTestCase, Dispatcher {
         
         promiseIntA = promise.then(
             on: self,
-            onFulfilled: { (value) -> Fulfilled<Int> in
+            onFulfilled: { (value) -> Promised<Int> in
                 return .value(value)
             },
-            onRejected: { (reason) -> Fulfilled<Int> in
+            onRejected: { (reason) -> Promised<Int> in
                 promisedOrder += 1
                 promisedOrders.append(promisedOrder)
                 throw reason
@@ -139,10 +139,10 @@ class FranticApparatusTests: XCTestCase, Dispatcher {
         
         promiseIntB = promise.then(
             on: self,
-            onFulfilled: { (value) -> Fulfilled<Int> in
+            onFulfilled: { (value) -> Promised<Int> in
                 return .value(value)
             },
-            onRejected: { (reason) -> Fulfilled<Int> in
+            onRejected: { (reason) -> Promised<Int> in
                 promisedOrder += 1
                 promisedOrders.append(promisedOrder)
                 throw reason
@@ -163,19 +163,19 @@ class FranticApparatusTests: XCTestCase, Dispatcher {
         
         promiseString = promiseA.then(
             on: self,
-            onFulfilled: { (value) -> Fulfilled<String> in
+            onFulfilled: { (value) -> Promised<String> in
                 return .promise(promiseB)
             },
-            onRejected: { (reason) -> Fulfilled<String> in
+            onRejected: { (reason) -> Promised<String> in
                 throw reason
             }
             ).then(
                 on: self,
-                onFulfilled: { (value) -> Fulfilled<String> in
+                onFulfilled: { (value) -> Promised<String> in
                     promisedValue = value
                     return .value(value)
                 },
-                onRejected: { (reason) -> Fulfilled<String> in
+                onRejected: { (reason) -> Promised<String> in
                     throw reason
                 }
         )
@@ -194,18 +194,18 @@ class FranticApparatusTests: XCTestCase, Dispatcher {
         
         promiseString = promiseA.then(
             on: self,
-            onFulfilled: { (value) -> Fulfilled<String> in
+            onFulfilled: { (value) -> Promised<String> in
                 return .promise(promiseB)
             },
-            onRejected: { (reason) -> Fulfilled<String> in
+            onRejected: { (reason) -> Promised<String> in
                 throw reason
             }
             ).then(
                 on: self,
-                onFulfilled: { (value) -> Fulfilled<String> in
+                onFulfilled: { (value) -> Promised<String> in
                     return .value(value)
                 },
-                onRejected: { (reason) -> Fulfilled<String> in
+                onRejected: { (reason) -> Promised<String> in
                     promisedReason = reason as! TestError
                     throw reason
                 }
@@ -224,18 +224,18 @@ class FranticApparatusTests: XCTestCase, Dispatcher {
         
         promiseString = promise.then(
             on: self,
-            onFulfilled: { (value) -> Fulfilled<String> in
+            onFulfilled: { (value) -> Promised<String> in
                 throw TestError.expectedRejection
             },
-            onRejected: { (reason) -> Fulfilled<String> in
+            onRejected: { (reason) -> Promised<String> in
                 throw reason
             }
             ).then(
                 on: self,
-                onFulfilled: { (value) -> Fulfilled<String> in
+                onFulfilled: { (value) -> Promised<String> in
                     return .value(value)
                 },
-                onRejected: { (reason) -> Fulfilled<String> in
+                onRejected: { (reason) -> Promised<String> in
                     promisedReason = reason as! TestError
                     throw reason
                 }
@@ -254,18 +254,18 @@ class FranticApparatusTests: XCTestCase, Dispatcher {
         
         promiseString = promise.then(
             on: self,
-            onFulfilled: { (value) -> Fulfilled<String> in
+            onFulfilled: { (value) -> Promised<String> in
                 return .value("promised")
             },
-            onRejected: { (reason) -> Fulfilled<String> in
+            onRejected: { (reason) -> Promised<String> in
                 throw TestError.expectedRejection
             }
             ).then(
                 on: self,
-                onFulfilled: { (value) -> Fulfilled<String> in
+                onFulfilled: { (value) -> Promised<String> in
                     return .value(value)
                 },
-                onRejected: { (reason) -> Fulfilled<String> in
+                onRejected: { (reason) -> Promised<String> in
                     promisedReason = reason as! TestError
                     throw reason
                 }
@@ -277,7 +277,7 @@ class FranticApparatusTests: XCTestCase, Dispatcher {
         XCTAssertEqual(promisedReason, TestError.expectedRejection)
     }
 
-    func dispatch(_ closure: @escaping () -> Void) {
+    func async(_ closure: @escaping () -> Void) {
         pendingDispatch.append(closure)
     }
     
