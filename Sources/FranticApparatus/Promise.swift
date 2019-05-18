@@ -34,9 +34,17 @@ public final class Promise<Value> : Thenable {
             return self == nil
         }
         
-        promise(weakifyFulfill(), weakifyReject(), isCancelled)
+        promise(weakify(Promise.fulfill), weakify(Promise.reject), isCancelled)
     }
-    
+
+    private func weakify<V>(_ method: @escaping (Promise<Value>) -> (V) -> Void) -> (V) -> Void {
+        return { [weak self] (value: V) in
+            guard let self = self else { return }
+            
+            method(self)(value)
+        }
+    }
+
     public func then<ResultingValue>(on dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> Fulfilled<ResultingValue>, onRejected: @escaping (Error) throws -> Fulfilled<ResultingValue>) -> Promise<ResultingValue> {
         return Promise<ResultingValue>(pendingPromise: self) { (resolve, reject) in
             self.onResolve(
@@ -70,22 +78,14 @@ public final class Promise<Value> : Thenable {
         self.lock = Lock()
         self.state = .pending(Deferred(pending: pending))
         
-        resolver(weakifyFulfill(), weakifyReject())
+        resolver(weakify(Promise.fulfill), weakify(Promise.reject))
     }
 
     private init<PendingValue>(pendingPromise: Promise<PendingValue>, _ resolver: (_ resolve: @escaping (Fulfilled<Value>) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
         self.lock = Lock()
         self.state = .pending(Deferred(pendingPromise: pendingPromise))
         
-        resolver(weakifyResolve(), weakifyReject())
-    }
-    
-    private func weakifyFulfill() -> (Value) -> Void {
-        return { [weak self] (value) in
-            guard let strongSelf = self else { return }
-            
-            strongSelf.fulfill(value)
-        }
+        resolver(weakify(Promise.resolve), weakify(Promise.reject))
     }
     
     private func fulfill(_ value: Value) {
@@ -102,14 +102,6 @@ public final class Promise<Value> : Thenable {
             
         default:
             fatalError("Duplicate attempt to resolve promise")
-        }
-    }
-    
-    private func weakifyReject() -> (Error) -> Void {
-        return { [weak self] (reason) in
-            guard let strongSelf = self else { return }
-            
-            strongSelf.reject(reason)
         }
     }
     
@@ -139,18 +131,10 @@ public final class Promise<Value> : Thenable {
         case .pending(let deferred):
             state = .pending(Deferred(pendingPromise: promise, onFulfilled: deferred.onFulfilled, onRejected: deferred.onRejected))
             lock.unlock()
-            promise.onResolve(fulfill: weakifyFulfill(), reject: weakifyReject())
+            promise.onResolve(fulfill: weakify(Promise.fulfill), reject: weakify(Promise.reject))
             
         default:
             fatalError("Duplicate attempt to resolve promise")
-        }
-    }
-    
-    private func weakifyResolve() -> (Fulfilled<Value>) -> Void {
-        return { [weak self] (result) in
-            guard let strongSelf = self else { return }
-            
-            strongSelf.resolve(result)
         }
     }
 
