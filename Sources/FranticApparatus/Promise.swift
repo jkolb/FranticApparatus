@@ -37,7 +37,7 @@ public final class Promise<Value> : Thenable {
         promise(weakifyFulfill(), weakifyReject(), isCancelled)
     }
     
-    public func then<ResultingValue>(on dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> Result<ResultingValue>, onRejected: @escaping (Error) throws -> Result<ResultingValue>) -> Promise<ResultingValue> {
+    public func then<ResultingValue>(on dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> Fulfilled<ResultingValue>, onRejected: @escaping (Error) throws -> Fulfilled<ResultingValue>) -> Promise<ResultingValue> {
         return Promise<ResultingValue>(pendingPromise: self) { (resolve, reject) in
             self.onResolve(
                 fulfill: { (value) in
@@ -73,7 +73,7 @@ public final class Promise<Value> : Thenable {
         resolver(weakifyFulfill(), weakifyReject())
     }
 
-    private init<PendingValue>(pendingPromise: Promise<PendingValue>, _ resolver: (_ resolve: @escaping (Result<Value>) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
+    private init<PendingValue>(pendingPromise: Promise<PendingValue>, _ resolver: (_ resolve: @escaping (Fulfilled<Value>) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
         self.lock = Lock()
         self.state = .pending(Deferred(pendingPromise: pendingPromise))
         
@@ -146,7 +146,7 @@ public final class Promise<Value> : Thenable {
         }
     }
     
-    private func weakifyResolve() -> (Result<Value>) -> Void {
+    private func weakifyResolve() -> (Fulfilled<Value>) -> Void {
         return { [weak self] (result) in
             guard let strongSelf = self else { return }
             
@@ -154,7 +154,7 @@ public final class Promise<Value> : Thenable {
         }
     }
 
-    private func resolve(_ result: Result<Value>) {
+    private func resolve(_ result: Fulfilled<Value>) {
         switch result {
         case .value(let value):
             fulfill(value)

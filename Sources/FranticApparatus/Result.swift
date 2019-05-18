@@ -22,7 +22,7 @@
  SOFTWARE.
  */
 
-public enum Result<Value> {
+public enum Fulfilled<Value> {
     case value(Value)
     case promise(Promise<Value>)
 }
