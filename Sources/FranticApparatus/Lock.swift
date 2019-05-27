@@ -25,24 +25,30 @@
 #if os(OSX) || os(iOS) || os(tvOS) || os(watchOS)
 import Darwin
 
-final class Lock {
-    private var unfairLock = os_unfair_lock()
+public final class Lock {
+    private var unfairLock: os_unfair_lock
     
-    func lock() {
+    public init() {
+        self.unfairLock = os_unfair_lock()
+    }
+    
+    public func lock() {
         os_unfair_lock_lock(&unfairLock)
     }
     
-    func unlock() {
+    public func unlock() {
         os_unfair_lock_unlock(&unfairLock)
     }
 }
 #elseif os(Linux)
 import Glibc
 
-final class Lock {
-    private var mutex = pthread_mutex_t()
+public final class Lock {
+    private var mutex: pthread_mutex_t
     
-    init() {
+    public init() {
+        self.mutex = pthread_mutex_t()
+        
         pthread_mutex_init(&mutex, nil)
     }
     
@@ -50,11 +56,11 @@ final class Lock {
         pthread_mutex_destroy(&mutex)
     }
     
-    func lock() {
+    public func lock() {
         pthread_mutex_lock(&mutex)
     }
     
-    func unlock() {
+    public func unlock() {
         pthread_mutex_unlock(&mutex)
     }
 }

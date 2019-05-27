@@ -22,21 +22,23 @@
  SOFTWARE.
  */
 
+import Dispatch
+
 public final class PromiseMaker {
-    public static func makeUsing<Context, Value, InitialValue>(dispatcher: Dispatcher = GCDDispatcher.main, context: Context, builder: (((Context) -> Promise<InitialValue>) -> PromiseMakerHelper<Context, InitialValue>) -> PromiseMakerHelper<Context, Value>) -> Promise<Value> {
+    public static func makeUsing<Context, Value, InitialValue>(executionContext: ExecutionContext = DispatchQueue.main, context: Context, builder: (((Context) -> Promise<InitialValue>) -> PromiseMakerHelper<Context, InitialValue>) -> PromiseMakerHelper<Context, Value>) -> Promise<Value> {
         return builder { (initialBuilder) in
-            return PromiseMakerHelper<Context, InitialValue>(dispatcher: dispatcher, context: context, promise: initialBuilder(context))
+            return PromiseMakerHelper<Context, InitialValue>(executionContext: executionContext, context: context, promise: initialBuilder(context))
         }.promise
     }
 }
 
 public final class PromiseMakerHelper<Context: AnyObject, Value> {
-    private let dispatcher: Dispatcher
+    private let executionContext: ExecutionContext
     private let context: Context
     fileprivate let promise: Promise<Value>
     
-    fileprivate init(dispatcher: Dispatcher, context: Context, promise: Promise<Value>) {
-        self.dispatcher = dispatcher
+    fileprivate init(executionContext: ExecutionContext, context: Context, promise: Promise<Value>) {
+        self.executionContext = executionContext
         self.context = context
         self.promise = promise
     }
@@ -45,7 +47,7 @@ public final class PromiseMakerHelper<Context: AnyObject, Value> {
         weak var weakContext = self.context
 
         let promise2 = promise.then(
-            on: dispatcher,
+            on: executionContext,
             onFulfilled: { (value) throws -> Promised<ResultingValue> in
                 guard let context = weakContext else { throw PromiseError.contextDeallocated }
                 
@@ -57,7 +59,7 @@ public final class PromiseMakerHelper<Context: AnyObject, Value> {
                 return try onRejected(context, reason)
             }
         )
-        return PromiseMakerHelper<Context, ResultingValue>(dispatcher: dispatcher, context: context, promise: promise2)
+        return PromiseMakerHelper<Context, ResultingValue>(executionContext: executionContext, context: context, promise: promise2)
     }
     
     public func whenFulfilledThenMap<ResultingValue>(_ map: @escaping (Context, Value) throws -> Promised<ResultingValue>) -> PromiseMakerHelper<Context, ResultingValue> {

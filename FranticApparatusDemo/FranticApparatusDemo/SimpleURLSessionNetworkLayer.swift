@@ -47,7 +47,7 @@ public final class SimpleURLSessionNetworkLayer : NetworkLayer {
                     fulfill(NetworkResult(response: response, data: data))
                 }
                 else {
-                    reject(NetworkError.highlyImprobable)
+                    fatalError("Unexpected")
                 }
             }.resume()
         }

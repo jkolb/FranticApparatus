@@ -22,7 +22,7 @@
  SOFTWARE.
  */
 
-public final class Promise<Value> : Thenable {
+public final class Promise<Value> {
     private let lock: Lock
     private var state: State<Value>
     
@@ -45,11 +45,11 @@ public final class Promise<Value> : Thenable {
         }
     }
 
-    public func then<ThenValue>(on dispatcher: Dispatcher, onFulfilled: @escaping (Value) throws -> Promised<ThenValue>, onRejected: @escaping (Error) throws -> Promised<ThenValue>) -> Promise<ThenValue> {
+    public func then<ThenValue>(on executionContext: ExecutionContext, onFulfilled: @escaping (Value) throws -> Promised<ThenValue>, onRejected: @escaping (Error) throws -> Promised<ThenValue>) -> Promise<ThenValue> {
         return Promise<ThenValue>(pendingPromise: self) { (resolve, reject) in
             self.onResolve(
                 fulfill: { (value) in
-                    dispatcher.async {
+                    executionContext.execute {
                         do {
                             let result = try onFulfilled(value)
                             resolve(result)
@@ -60,7 +60,7 @@ public final class Promise<Value> : Thenable {
                     }
                 },
                 reject: { (reason) in
-                    dispatcher.async {
+                    executionContext.execute {
                         do {
                             let result = try onRejected(reason)
                             resolve(result)
@@ -165,5 +165,97 @@ public final class Promise<Value> : Thenable {
             deferred.onRejected.append(reject)
             lock.unlock()
         }
+    }
+}
+
+public extension Promise {
+    func whenFulfilledThenMap<ResultingValue>(on executionContext: ExecutionContext, map: @escaping (Value) throws -> Promised<ResultingValue>) -> Promise<ResultingValue> {
+        return then(
+            on: executionContext,
+            onFulfilled: { (value) throws -> Promised<ResultingValue> in
+                return try map(value)
+            },
+            onRejected: { (reason) throws -> Promised<ResultingValue> in
+                throw reason
+            }
+        )
+    }
+    
+    func whenFulfilled(on executionContext: ExecutionContext, thenDo: @escaping (Value) throws -> Void) -> Promise<Value> {
+        return whenFulfilledThenMap(on: executionContext) { (value) throws -> Promised<Value> in
+            try thenDo(value)
+            
+            return .value(value)
+        }
+    }
+    
+    func whenFulfilledThenTransform<ResultingValue>(on executionContext: ExecutionContext, transform: @escaping (Value) throws -> ResultingValue) -> Promise<ResultingValue> {
+        return whenFulfilledThenMap(on: executionContext) { (value) throws -> Promised<ResultingValue> in
+            let result = try transform(value)
+            
+            return .value(result)
+        }
+    }
+    
+    func whenFulfilledThenPromise<ResultingValue>(on executionContext: ExecutionContext, promise: @escaping (Value) throws -> Promise<ResultingValue>) -> Promise<ResultingValue> {
+        return whenFulfilledThenMap(on: executionContext) { (value) throws -> Promised<ResultingValue> in
+            let result = try promise(value)
+            
+            return .promise(result)
+        }
+    }
+    
+    func whenRejectedThenMap(on executionContext: ExecutionContext, map: @escaping (Error) throws -> Promised<Value>) -> Promise<Value> {
+        return then(
+            on: executionContext,
+            onFulfilled: { (value) throws -> Promised<Value> in
+                return .value(value)
+            },
+            onRejected: { (reason) throws -> Promised<Value> in
+                let result = try map(reason)
+                
+                return result
+            }
+        )
+    }
+    
+    func whenRejected(on executionContext: ExecutionContext, thenDo: @escaping (Error) throws -> Void) -> Promise<Value> {
+        return whenRejectedThenMap(on: executionContext) { (reason) throws -> Promised<Value> in
+            try thenDo(reason)
+            
+            throw reason
+        }
+    }
+    
+    func whenRejectedThenTransform(on executionContext: ExecutionContext, transform: @escaping (Error) throws -> Value) -> Promise<Value> {
+        return whenRejectedThenMap(on: executionContext) { (reason) throws -> Promised<Value> in
+            let result = try transform(reason)
+            
+            return .value(result)
+        }
+    }
+    
+    func whenRejectedThenPromise(on executionContext: ExecutionContext, promise: @escaping (Error) throws -> Promise<Value>) -> Promise<Value> {
+        return whenRejectedThenMap(on: executionContext) { (reason) throws -> Promised<Value> in
+            let result = try promise(reason)
+            
+            return .promise(result)
+        }
+    }
+    
+    func whenComplete(on executionContext: ExecutionContext, thenDo: @escaping () -> Void) -> Promise<Value> {
+        return then(
+            on: executionContext,
+            onFulfilled: { (value) throws -> Promised<Value> in
+                thenDo()
+                
+                return .value(value)
+            },
+            onRejected: { (reason) throws -> Promised<Value> in
+                thenDo()
+                
+                throw reason
+            }
+        )
     }
 }

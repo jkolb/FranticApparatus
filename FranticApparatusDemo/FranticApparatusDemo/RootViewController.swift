@@ -66,16 +66,19 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
         collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         
-        let networkLayer = ActivityNetworkLayer(dispatcher: GCDDispatcher.main, networkLayer: SimpleURLSessionNetworkLayer(), networkActivityIndicator: ApplicationNetworkActvityIndicator())
-        let networkDispatcher = OperationDispatcher(queue: OperationQueue())
-        networkAPI = NetworkAPI(dispatcher: networkDispatcher, networkLayer: networkLayer)
+        let networkLayer = SimpleURLSessionNetworkLayer()//ActivityNetworkLayer(executionContext: DispatchQueue.main, networkLayer: SimpleURLSessionNetworkLayer(), networkActivityIndicator: ApplicationNetworkActvityIndicator())
+        let networkDispatcher = ThreadContext()
+        networkDispatcher.start()
+        networkAPI = NetworkAPI(executionContext: networkDispatcher, networkLayer: networkLayer)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
         if thumbnailsPromise == nil {
-            thumbnailsPromise = PromiseMaker.makeUsing(context: self) { (makePromise) in
+//            let executionContext = ThreadContext()
+//            executionContext.start()
+            ApplicationNetworkActvityIndicator.shared.show()
+            thumbnailsPromise = PromiseMaker.makeUsing(executionContext: CurrentContext(), context: self) { (makePromise) in
                 makePromise { (context) -> Promise<NSDictionary> in
                     context.networkAPI.requestJSONObjectForURL(URL(string: "https://reddit.com/.json")!)
                 }.whenFulfilledThenPromise { (context, object) -> Promise<[UIImage]> in
@@ -83,12 +86,18 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
                     let thumbnailPromises = thumbnailURLs.map({ context.networkAPI.requestImageForURL($0) })
                     return all(thumbnailPromises)
                 }.whenFulfilled { (context, thumbnails) in
-                    context.thumbnails = thumbnails
-                    context.collectionView.reloadData()
+//                    DispatchQueue.main.async {
+                        context.thumbnails = thumbnails
+//                        context.collectionView.reloadData()
+//                    }
                 }.whenRejected { (context, reason) in
                     NSLog("\(reason)")
                 }.whenComplete { (context) in
-                    context.thumbnailsPromise = nil
+                    DispatchQueue.main.async {
+                        context.thumbnailsPromise = nil
+                        ApplicationNetworkActvityIndicator.shared.hide()
+                        context.collectionView.reloadData()
+                    }
                 }
             }
         }
@@ -159,8 +168,6 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
         switch error {
         case let networkError as NetworkError:
             switch networkError {
-            case .highlyImprobable:
-                return "Nothing is impossible"
             case .unexpectedData(let data):
                 return "Unexpected Data: \(data)"
             case .unexpectedResponse(let response):

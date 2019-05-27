@@ -25,7 +25,6 @@
 import Foundation
 
 public enum NetworkError : Error {
-    case highlyImprobable
     case unexpectedData(Data)
     case unexpectedResponse(URLResponse)
     case unexpectedStatusCode(Int)

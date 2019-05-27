@@ -25,11 +25,10 @@
 import UIKit
 
 public final class ApplicationNetworkActvityIndicator : NetworkActivityIndicator {
-    fileprivate let lock: NSLock
-    fileprivate var activityVisibleCount: Int
+    public static let shared = ApplicationNetworkActvityIndicator()
+    private var activityVisibleCount: Int
 
     public init() {
-        self.lock = NSLock()
         self.activityVisibleCount = 0
     }
     
@@ -38,30 +37,22 @@ public final class ApplicationNetworkActvityIndicator : NetworkActivityIndicator
     }
 
     public func show() {
-        lock.lock()
-        
-        if activityVisibleCount == 0 {
+        if self.activityVisibleCount == 0 {
             UIApplication.shared.isNetworkActivityIndicatorVisible = true
-            activityVisibleCount = 1
+            self.activityVisibleCount = 1
         }
-        else if activityVisibleCount < Int.max {
-            activityVisibleCount += 1
+        else if self.activityVisibleCount < Int.max {
+            self.activityVisibleCount += 1
         }
-        
-        lock.unlock()
     }
     
     public func hide() {
-        lock.lock()
-        
-        if activityVisibleCount == 1 {
+        if self.activityVisibleCount == 1 {
             UIApplication.shared.isNetworkActivityIndicatorVisible = false
-            activityVisibleCount = 0
+            self.activityVisibleCount = 0
         }
-        else if activityVisibleCount > 0 {
-            activityVisibleCount -= 1
+        else if self.activityVisibleCount > 0 {
+            self.activityVisibleCount -= 1
         }
-        
-        lock.unlock()
     }
 }

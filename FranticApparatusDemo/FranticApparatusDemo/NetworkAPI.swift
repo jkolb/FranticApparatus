@@ -28,15 +28,15 @@ import UIKit
 
 public final class NetworkAPI {
     fileprivate let networkLayer: NetworkLayer
-    fileprivate let dispatcher: Dispatcher
+    fileprivate let executionContext: ExecutionContext
     
-    public init(dispatcher: Dispatcher, networkLayer: NetworkLayer) {
-        self.dispatcher = dispatcher
+    public init(executionContext: ExecutionContext, networkLayer: NetworkLayer) {
+        self.executionContext = executionContext
         self.networkLayer = networkLayer
     }
     
     public func requestJSONObjectForURL(_ url: URL) -> Promise<NSDictionary> {
-        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (makePromise) in
+        return PromiseMaker.makeUsing(executionContext: executionContext, context: self) { (makePromise) in
             makePromise { (context) in
                return context.requestJSON(URLRequest(url: url))
             }.whenFulfilledThenPromise { (context, data) in
@@ -46,7 +46,7 @@ public final class NetworkAPI {
     }
     
     public func requestImageForURL(_ url: URL) -> Promise<UIImage> {
-        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (makePromise) in
+        return PromiseMaker.makeUsing(executionContext: executionContext, context: self) { (makePromise) in
             makePromise { (context) in
                 return context.requestImage(URLRequest(url: url))
             }.whenFulfilledThenPromise { (context, data) in
@@ -57,7 +57,7 @@ public final class NetworkAPI {
 
     fileprivate func parseJSONData(_ data: Data) -> Promise<NSDictionary> {
         return Promise<NSDictionary> { (fulfill, reject, isCancelled) in
-            dispatcher.async {
+            executionContext.execute {
                 do {
                     let object = try JSONSerialization.jsonObject(with: data, options: [])
                     
@@ -77,7 +77,7 @@ public final class NetworkAPI {
     
     fileprivate func parseImageData(_ data: Data) -> Promise<UIImage> {
         return Promise<UIImage> { (fulfill, reject, isCancelled) in
-            dispatcher.async {
+            executionContext.execute {
                 if let image = UIImage(data: data) {
                     fulfill(image)
                 }
@@ -97,7 +97,7 @@ public final class NetworkAPI {
     }
     
     fileprivate func requestData(_ request: URLRequest, allowedStatusCodes: [Int], allowedContentTypes: [String]) -> Promise<Data> {
-        return PromiseMaker.makeUsing(dispatcher: dispatcher, context: self) { (makePromise) in
+        return PromiseMaker.makeUsing(executionContext: executionContext, context: self) { (makePromise) in
             makePromise { (context) in
                 return context.networkLayer.requestData(request)
             }.whenFulfilledThenTransform { (context, result) in
