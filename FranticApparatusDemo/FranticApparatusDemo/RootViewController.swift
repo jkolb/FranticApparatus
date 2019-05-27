@@ -30,7 +30,6 @@ enum JSONError : Error {
 }
 
 class RootViewController : UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    var networkAPI: NetworkAPI!
     var collectionView: UICollectionView!
     var models = [
         ImageModel(width: 125, height: 100, url: URL(string: "https://placekitten.com/100/100")!),
@@ -47,6 +46,8 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
     var promises = [IndexPath : Promise<UIImage>](minimumCapacity: 8)
     var thumbnailsPromise: Promise<[UIImage]>?
     var thumbnails = [UIImage]()
+    let networkLayer = SimpleURLSessionNetworkLayer()
+    let processQueue = DispatchQueue(label: "processing")
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,40 +66,58 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
         collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
         collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        
-        let networkLayer = SimpleURLSessionNetworkLayer()//ActivityNetworkLayer(executionContext: DispatchQueue.main, networkLayer: SimpleURLSessionNetworkLayer(), networkActivityIndicator: ApplicationNetworkActvityIndicator())
-        let networkDispatcher = ThreadContext()
-        networkDispatcher.start()
-        networkAPI = NetworkAPI(executionContext: networkDispatcher, networkLayer: networkLayer)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if thumbnailsPromise == nil {
-//            let executionContext = ThreadContext()
-//            executionContext.start()
             ApplicationNetworkActvityIndicator.shared.show()
-            thumbnailsPromise = PromiseMaker.makeUsing(executionContext: CurrentContext(), context: self) { (makePromise) in
-                makePromise { (context) -> Promise<NSDictionary> in
-                    context.networkAPI.requestJSONObjectForURL(URL(string: "https://reddit.com/.json")!)
-                }.whenFulfilledThenPromise { (context, object) -> Promise<[UIImage]> in
-                    let thumbnailURLs = try context.thumbnailsFromJSON(object: object)
-                    let thumbnailPromises = thumbnailURLs.map({ context.networkAPI.requestImageForURL($0) })
-                    return all(thumbnailPromises)
+            thumbnailsPromise = PromiseMaker.makeUsing(executionContext: DispatchQueue.main, context: self) { (makePromise) in
+                makePromise { (context) -> Promise<[UIImage]> in
+                    fetchThumbnails()
                 }.whenFulfilled { (context, thumbnails) in
-//                    DispatchQueue.main.async {
-                        context.thumbnails = thumbnails
-//                        context.collectionView.reloadData()
-//                    }
+                    context.thumbnails = thumbnails
+                    context.collectionView.reloadData()
                 }.whenRejected { (context, reason) in
                     NSLog("\(reason)")
                 }.whenComplete { (context) in
-                    DispatchQueue.main.async {
-                        context.thumbnailsPromise = nil
-                        ApplicationNetworkActvityIndicator.shared.hide()
-                        context.collectionView.reloadData()
-                    }
+                    ApplicationNetworkActvityIndicator.shared.hide()
+                    context.thumbnailsPromise = nil
                 }
+            }
+        }
+    }
+    
+    func fetchThumbnails() -> Promise<[UIImage]> {
+        return PromiseMaker.makeUsing(executionContext: processQueue, context: self) { (makePromise) in
+            makePromise { (context) -> Promise<NetworkResult> in
+                context.networkLayer.requestData(URLRequest(url: URL(string: "https://reddit.com/.json")!))
+            }.whenFulfilledThenPromise { (context, result) -> Promise<[UIImage]> in
+                guard let httpResponse = result.response as? HTTPURLResponse else {
+                    throw NetworkError.unexpectedResponse(result.response)
+                }
+                
+                guard Set<Int>([200]).contains(httpResponse.statusCode) else {
+                    throw NetworkError.unexpectedStatusCode(httpResponse.statusCode)
+                }
+                
+                let contentType = httpResponse.mimeType ?? ""
+                
+                guard Set<String>(["application/json"]).contains(contentType) else {
+                    throw NetworkError.unexpectedContentType(contentType)
+                }
+                
+                
+                let object = try JSONSerialization.jsonObject(with: result.data, options: [])
+                
+                guard let dictionary = object as? NSDictionary else {
+                    throw NetworkError.unexpectedData(result.data)
+                }
+                
+                
+                let thumbnailURLs = try context.thumbnailsFromJSON(object: dictionary)
+                let thumbnailPromises = thumbnailURLs.map({ context.fetchImage(url: $0) })
+                return all(thumbnailPromises)
             }
         }
     }
@@ -126,12 +145,40 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
         return thumbnailURLs
     }
     
+    func fetchImage(url: URL) -> Promise<UIImage> {
+        return PromiseMaker.makeUsing(executionContext: processQueue, context: self) { (makePromise) in
+            makePromise { (context) -> Promise<NetworkResult> in
+                context.networkLayer.requestData(URLRequest(url: url))
+            }.whenFulfilledThenTransform { (context, result) -> UIImage in
+                guard let httpResponse = result.response as? HTTPURLResponse else {
+                    throw NetworkError.unexpectedResponse(result.response)
+                }
+                
+                guard Set<Int>([200]).contains(httpResponse.statusCode) else {
+                    throw NetworkError.unexpectedStatusCode(httpResponse.statusCode)
+                }
+                
+                let contentType = httpResponse.mimeType ?? ""
+                
+                guard Set<String>(["image/jpeg", "image/png"]).contains(contentType) else {
+                    throw NetworkError.unexpectedContentType(contentType)
+                }
+                
+                guard let image = UIImage(data: result.data) else {
+                    throw NetworkError.unexpectedData(result.data)
+                }
+
+                return image
+            }
+        }
+    }
+    
     func loadImage(at indexPath: IndexPath) {
         let model = models[indexPath.item]
         
         promises[indexPath] = PromiseMaker.makeUsing(context: self) { (makePromise) in
             makePromise { (context) -> Promise<UIImage> in
-                context.networkAPI.requestImageForURL(model.url)
+                context.fetchImage(url: model.url)
             }.whenFulfilled { (context, image) in
                 context.images[indexPath] = image
                 context.showImage(at: indexPath)
