@@ -176,6 +176,7 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
     func loadImage(at indexPath: IndexPath) {
         let model = models[indexPath.item]
         
+        ApplicationNetworkActvityIndicator.shared.show()
         promises[indexPath] = PromiseMaker.makeUsing(context: self) { (makePromise) in
             makePromise { (context) -> Promise<UIImage> in
                 context.fetchImage(url: model.url)
@@ -186,6 +187,7 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
                 context.errors[indexPath] = reason
                 context.showError(at: indexPath)
             }.whenComplete { (context) in
+                ApplicationNetworkActvityIndicator.shared.hide()
                 context.promises[indexPath] = nil
             }
         }
