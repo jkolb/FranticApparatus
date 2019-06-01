@@ -22,9 +22,58 @@
  SOFTWARE.
  */
 
+public enum Result<Value> {
+    case value(Value)
+    case promise(Promise<Value>)
+}
+
 public final class Promise<Value> {
+    private enum State {
+        case pending(Deferred)
+        case fulfilled(Value)
+        case rejected(Error)
+    }
+
+    private final class Deferred {
+        private let pending: Any?
+        var onFulfilled: [(Value) -> Void]
+        var onRejected: [(Error) -> Void]
+        
+        convenience init() {
+            self.init(pending: nil, onFulfilled: [], onRejected: [])
+        }
+        
+        convenience init(pending: Any) {
+            self.init(pending: pending, onFulfilled: [], onRejected: [])
+        }
+        
+        convenience init<P>(pendingPromise: Promise<P>?) {
+            self.init(pending: pendingPromise, onFulfilled: [], onRejected: [])
+        }
+        
+        convenience init<P>(pendingPromise: Promise<P>, onFulfilled: [(Value) -> Void], onRejected: [(Error) -> Void]) {
+            self.init(pending: pendingPromise, onFulfilled: onFulfilled, onRejected: onRejected)
+        }
+        
+        private init(pending: Any?, onFulfilled: [(Value) -> Void], onRejected: [(Error) -> Void]) {
+            self.pending = pending
+            self.onFulfilled = onFulfilled
+            self.onRejected = onRejected
+        }
+    }
+
     private let lock: Lock
-    private var state: State<Value>
+    private var state: State
+    
+    public init(value: Value) {
+        self.lock = Lock()
+        self.state = .fulfilled(value)
+    }
+
+    public init(reason: Error) {
+        self.lock = Lock()
+        self.state = .rejected(reason)
+    }
     
     public init(_ promise: (_ fulfill: @escaping (Value) -> Void, _ reject: @escaping (Error) -> Void, _ isCancelled: @escaping () -> Bool) -> Void) {
         self.lock = Lock()
@@ -45,13 +94,49 @@ public final class Promise<Value> {
         }
     }
 
-    public func then<ThenValue>(on executionContext: ExecutionContext, onFulfilled: @escaping (Value) throws -> Promised<ThenValue>, onRejected: @escaping (Error) throws -> Promised<ThenValue>) -> Promise<ThenValue> {
-        return Promise<ThenValue>(pendingPromise: self) { (resolve, reject) in
+    public func then(on executionContext: ExecutionContext = ThreadContext.defaultContext, _ whenFulfilled: @escaping (Value) -> Void) -> Promise<Value> {
+        return then(on: executionContext, whenFulfilled: { whenFulfilled($0); return .value($0) }, whenRejected: { throw $0 })
+    }
+
+    public func then<Other>(on executionContext: ExecutionContext = ThreadContext.defaultContext, map: @escaping (Value) throws -> Other) -> Promise<Other> {
+        return then(on: executionContext, whenFulfilled: { try .value(map($0)) }, whenRejected: { throw $0 })
+    }
+
+    public func then<Other>(on executionContext: ExecutionContext = ThreadContext.defaultContext, promise: @escaping (Value) throws -> Promise<Other>) -> Promise<Other> {
+        return then(on: executionContext, whenFulfilled: { try .promise(promise($0)) }, whenRejected: { throw $0 })
+    }
+
+    public func then<Other>(on executionContext: ExecutionContext = ThreadContext.defaultContext, _ transform: @escaping (Value) throws -> Result<Other>) -> Promise<Other> {
+        return then(on: executionContext, whenFulfilled: transform, whenRejected: { throw $0 })
+    }
+
+    public func `catch`(on executionContext: ExecutionContext = ThreadContext.defaultContext, _ whenRejected: @escaping (Error) -> Void) -> Promise<Value> {
+        return then(on: executionContext, whenFulfilled: { .value($0) }, whenRejected: { whenRejected($0); throw $0 })
+    }
+
+    public func recover(on executionContext: ExecutionContext = ThreadContext.defaultContext, map: @escaping (Error) throws -> Value) -> Promise<Value> {
+        return then(on: executionContext, whenFulfilled: { .value($0) }, whenRejected: { try .value(map($0)) })
+    }
+
+    public func recover(on executionContext: ExecutionContext = ThreadContext.defaultContext, promise: @escaping (Error) throws -> Promise<Value>) -> Promise<Value> {
+        return then(on: executionContext, whenFulfilled: { .value($0) }, whenRejected: { try .promise(promise($0)) })
+    }
+
+    public func recover(on executionContext: ExecutionContext = ThreadContext.defaultContext, _ transform: @escaping (Error) throws -> Result<Value>) -> Promise<Value> {
+        return then(on: executionContext, whenFulfilled: { .value($0) }, whenRejected: transform)
+    }
+
+    public func finally(on executionContext: ExecutionContext = ThreadContext.defaultContext, _ always: @escaping () -> Void) -> Promise<Value> {
+        return then(on: executionContext, whenFulfilled: { always(); return .value($0) }, whenRejected: { always(); throw $0 })
+    }
+
+    public func then<Other>(on executionContext: ExecutionContext = ThreadContext.defaultContext, whenFulfilled: @escaping (Value) throws -> Result<Other>, whenRejected: @escaping (Error) throws -> Result<Other>) -> Promise<Other> {
+        return Promise<Other>(pendingPromise: self) { (resolve, reject) in
             self.onResolve(
                 fulfill: { (value) in
                     executionContext.execute {
                         do {
-                            let result = try onFulfilled(value)
+                            let result = try whenFulfilled(value)
                             resolve(result)
                         }
                         catch {
@@ -62,7 +147,7 @@ public final class Promise<Value> {
                 reject: { (reason) in
                     executionContext.execute {
                         do {
-                            let result = try onRejected(reason)
+                            let result = try whenRejected(reason)
                             resolve(result)
                         }
                         catch {
@@ -81,7 +166,7 @@ public final class Promise<Value> {
         resolver(weakify(Promise.fulfill), weakify(Promise.reject))
     }
 
-    private init<PendingValue>(pendingPromise: Promise<PendingValue>, _ resolver: (_ resolve: @escaping (Promised<Value>) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
+    private init<PendingValue>(pendingPromise: Promise<PendingValue>, _ resolver: (_ resolve: @escaping (Result<Value>) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
         self.lock = Lock()
         self.state = .pending(Deferred(pendingPromise: pendingPromise))
         
@@ -138,7 +223,7 @@ public final class Promise<Value> {
         }
     }
 
-    private func resolve(_ result: Promised<Value>) {
+    private func resolve(_ result: Result<Value>) {
         switch result {
         case .value(let value):
             fulfill(value)
@@ -165,97 +250,5 @@ public final class Promise<Value> {
             deferred.onRejected.append(reject)
             lock.unlock()
         }
-    }
-}
-
-public extension Promise {
-    func whenFulfilledThenMap<ResultingValue>(on executionContext: ExecutionContext, map: @escaping (Value) throws -> Promised<ResultingValue>) -> Promise<ResultingValue> {
-        return then(
-            on: executionContext,
-            onFulfilled: { (value) throws -> Promised<ResultingValue> in
-                return try map(value)
-            },
-            onRejected: { (reason) throws -> Promised<ResultingValue> in
-                throw reason
-            }
-        )
-    }
-    
-    func whenFulfilled(on executionContext: ExecutionContext, thenDo: @escaping (Value) throws -> Void) -> Promise<Value> {
-        return whenFulfilledThenMap(on: executionContext) { (value) throws -> Promised<Value> in
-            try thenDo(value)
-            
-            return .value(value)
-        }
-    }
-    
-    func whenFulfilledThenTransform<ResultingValue>(on executionContext: ExecutionContext, transform: @escaping (Value) throws -> ResultingValue) -> Promise<ResultingValue> {
-        return whenFulfilledThenMap(on: executionContext) { (value) throws -> Promised<ResultingValue> in
-            let result = try transform(value)
-            
-            return .value(result)
-        }
-    }
-    
-    func whenFulfilledThenPromise<ResultingValue>(on executionContext: ExecutionContext, promise: @escaping (Value) throws -> Promise<ResultingValue>) -> Promise<ResultingValue> {
-        return whenFulfilledThenMap(on: executionContext) { (value) throws -> Promised<ResultingValue> in
-            let result = try promise(value)
-            
-            return .promise(result)
-        }
-    }
-    
-    func whenRejectedThenMap(on executionContext: ExecutionContext, map: @escaping (Error) throws -> Promised<Value>) -> Promise<Value> {
-        return then(
-            on: executionContext,
-            onFulfilled: { (value) throws -> Promised<Value> in
-                return .value(value)
-            },
-            onRejected: { (reason) throws -> Promised<Value> in
-                let result = try map(reason)
-                
-                return result
-            }
-        )
-    }
-    
-    func whenRejected(on executionContext: ExecutionContext, thenDo: @escaping (Error) throws -> Void) -> Promise<Value> {
-        return whenRejectedThenMap(on: executionContext) { (reason) throws -> Promised<Value> in
-            try thenDo(reason)
-            
-            throw reason
-        }
-    }
-    
-    func whenRejectedThenTransform(on executionContext: ExecutionContext, transform: @escaping (Error) throws -> Value) -> Promise<Value> {
-        return whenRejectedThenMap(on: executionContext) { (reason) throws -> Promised<Value> in
-            let result = try transform(reason)
-            
-            return .value(result)
-        }
-    }
-    
-    func whenRejectedThenPromise(on executionContext: ExecutionContext, promise: @escaping (Error) throws -> Promise<Value>) -> Promise<Value> {
-        return whenRejectedThenMap(on: executionContext) { (reason) throws -> Promised<Value> in
-            let result = try promise(reason)
-            
-            return .promise(result)
-        }
-    }
-    
-    func whenComplete(on executionContext: ExecutionContext, thenDo: @escaping () -> Void) -> Promise<Value> {
-        return then(
-            on: executionContext,
-            onFulfilled: { (value) throws -> Promised<Value> in
-                thenDo()
-                
-                return .value(value)
-            },
-            onRejected: { (reason) throws -> Promised<Value> in
-                thenDo()
-                
-                throw reason
-            }
-        )
     }
 }

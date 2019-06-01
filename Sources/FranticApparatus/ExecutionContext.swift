@@ -41,15 +41,12 @@ extension OperationQueue : ExecutionContext {
     }
 }
 
-public final class CurrentContext : ExecutionContext {
-    public init() {}
-    
-    public func execute(_ block: @escaping () -> Void) {
-        block()
-    }
-}
-
 public final class ThreadContext : Thread, ExecutionContext {
+    public static var defaultContext: ExecutionContext = {
+        let threadContext = ThreadContext()
+        threadContext.start()
+        return threadContext
+    }()
     private let condition: NSCondition
     private var queue: [() -> Void]
     

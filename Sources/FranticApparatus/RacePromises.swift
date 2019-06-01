@@ -22,6 +22,18 @@
  SOFTWARE.
  */
 
+public struct ErrorArray : Error, CustomStringConvertible {
+    public let errors: [Error]
+    
+    public init(errors: [Error]) {
+        self.errors = errors
+    }
+    
+    public var description: String {
+        return self.errors.description
+    }
+}
+
 public func race<Value, Promises : Collection>(_ promises: Promises) -> Promise<Value> where Promises.Iterator.Element == Promise<Value> {
     return Promise<Value>(pending: promises) { (fulfill, reject) in
         let race = RacePromises<Value>(

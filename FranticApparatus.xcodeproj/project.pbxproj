@@ -26,15 +26,10 @@
 		OBJ_46 /* FranticApparatus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "FranticApparatus::FranticApparatus::Product" /* FranticApparatus.framework */; };
 		OBJ_53 /* AllPromises.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* AllPromises.swift */; };
 		OBJ_54 /* AnyPromises.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* AnyPromises.swift */; };
-		OBJ_55 /* Deferred.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* Deferred.swift */; };
 		OBJ_56 /* ExecutionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* ExecutionContext.swift */; };
 		OBJ_58 /* Lock.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* Lock.swift */; };
 		OBJ_60 /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* Promise.swift */; };
-		OBJ_61 /* PromiseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* PromiseError.swift */; };
-		OBJ_62 /* PromiseMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* PromiseMaker.swift */; };
 		OBJ_63 /* RacePromises.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* RacePromises.swift */; };
-		OBJ_64 /* Promised.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* Promised.swift */; };
-		OBJ_65 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* State.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,15 +53,10 @@
 		"FranticApparatus::FranticApparatus::Product" /* FranticApparatus.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = FranticApparatus.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"FranticApparatus::FranticApparatusTests::Product" /* FranticApparatusTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = FranticApparatusTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		OBJ_10 /* AnyPromises.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyPromises.swift; sourceTree = "<group>"; };
-		OBJ_11 /* Deferred.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deferred.swift; sourceTree = "<group>"; };
 		OBJ_12 /* ExecutionContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionContext.swift; sourceTree = "<group>"; };
 		OBJ_14 /* Lock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lock.swift; sourceTree = "<group>"; };
 		OBJ_16 /* Promise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
-		OBJ_17 /* PromiseError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromiseError.swift; sourceTree = "<group>"; };
-		OBJ_18 /* PromiseMaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromiseMaker.swift; sourceTree = "<group>"; };
 		OBJ_19 /* RacePromises.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RacePromises.swift; sourceTree = "<group>"; };
-		OBJ_20 /* Promised.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Promised.swift; sourceTree = "<group>"; };
-		OBJ_21 /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
 		OBJ_25 /* FranticApparatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FranticApparatusTests.swift; sourceTree = "<group>"; };
 		OBJ_26 /* FranticApparatusTests */ = {isa = PBXFileReference; lastKnownFileType = folder; path = FranticApparatusTests; sourceTree = SOURCE_ROOT; };
 		OBJ_27 /* FranticApparatus.xcworkspace */ = {isa = PBXFileReference; lastKnownFileType = wrapper.workspace; path = FranticApparatus.xcworkspace; sourceTree = SOURCE_ROOT; };
@@ -148,15 +138,10 @@
 			children = (
 				OBJ_9 /* AllPromises.swift */,
 				OBJ_10 /* AnyPromises.swift */,
-				OBJ_11 /* Deferred.swift */,
 				OBJ_12 /* ExecutionContext.swift */,
 				OBJ_14 /* Lock.swift */,
 				OBJ_16 /* Promise.swift */,
-				OBJ_17 /* PromiseError.swift */,
-				OBJ_18 /* PromiseMaker.swift */,
 				OBJ_19 /* RacePromises.swift */,
-				OBJ_20 /* Promised.swift */,
-				OBJ_21 /* State.swift */,
 			);
 			name = FranticApparatus;
 			path = Sources/FranticApparatus;
@@ -272,15 +257,10 @@
 			files = (
 				OBJ_53 /* AllPromises.swift in Sources */,
 				OBJ_54 /* AnyPromises.swift in Sources */,
-				OBJ_55 /* Deferred.swift in Sources */,
 				OBJ_56 /* ExecutionContext.swift in Sources */,
 				OBJ_58 /* Lock.swift in Sources */,
 				OBJ_60 /* Promise.swift in Sources */,
-				OBJ_61 /* PromiseError.swift in Sources */,
-				OBJ_62 /* PromiseMaker.swift in Sources */,
 				OBJ_63 /* RacePromises.swift in Sources */,
-				OBJ_64 /* Promised.swift in Sources */,
-				OBJ_65 /* State.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

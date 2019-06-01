@@ -22,6 +22,18 @@
  SOFTWARE.
  */
 
+public struct ErrorDictionary<Key : Hashable> : Error, CustomStringConvertible {
+    public let errors: [Key:Error]
+    
+    public init(errors: [Key:Error]) {
+        self.errors = errors
+    }
+    
+    public var description: String {
+        return self.errors.description
+    }
+}
+
 public struct AnyResult<Key : Hashable, Value> {
     public let values: [Key:Value]
     public let reasons: [Key:Error]
@@ -38,31 +50,27 @@ public struct AnyResult<Key : Hashable, Value> {
         if let value = values[key] {
             return value
         }
+        else if let error = reasons[key] {
+            throw error
+        }
         else {
-            throw reasons[key] ?? PromiseError.unknownReason
+            fatalError("Unknown key: \(key)")
         }
     }
 }
 
 public func any<Key, Value>(_ promises: [Key:Promise<Value>]) -> Promise<AnyResult<Key, Value>> {
     return Promise<AnyResult<Key, Value>>(pending: promises) { (fulfill, reject) in
-        let any = AnyPromises<Key, Value>(
-            count: promises.count,
-            fulfill: fulfill,
-            reject: { (reasons) in
-                reject(ErrorDictionary<Key>(errors: reasons))
-        }
-        )
-        
+        let any = AnyPromises<Key, Value>(count: promises.count, fulfill: fulfill, reject: { (reasons) in
+            reject(ErrorDictionary<Key>(errors: reasons))
+        })
+
         for (key, promise) in promises {
-            promise.onResolve(
-                fulfill: { (value) in
-                    any.fulfill(value: value, for: key)
-            },
-                reject: { (reason) in
-                    any.reject(reason: reason, for: key)
-            }
-            )
+            promise.onResolve(fulfill: { (value) in
+                any.fulfill(value: value, for: key)
+            }, reject: { (reason) in
+                any.reject(reason: reason, for: key)
+            })
         }
     }
 }
