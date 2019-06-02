@@ -59,16 +59,16 @@ public struct AnyResult<Key : Hashable, Value> {
     }
 }
 
-public func any<Key, Value>(_ promises: [Key:Promise<Value>]) -> Promise<AnyResult<Key, Value>> {
+public func any<Key, Value>(context: ExecutionContext, promises: [Key:Promise<Value>]) -> Promise<AnyResult<Key, Value>> {
     return Promise<AnyResult<Key, Value>> { (fulfill, reject) in
         let any = AnyPromises<Key, Value>(count: promises.count, fulfill: fulfill, reject: { (reasons) in
             reject(ErrorDictionary<Key>(errors: reasons))
         })
 
         for (key, promise) in promises {
-            promise.addCallback(context: ThreadContext.defaultContext, whenFulfilled: { (value) in
+            promise.addCallback(context: context, fulfilled: { (value) in
                 any.fulfill(value: value, for: key)
-            }, whenRejected: { (reason) in
+            }, rejected: { (reason) in
                 any.reject(reason: reason, for: key)
             })
         }

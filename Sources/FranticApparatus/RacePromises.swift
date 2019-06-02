@@ -34,16 +34,16 @@ public struct ErrorArray : Error, CustomStringConvertible {
     }
 }
 
-public func race<Value, Promises : Collection>(_ promises: Promises) -> Promise<Value> where Promises.Iterator.Element == Promise<Value> {
+public func race<Value, Promises : Collection>(context: ExecutionContext, promises: Promises) -> Promise<Value> where Promises.Iterator.Element == Promise<Value> {
     return Promise<Value> { (fulfill, reject) in
         let race = RacePromises<Value>(count: numericCast(promises.count), fulfill: fulfill, reject: { (reasons) in
                 reject(ErrorArray(errors: reasons))
         })
         
         for promise in promises {
-            promise.addCallback(context: ThreadContext.defaultContext, whenFulfilled: { (value) in
+            promise.addCallback(context: context, fulfilled: { (value) in
                 race.fulfill(value: value)
-            }, whenRejected: { (reason) in
+            }, rejected: { (reason) in
                 race.reject(reason: reason)
             })
         }

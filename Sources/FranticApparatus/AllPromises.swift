@@ -22,7 +22,7 @@
  SOFTWARE.
  */
 
-public func all<Value, Promises : Collection>(_ promises: Promises) -> Promise<[Value]> where Promises.Iterator.Element == Promise<Value> {
+public func all<Value, Promises : Collection>(context: ExecutionContext, promises: Promises) -> Promise<[Value]> where Promises.Iterator.Element == Promise<Value> {
     return Promise<[Value]> { (fulfill, reject) in
         let all = AllPromises<Int, Value>(count: numericCast(promises.count), fulfill: { (values) in
             let sortedValues = values.sorted(by: { $0.key < $1.key }).map({ $0.value })
@@ -31,23 +31,23 @@ public func all<Value, Promises : Collection>(_ promises: Promises) -> Promise<[
         }, reject: reject)
 
         for (index, promise) in promises.enumerated() {
-            promise.addCallback(context: ThreadContext.defaultContext, whenFulfilled: { (value) in
+            promise.addCallback(context: context, fulfilled: { (value) in
                 all.fulfill(value: value, for: index)
-            }, whenRejected: { (reason) in
+            }, rejected: { (reason) in
                 all.reject(reason: reason, for: index)
             })
         }
     }
 }
 
-public func all<Key, Value>(_ promises: [Key:Promise<Value>]) -> Promise<[Key:Value]> {
+public func all<Key, Value>(context: ExecutionContext, promises: [Key:Promise<Value>]) -> Promise<[Key:Value]> {
     return Promise<[Key:Value]> { (fulfill, reject) in
         let all = AllPromises<Key, Value>(count: numericCast(promises.count), fulfill: fulfill, reject: reject)
         
         for (key, promise) in promises {
-            promise.addCallback(context: ThreadContext.defaultContext, whenFulfilled: { (value) in
+            promise.addCallback(context: context, fulfilled: { (value) in
                 all.fulfill(value: value, for: key)
-            }, whenRejected: { (reason) in
+            }, rejected: { (reason) in
                 all.reject(reason: reason, for: key)
             })
         }

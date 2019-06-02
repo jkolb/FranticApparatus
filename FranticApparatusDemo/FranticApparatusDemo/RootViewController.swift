@@ -88,7 +88,7 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
     
     func fetchThumbnails() -> Promise<[UIImage]> {
         let networkLayer = self.networkLayer
-        return networkLayer.requestData(URLRequest(url: URL(string: "https://reddit.com/.json")!)).then(promise: { (result) in
+        return networkLayer.requestData(URLRequest(url: URL(string: "https://reddit.com/.json")!)).then(on: processQueue, promise: { (result) in
             guard let httpResponse = result.response as? HTTPURLResponse else {
                 throw NetworkError.unexpectedResponse(result.response)
             }
@@ -109,13 +109,13 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
                 throw NetworkError.unexpectedData(result.data)
             }
             
-            let thumbnailURLs = try RootViewController.thumbnailsFromJSON(object: dictionary)
-            let thumbnailPromises = thumbnailURLs.map({ RootViewController.fetchImage(networkLayer: networkLayer, url: $0) })
-            return all(thumbnailPromises)
+            let thumbnailURLs = try self.thumbnailsFromJSON(object: dictionary)
+            let thumbnailPromises = thumbnailURLs.map({ self.fetchImage(networkLayer: networkLayer, url: $0) })
+            return all(context: self.processQueue, promises: thumbnailPromises)
         })
     }
     
-    static func thumbnailsFromJSON(object: NSDictionary) throws -> [URL] {
+    func thumbnailsFromJSON(object: NSDictionary) throws -> [URL] {
         guard let data = object["data"] as? NSDictionary else { throw JSONError.unexpectedJSON }
         guard let children = data["children"] as? NSArray else { throw JSONError.unexpectedJSON }
         var thumbnailURLs = [URL]()
@@ -138,8 +138,8 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
         return thumbnailURLs
     }
     
-    static func fetchImage(networkLayer: NetworkLayer, url: URL) -> Promise<UIImage> {
-        return networkLayer.requestData(URLRequest(url: url)).then(map: { (result) in
+    func fetchImage(networkLayer: NetworkLayer, url: URL) -> Promise<UIImage> {
+        return networkLayer.requestData(URLRequest(url: url)).then(on: processQueue, map: { (result) in
             guard let httpResponse = result.response as? HTTPURLResponse else {
                 throw NetworkError.unexpectedResponse(result.response)
             }
@@ -166,16 +166,13 @@ class RootViewController : UIViewController, UICollectionViewDataSource, UIColle
         let model = models[indexPath.item]
         
         ApplicationNetworkActvityIndicator.shared.show()
-        promises[indexPath] = RootViewController.fetchImage(networkLayer: networkLayer, url: model.url).then(on: DispatchQueue.main, { [weak self] (image) in
-            guard let self = self else { return }
+        promises[indexPath] = self.fetchImage(networkLayer: networkLayer, url: model.url).then(on: DispatchQueue.main, { (image) in
             self.images[indexPath] = image
             self.showImage(at: indexPath)
-        }).catch(on: DispatchQueue.main, { [weak self] (error) in
-            guard let self = self else { return }
+        }).catch(on: DispatchQueue.main, { (error) in
             self.errors[indexPath] = error
             self.showError(at: indexPath)
-        }).finally(on: DispatchQueue.main, { [weak self] in
-            guard let self = self else { return }
+        }).finally(on: DispatchQueue.main, {
             ApplicationNetworkActvityIndicator.shared.hide()
             self.promises[indexPath] = nil
         })

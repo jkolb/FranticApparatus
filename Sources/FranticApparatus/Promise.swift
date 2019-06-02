@@ -36,24 +36,24 @@ public final class Promise<Value> {
     
     struct Callback {
         private let context: ExecutionContext
-        private let whenFulfilled: (Value) -> Void
-        private let whenRejected: (Error) -> Void
+        private let fulfilled: (Value) -> Void
+        private let rejected: (Error) -> Void
         
-        init(context: ExecutionContext, whenFulfilled: @escaping (Value) -> Void, whenRejected: @escaping (Error) -> Void) {
+        init(context: ExecutionContext, fulfilled: @escaping (Value) -> Void, rejected: @escaping (Error) -> Void) {
             self.context = context
-            self.whenFulfilled = whenFulfilled
-            self.whenRejected = whenRejected
+            self.fulfilled = fulfilled
+            self.rejected = rejected
         }
         
         func fulfill(value: Value) {
             context.execute {
-                self.whenFulfilled(value)
+                self.fulfilled(value)
             }
         }
         
         func reject(reason: Error) {
             context.execute {
-                self.whenRejected(reason)
+                self.rejected(reason)
             }
         }
     }
@@ -79,54 +79,54 @@ public final class Promise<Value> {
         pending(resolve, reject)
     }
 
-    public func then(on context: ExecutionContext = ThreadContext.defaultContext, _ use: @escaping (Value) -> Void) -> Promise<Value> {
-        return then(on: context, whenFulfilled: { use($0); return .value($0) }, whenRejected: { throw $0 })
+    public func then(on context: ExecutionContext, _ fulfilled: @escaping (Value) -> Void) -> Promise<Value> {
+        return then(on: context, fulfilled: { fulfilled($0); return .value($0) }, rejected: { throw $0 })
     }
     
-    public func then<Other>(on context: ExecutionContext = ThreadContext.defaultContext, map: @escaping (Value) throws -> Other) -> Promise<Other> {
-        return then(on: context, whenFulfilled: { try .value(map($0)) }, whenRejected: { throw $0 })
+    public func then<Other>(on context: ExecutionContext, map: @escaping (Value) throws -> Other) -> Promise<Other> {
+        return then(on: context, fulfilled: { try .value(map($0)) }, rejected: { throw $0 })
     }
     
-    public func then<Other>(on context: ExecutionContext = ThreadContext.defaultContext, promise: @escaping (Value) throws -> Promise<Other>) -> Promise<Other> {
-        return then(on: context, whenFulfilled: { try .promise(promise($0)) }, whenRejected: { throw $0 })
+    public func then<Other>(on context: ExecutionContext, promise: @escaping (Value) throws -> Promise<Other>) -> Promise<Other> {
+        return then(on: context, fulfilled: { try .promise(promise($0)) }, rejected: { throw $0 })
     }
     
-    public func then<Other>(on context: ExecutionContext = ThreadContext.defaultContext, transform: @escaping (Value) throws -> Result<Other>) -> Promise<Other> {
-        return then(on: context, whenFulfilled: transform, whenRejected: { throw $0 })
+    public func then<Other>(on context: ExecutionContext, transform: @escaping (Value) throws -> Result<Other>) -> Promise<Other> {
+        return then(on: context, fulfilled: transform, rejected: { throw $0 })
     }
     
-    public func `catch`(on context: ExecutionContext = ThreadContext.defaultContext, _ use: @escaping (Error) -> Void) -> Promise<Value> {
-        return then(on: context, whenFulfilled: { .value($0) }, whenRejected: { use($0); throw $0 })
+    public func `catch`(on context: ExecutionContext, _ rejected: @escaping (Error) -> Void) -> Promise<Value> {
+        return then(on: context, fulfilled: { .value($0) }, rejected: { rejected($0); throw $0 })
     }
     
-    public func `catch`(on context: ExecutionContext = ThreadContext.defaultContext, map: @escaping (Error) throws -> Value) -> Promise<Value> {
-        return then(on: context, whenFulfilled: { .value($0) }, whenRejected: { try .value(map($0)) })
+    public func `catch`(on context: ExecutionContext, map: @escaping (Error) throws -> Value) -> Promise<Value> {
+        return then(on: context, fulfilled: { .value($0) }, rejected: { try .value(map($0)) })
     }
     
-    public func `catch`(on context: ExecutionContext = ThreadContext.defaultContext, promise: @escaping (Error) throws -> Promise<Value>) -> Promise<Value> {
-        return then(on: context, whenFulfilled: { .value($0) }, whenRejected: { try .promise(promise($0)) })
+    public func `catch`(on context: ExecutionContext, promise: @escaping (Error) throws -> Promise<Value>) -> Promise<Value> {
+        return then(on: context, fulfilled: { .value($0) }, rejected: { try .promise(promise($0)) })
     }
     
-    public func `catch`(on context: ExecutionContext = ThreadContext.defaultContext, transform: @escaping (Error) throws -> Result<Value>) -> Promise<Value> {
-        return then(on: context, whenFulfilled: { .value($0) }, whenRejected: transform)
+    public func `catch`(on context: ExecutionContext, transform: @escaping (Error) throws -> Result<Value>) -> Promise<Value> {
+        return then(on: context, fulfilled: { .value($0) }, rejected: transform)
     }
     
-    public func finally(on context: ExecutionContext = ThreadContext.defaultContext, _ always: @escaping () -> Void) -> Promise<Value> {
-        return then(on: context, whenFulfilled: { always(); return .value($0) }, whenRejected: { always(); throw $0 })
+    public func finally(on context: ExecutionContext, _ always: @escaping () -> Void) -> Promise<Value> {
+        return then(on: context, fulfilled: { always(); return .value($0) }, rejected: { always(); throw $0 })
     }
     
-    public func then<Other>(on context: ExecutionContext = ThreadContext.defaultContext, whenFulfilled: @escaping (Value) throws -> Result<Other>, whenRejected: @escaping (Error) throws -> Result<Other>) -> Promise<Other> {
+    public func then<Other>(on context: ExecutionContext, fulfilled: @escaping (Value) throws -> Result<Other>, rejected: @escaping (Error) throws -> Result<Other>) -> Promise<Other> {
         return Promise<Other>(pending: { (resolve, reject) in
-            self.addCallback(context: context, whenFulfilled: { (value) in
+            self.addCallback(context: context, fulfilled: { (value) in
                 do {
-                    resolve(context, try whenFulfilled(value))
+                    resolve(context, try fulfilled(value))
                 }
                 catch {
                     reject(error)
                 }
-            }, whenRejected: { (reason) in
+            }, rejected: { (reason) in
                 do {
-                    resolve(context, try whenRejected(reason))
+                    resolve(context, try rejected(reason))
                 }
                 catch {
                     reject(error)
@@ -135,7 +135,7 @@ public final class Promise<Value> {
         })
     }
     
-    private func fulfill(value: Value) {
+    private func fulfill(_ value: Value) {
         lock.lock()
         switch state {
         case .pending(_, let callbacks):
@@ -151,7 +151,7 @@ public final class Promise<Value> {
         }
     }
     
-    private func reject(reason: Error) {
+    private func reject(_ reason: Error) {
         lock.lock()
         switch state {
         case .pending(_, let callbacks):
@@ -167,7 +167,7 @@ public final class Promise<Value> {
         }
     }
     
-    private func pending(promise: Promise<Value>) {
+    private func pending(_ promise: Promise<Value>) {
         lock.lock()
         switch state {
         case .pending(_, let callbacks):
@@ -182,16 +182,16 @@ public final class Promise<Value> {
     private func resolve(context: ExecutionContext, result: Result<Value>) {
         switch result {
         case .value(let value):
-            fulfill(value: value)
+            fulfill(value)
             
         case .promise(let promise):
-            pending(promise: promise)
-            promise.addCallback(context: context, whenFulfilled: fulfill, whenRejected: reject)
+            pending(promise)
+            promise.addCallback(context: context, fulfilled: fulfill, rejected: reject)
         }
     }
     
-    func addCallback(context: ExecutionContext, whenFulfilled: @escaping (Value) -> Void, whenRejected: @escaping (Error) -> Void) {
-        let callback = Callback(context: context, whenFulfilled: whenFulfilled, whenRejected: whenRejected)
+    func addCallback(context: ExecutionContext, fulfilled: @escaping (Value) -> Void, rejected: @escaping (Error) -> Void) {
+        let callback = Callback(context: context, fulfilled: fulfilled, rejected: rejected)
         
         lock.lock()
         

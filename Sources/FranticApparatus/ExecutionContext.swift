@@ -42,17 +42,17 @@ extension OperationQueue : ExecutionContext {
 }
 
 public final class ThreadContext : Thread, ExecutionContext {
-    public static var defaultContext: ExecutionContext = {
-        let threadContext = ThreadContext()
-        threadContext.start()
-        return threadContext
-    }()
     private let condition: NSCondition
     private var queue: [() -> Void]
     
-    public override init() {
+    public init(name: String? = nil, autostart: Bool = true) {
         self.condition = NSCondition()
         self.queue = []
+        super.init()
+        self.name = name
+        if autostart {
+            start()
+        }
     }
     
     public override func main() {
