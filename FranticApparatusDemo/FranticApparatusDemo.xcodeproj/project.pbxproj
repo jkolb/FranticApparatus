@@ -8,10 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E5608B921CE771A30040E140 /* NetworkLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5608B911CE771A30040E140 /* NetworkLayer.swift */; };
-		E5608B941CE772210040E140 /* SimpleURLSessionNetworkLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5608B931CE772210040E140 /* SimpleURLSessionNetworkLayer.swift */; };
-		E5608B961CE772E90040E140 /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5608B951CE772E90040E140 /* NetworkError.swift */; };
 		E5608B9A1CE79AAC0040E140 /* NetworkActivityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5608B991CE79AAC0040E140 /* NetworkActivityIndicator.swift */; };
-		E5608B9C1CE79AF40040E140 /* ApplicationNetworkActivityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5608B9B1CE79AF40040E140 /* ApplicationNetworkActivityIndicator.swift */; };
 		E57D1B051CE5688900C0C6BE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57D1B041CE5688900C0C6BE /* AppDelegate.swift */; };
 		E57D1B071CE5688900C0C6BE /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E57D1B061CE5688900C0C6BE /* RootViewController.swift */; };
 		E57D1B0E1CE5688900C0C6BE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E57D1B0D1CE5688900C0C6BE /* Assets.xcassets */; };
@@ -23,10 +20,7 @@
 
 /* Begin PBXFileReference section */
 		E5608B911CE771A30040E140 /* NetworkLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkLayer.swift; sourceTree = "<group>"; };
-		E5608B931CE772210040E140 /* SimpleURLSessionNetworkLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleURLSessionNetworkLayer.swift; sourceTree = "<group>"; };
-		E5608B951CE772E90040E140 /* NetworkError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
 		E5608B991CE79AAC0040E140 /* NetworkActivityIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkActivityIndicator.swift; sourceTree = "<group>"; };
-		E5608B9B1CE79AF40040E140 /* ApplicationNetworkActivityIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApplicationNetworkActivityIndicator.swift; sourceTree = "<group>"; };
 		E57D1B011CE5688800C0C6BE /* FranticApparatusDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FranticApparatusDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E57D1B041CE5688900C0C6BE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E57D1B061CE5688900C0C6BE /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
@@ -75,10 +69,7 @@
 				E57F6CD51D8D9777006807C4 /* ImageModel.swift */,
 				E57F6CD31D8D9348006807C4 /* ImageCell.swift */,
 				E5608B911CE771A30040E140 /* NetworkLayer.swift */,
-				E5608B931CE772210040E140 /* SimpleURLSessionNetworkLayer.swift */,
-				E5608B951CE772E90040E140 /* NetworkError.swift */,
 				E5608B991CE79AAC0040E140 /* NetworkActivityIndicator.swift */,
-				E5608B9B1CE79AF40040E140 /* ApplicationNetworkActivityIndicator.swift */,
 				E57D1B0D1CE5688900C0C6BE /* Assets.xcassets */,
 				E57D1B0F1CE5688900C0C6BE /* LaunchScreen.storyboard */,
 				E57D1B121CE5688900C0C6BE /* Info.plist */,
@@ -159,9 +150,6 @@
 			files = (
 				E57F6CD61D8D9777006807C4 /* ImageModel.swift in Sources */,
 				E5608B9A1CE79AAC0040E140 /* NetworkActivityIndicator.swift in Sources */,
-				E5608B961CE772E90040E140 /* NetworkError.swift in Sources */,
-				E5608B941CE772210040E140 /* SimpleURLSessionNetworkLayer.swift in Sources */,
-				E5608B9C1CE79AF40040E140 /* ApplicationNetworkActivityIndicator.swift in Sources */,
 				E57D1B071CE5688900C0C6BE /* RootViewController.swift in Sources */,
 				E5608B921CE771A30040E140 /* NetworkLayer.swift in Sources */,
 				E57D1B051CE5688900C0C6BE /* AppDelegate.swift in Sources */,
@@ -231,7 +219,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -282,7 +270,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";

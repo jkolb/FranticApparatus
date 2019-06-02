@@ -30,6 +30,42 @@ public struct NetworkResult {
     public let data: Data
 }
 
+public enum NetworkError : Error {
+    case unexpectedData(Data)
+    case unexpectedResponse(URLResponse)
+    case unexpectedStatusCode(Int)
+    case unexpectedContentType(String)
+}
+
 public protocol NetworkLayer : class {
     func requestData(_ request: URLRequest) -> Promise<NetworkResult>
+}
+
+public final class SimpleURLSessionNetworkLayer : NetworkLayer {
+    private let session: URLSession
+    
+    public init() {
+        let sessionConfiguration = URLSessionConfiguration.default
+        self.session = URLSession(configuration: sessionConfiguration)
+    }
+    
+    deinit {
+        session.invalidateAndCancel()
+    }
+    
+    public func requestData(_ request: URLRequest) -> Promise<NetworkResult> {
+        return Promise<NetworkResult> { (fulfill, reject) in
+            session.dataTask(with: request, completionHandler: { (data, response, error) in
+                if let error = error {
+                    reject(error)
+                }
+                else if let data = data, let response = response {
+                    fulfill(NetworkResult(response: response, data: data))
+                }
+                else {
+                    fatalError("Unexpected")
+                }
+            }).resume()
+        }
+    }
 }

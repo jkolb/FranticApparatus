@@ -53,20 +53,23 @@ public class ImageCell : UICollectionViewCell {
         errorLabel.lineBreakMode = .byWordWrapping
         errorLabel.numberOfLines = 0
         errorLabel.translatesAutoresizingMaskIntoConstraints = false
-        errorLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4.0).isActive = true
-        errorLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4.0).isActive = true
-        errorLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 4.0).isActive = true
-        errorLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -4.0).isActive = true
         
         imageView.contentMode = .center
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
-        imageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
         
         activityIndicator.hidesWhenStopped = true
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        activityIndicator.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
-        activityIndicator.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
+
+        addConstraints([
+            errorLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4.0),
+            errorLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4.0),
+            errorLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 4.0),
+            errorLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -4.0),
+            imageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            activityIndicator.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            ])
     }
     
     public override func prepareForReuse() {

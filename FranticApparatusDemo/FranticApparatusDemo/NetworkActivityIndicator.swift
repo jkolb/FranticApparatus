@@ -22,7 +22,42 @@
  SOFTWARE.
  */
 
+import UIKit
+
 public protocol NetworkActivityIndicator : class {
     func show()
     func hide()
+}
+
+public final class ApplicationNetworkActvityIndicator : NetworkActivityIndicator {
+    public static let shared = ApplicationNetworkActvityIndicator()
+    private var activityVisibleCount: Int
+    
+    public init() {
+        self.activityVisibleCount = 0
+    }
+    
+    deinit {
+        UIApplication.shared.isNetworkActivityIndicatorVisible = false
+    }
+    
+    public func show() {
+        if self.activityVisibleCount == 0 {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = true
+            self.activityVisibleCount = 1
+        }
+        else if self.activityVisibleCount < Int.max {
+            self.activityVisibleCount += 1
+        }
+    }
+    
+    public func hide() {
+        if self.activityVisibleCount == 1 {
+            UIApplication.shared.isNetworkActivityIndicatorVisible = false
+            self.activityVisibleCount = 0
+        }
+        else if self.activityVisibleCount > 0 {
+            self.activityVisibleCount -= 1
+        }
+    }
 }
