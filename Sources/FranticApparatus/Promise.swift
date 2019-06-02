@@ -29,177 +29,137 @@ public enum Result<Value> {
 
 public final class Promise<Value> {
     private enum State {
-        case pending(Deferred)
+        case pending(Promise<Value>?, [Callback])
         case fulfilled(Value)
         case rejected(Error)
     }
-
-    private final class Deferred {
-        private let pending: Any?
-        var onFulfilled: [(Value) -> Void]
-        var onRejected: [(Error) -> Void]
+    
+    struct Callback {
+        private let context: ExecutionContext
+        private let whenFulfilled: (Value) -> Void
+        private let whenRejected: (Error) -> Void
         
-        convenience init() {
-            self.init(pending: nil, onFulfilled: [], onRejected: [])
+        init(context: ExecutionContext, whenFulfilled: @escaping (Value) -> Void, whenRejected: @escaping (Error) -> Void) {
+            self.context = context
+            self.whenFulfilled = whenFulfilled
+            self.whenRejected = whenRejected
         }
         
-        convenience init(pending: Any) {
-            self.init(pending: pending, onFulfilled: [], onRejected: [])
+        func fulfill(value: Value) {
+            context.execute {
+                self.whenFulfilled(value)
+            }
         }
         
-        convenience init<P>(pendingPromise: Promise<P>?) {
-            self.init(pending: pendingPromise, onFulfilled: [], onRejected: [])
-        }
-        
-        convenience init<P>(pendingPromise: Promise<P>, onFulfilled: [(Value) -> Void], onRejected: [(Error) -> Void]) {
-            self.init(pending: pendingPromise, onFulfilled: onFulfilled, onRejected: onRejected)
-        }
-        
-        private init(pending: Any?, onFulfilled: [(Value) -> Void], onRejected: [(Error) -> Void]) {
-            self.pending = pending
-            self.onFulfilled = onFulfilled
-            self.onRejected = onRejected
+        func reject(reason: Error) {
+            context.execute {
+                self.whenRejected(reason)
+            }
         }
     }
-
-    private let lock: Lock
+    
+    private let lock = Lock()
     private var state: State
     
     public init(value: Value) {
-        self.lock = Lock()
         self.state = .fulfilled(value)
     }
-
+    
     public init(reason: Error) {
-        self.lock = Lock()
         self.state = .rejected(reason)
     }
     
-    public init(_ promise: (_ fulfill: @escaping (Value) -> Void, _ reject: @escaping (Error) -> Void, _ isCancelled: @escaping () -> Bool) -> Void) {
-        self.lock = Lock()
-        self.state = .pending(Deferred())
-
-        let isCancelled: () -> Bool = { [weak self] in
-            return self == nil
-        }
-        
-        promise(weakify(Promise.fulfill), weakify(Promise.reject), isCancelled)
+    public init(_ promise: (_ fulfill: @escaping (Value) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
+        self.state = .pending(nil, [])
+        promise(fulfill, reject)
+    }
+    
+    private init(pending: (_ resolve: @escaping (ExecutionContext, Result<Value>) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
+        self.state = .pending(nil, [])
+        pending(resolve, reject)
     }
 
-    private func weakify<V>(_ method: @escaping (Promise) -> (V) -> Void) -> (V) -> Void {
-        return { [weak self] (value: V) in
-            guard let self = self else { return }
-            
-            method(self)(value)
-        }
+    public func then(on context: ExecutionContext = ThreadContext.defaultContext, _ use: @escaping (Value) -> Void) -> Promise<Value> {
+        return then(on: context, whenFulfilled: { use($0); return .value($0) }, whenRejected: { throw $0 })
     }
-
-    public func then(on executionContext: ExecutionContext = ThreadContext.defaultContext, _ whenFulfilled: @escaping (Value) -> Void) -> Promise<Value> {
-        return then(on: executionContext, whenFulfilled: { whenFulfilled($0); return .value($0) }, whenRejected: { throw $0 })
+    
+    public func then<Other>(on context: ExecutionContext = ThreadContext.defaultContext, map: @escaping (Value) throws -> Other) -> Promise<Other> {
+        return then(on: context, whenFulfilled: { try .value(map($0)) }, whenRejected: { throw $0 })
     }
-
-    public func then<Other>(on executionContext: ExecutionContext = ThreadContext.defaultContext, map: @escaping (Value) throws -> Other) -> Promise<Other> {
-        return then(on: executionContext, whenFulfilled: { try .value(map($0)) }, whenRejected: { throw $0 })
+    
+    public func then<Other>(on context: ExecutionContext = ThreadContext.defaultContext, promise: @escaping (Value) throws -> Promise<Other>) -> Promise<Other> {
+        return then(on: context, whenFulfilled: { try .promise(promise($0)) }, whenRejected: { throw $0 })
     }
-
-    public func then<Other>(on executionContext: ExecutionContext = ThreadContext.defaultContext, promise: @escaping (Value) throws -> Promise<Other>) -> Promise<Other> {
-        return then(on: executionContext, whenFulfilled: { try .promise(promise($0)) }, whenRejected: { throw $0 })
+    
+    public func then<Other>(on context: ExecutionContext = ThreadContext.defaultContext, transform: @escaping (Value) throws -> Result<Other>) -> Promise<Other> {
+        return then(on: context, whenFulfilled: transform, whenRejected: { throw $0 })
     }
-
-    public func then<Other>(on executionContext: ExecutionContext = ThreadContext.defaultContext, _ transform: @escaping (Value) throws -> Result<Other>) -> Promise<Other> {
-        return then(on: executionContext, whenFulfilled: transform, whenRejected: { throw $0 })
+    
+    public func `catch`(on context: ExecutionContext = ThreadContext.defaultContext, _ use: @escaping (Error) -> Void) -> Promise<Value> {
+        return then(on: context, whenFulfilled: { .value($0) }, whenRejected: { use($0); throw $0 })
     }
-
-    public func `catch`(on executionContext: ExecutionContext = ThreadContext.defaultContext, _ whenRejected: @escaping (Error) -> Void) -> Promise<Value> {
-        return then(on: executionContext, whenFulfilled: { .value($0) }, whenRejected: { whenRejected($0); throw $0 })
+    
+    public func `catch`(on context: ExecutionContext = ThreadContext.defaultContext, map: @escaping (Error) throws -> Value) -> Promise<Value> {
+        return then(on: context, whenFulfilled: { .value($0) }, whenRejected: { try .value(map($0)) })
     }
-
-    public func recover(on executionContext: ExecutionContext = ThreadContext.defaultContext, map: @escaping (Error) throws -> Value) -> Promise<Value> {
-        return then(on: executionContext, whenFulfilled: { .value($0) }, whenRejected: { try .value(map($0)) })
+    
+    public func `catch`(on context: ExecutionContext = ThreadContext.defaultContext, promise: @escaping (Error) throws -> Promise<Value>) -> Promise<Value> {
+        return then(on: context, whenFulfilled: { .value($0) }, whenRejected: { try .promise(promise($0)) })
     }
-
-    public func recover(on executionContext: ExecutionContext = ThreadContext.defaultContext, promise: @escaping (Error) throws -> Promise<Value>) -> Promise<Value> {
-        return then(on: executionContext, whenFulfilled: { .value($0) }, whenRejected: { try .promise(promise($0)) })
+    
+    public func `catch`(on context: ExecutionContext = ThreadContext.defaultContext, transform: @escaping (Error) throws -> Result<Value>) -> Promise<Value> {
+        return then(on: context, whenFulfilled: { .value($0) }, whenRejected: transform)
     }
-
-    public func recover(on executionContext: ExecutionContext = ThreadContext.defaultContext, _ transform: @escaping (Error) throws -> Result<Value>) -> Promise<Value> {
-        return then(on: executionContext, whenFulfilled: { .value($0) }, whenRejected: transform)
+    
+    public func finally(on context: ExecutionContext = ThreadContext.defaultContext, _ always: @escaping () -> Void) -> Promise<Value> {
+        return then(on: context, whenFulfilled: { always(); return .value($0) }, whenRejected: { always(); throw $0 })
     }
-
-    public func finally(on executionContext: ExecutionContext = ThreadContext.defaultContext, _ always: @escaping () -> Void) -> Promise<Value> {
-        return then(on: executionContext, whenFulfilled: { always(); return .value($0) }, whenRejected: { always(); throw $0 })
-    }
-
-    public func then<Other>(on executionContext: ExecutionContext = ThreadContext.defaultContext, whenFulfilled: @escaping (Value) throws -> Result<Other>, whenRejected: @escaping (Error) throws -> Result<Other>) -> Promise<Other> {
-        return Promise<Other>(pendingPromise: self) { (resolve, reject) in
-            self.onResolve(
-                fulfill: { (value) in
-                    executionContext.execute {
-                        do {
-                            let result = try whenFulfilled(value)
-                            resolve(result)
-                        }
-                        catch {
-                            reject(error)
-                        }
-                    }
-                },
-                reject: { (reason) in
-                    executionContext.execute {
-                        do {
-                            let result = try whenRejected(reason)
-                            resolve(result)
-                        }
-                        catch {
-                            reject(error)
-                        }
-                    }
+    
+    public func then<Other>(on context: ExecutionContext = ThreadContext.defaultContext, whenFulfilled: @escaping (Value) throws -> Result<Other>, whenRejected: @escaping (Error) throws -> Result<Other>) -> Promise<Other> {
+        return Promise<Other>(pending: { (resolve, reject) in
+            self.addCallback(context: context, whenFulfilled: { (value) in
+                do {
+                    resolve(context, try whenFulfilled(value))
                 }
-            )
-        }
+                catch {
+                    reject(error)
+                }
+            }, whenRejected: { (reason) in
+                do {
+                    resolve(context, try whenRejected(reason))
+                }
+                catch {
+                    reject(error)
+                }
+            })
+        })
     }
     
-    init(pending: Any, _ resolver: (_ fulfill: @escaping (Value) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
-        self.lock = Lock()
-        self.state = .pending(Deferred(pending: pending))
-        
-        resolver(weakify(Promise.fulfill), weakify(Promise.reject))
-    }
-
-    private init<PendingValue>(pendingPromise: Promise<PendingValue>, _ resolver: (_ resolve: @escaping (Result<Value>) -> Void, _ reject: @escaping (Error) -> Void) -> Void) {
-        self.lock = Lock()
-        self.state = .pending(Deferred(pendingPromise: pendingPromise))
-        
-        resolver(weakify(Promise.resolve), weakify(Promise.reject))
-    }
-    
-    private func fulfill(_ value: Value) {
+    private func fulfill(value: Value) {
         lock.lock()
-        
         switch state {
-        case .pending(let deferred):
+        case .pending(_, let callbacks):
             state = .fulfilled(value)
             lock.unlock()
             
-            for onFulfilled in deferred.onFulfilled {
-                onFulfilled(value)
+            for callback in callbacks {
+                callback.fulfill(value: value)
             }
-            
+
         default:
             fatalError("Duplicate attempt to resolve promise")
         }
     }
     
-    private func reject(_ reason: Error) {
+    private func reject(reason: Error) {
         lock.lock()
-        
         switch state {
-        case .pending(let deferred):
+        case .pending(_, let callbacks):
             state = .rejected(reason)
             lock.unlock()
             
-            for onRejected in deferred.onRejected {
-                onRejected(reason)
+            for callback in callbacks {
+                callback.reject(reason: reason)
             }
             
         default:
@@ -207,48 +167,46 @@ public final class Promise<Value> {
         }
     }
     
-    private func pendOn(_ promise: Promise<Value>) {
-        precondition(promise !== self)
-
+    private func pending(promise: Promise<Value>) {
         lock.lock()
-        
         switch state {
-        case .pending(let deferred):
-            state = .pending(Deferred(pendingPromise: promise, onFulfilled: deferred.onFulfilled, onRejected: deferred.onRejected))
+        case .pending(_, let callbacks):
+            state = .pending(promise, callbacks)
             lock.unlock()
-            promise.onResolve(fulfill: weakify(Promise.fulfill), reject: weakify(Promise.reject))
             
         default:
             fatalError("Duplicate attempt to resolve promise")
         }
     }
-
-    private func resolve(_ result: Result<Value>) {
+    
+    private func resolve(context: ExecutionContext, result: Result<Value>) {
         switch result {
         case .value(let value):
-            fulfill(value)
+            fulfill(value: value)
             
         case .promise(let promise):
-            pendOn(promise)
+            pending(promise: promise)
+            promise.addCallback(context: context, whenFulfilled: fulfill, whenRejected: reject)
         }
     }
     
-    func onResolve(fulfill: @escaping (Value) -> Void, reject: @escaping (Error) -> Void) {
+    func addCallback(context: ExecutionContext, whenFulfilled: @escaping (Value) -> Void, whenRejected: @escaping (Error) -> Void) {
+        let callback = Callback(context: context, whenFulfilled: whenFulfilled, whenRejected: whenRejected)
+        
         lock.lock()
         
         switch state {
+        case .pending(let promise, let callbacks):
+            state = .pending(promise, callbacks + [callback])
+            lock.unlock()
+
         case .fulfilled(let value):
             lock.unlock()
-            fulfill(value)
+            callback.fulfill(value: value)
             
         case .rejected(let reason):
             lock.unlock()
-            reject(reason)
-            
-        case .pending(let deferred):
-            deferred.onFulfilled.append(fulfill)
-            deferred.onRejected.append(reject)
-            lock.unlock()
+            callback.reject(reason: reason)
         }
     }
 }

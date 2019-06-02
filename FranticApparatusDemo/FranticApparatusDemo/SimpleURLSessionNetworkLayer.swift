@@ -38,7 +38,7 @@ public final class SimpleURLSessionNetworkLayer : NetworkLayer {
     }
     
     public func requestData(_ request: URLRequest) -> Promise<NetworkResult> {
-        return Promise<NetworkResult> { (fulfill, reject, isCancelled) in
+        return Promise<NetworkResult> { (fulfill, reject) in
             session.dataTask(with: request) { (data, response, error) in
                 if let error = error {
                     reject(error)

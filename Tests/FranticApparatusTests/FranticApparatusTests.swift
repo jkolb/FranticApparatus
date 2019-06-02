@@ -48,7 +48,7 @@ class FranticApparatusTests: XCTestCase, ExecutionContext {
     func testFulfill() {
         var promisedValue = 0
         
-        promiseIntA = Promise<Int> { (fulfill, reject, isCancelled) in fulfill(1) }.then(
+        promiseIntA = Promise<Int> { (fulfill, reject) in fulfill(1) }.then(
             on: self,
             whenFulfilled: { (value) -> Result<Int> in
                 promisedValue = value
@@ -59,15 +59,15 @@ class FranticApparatusTests: XCTestCase, ExecutionContext {
             }
         )
         
-        dispatchNext()
-        
+        dispatch()
+
         XCTAssertEqual(promisedValue, 1)
     }
     
     func testReject() {
         var promisedReason = TestError.unexpectedRejection
         
-        promiseIntA = Promise<Int> { (fulfill, reject, isCancelled) in reject(TestError.expectedRejection) }.then(
+        promiseIntA = Promise<Int> { (fulfill, reject) in reject(TestError.expectedRejection) }.then(
             on: self,
             whenFulfilled: { (value) -> Result<Int> in
                 return .value(value)
@@ -78,8 +78,8 @@ class FranticApparatusTests: XCTestCase, ExecutionContext {
             }
         )
         
-        dispatchNext()
-        
+        dispatch()
+
         XCTAssertEqual(promisedReason, TestError.expectedRejection)
     }
     
@@ -87,7 +87,7 @@ class FranticApparatusTests: XCTestCase, ExecutionContext {
         var promisedOrders = [Int]()
         var promisedOrder = 0
         
-        let promise = Promise<Int> { (fulfill, reject, isCancelled) -> Void in fulfill(1) }
+        let promise = Promise<Int> { (fulfill, reject) -> Void in fulfill(1) }
         
         promiseIntA = promise.then(
             on: self,
@@ -113,9 +113,8 @@ class FranticApparatusTests: XCTestCase, ExecutionContext {
             }
         )
 
-        dispatchNext()
-        dispatchNext()
-        
+        dispatch()
+
         XCTAssertEqual([1, 2], promisedOrders)
     }
     
@@ -123,7 +122,7 @@ class FranticApparatusTests: XCTestCase, ExecutionContext {
         var promisedOrders = [Int]()
         var promisedOrder = 0
         
-        let promise = Promise<Int> { (fulfill, reject, isCancelled) -> Void in reject(TestError.expectedRejection) }
+        let promise = Promise<Int> { (fulfill, reject) -> Void in reject(TestError.expectedRejection) }
         
         promiseIntA = promise.then(
             on: self,
@@ -149,48 +148,38 @@ class FranticApparatusTests: XCTestCase, ExecutionContext {
             }
         )
         
-        dispatchNext()
-        dispatchNext()
-        
+        dispatch()
+
         XCTAssertEqual([1, 2], promisedOrders)
     }
     
     func testWhenPromiseResolvedWithAPromiseThenPromise2WillFulfillWithValueOfThatPromise() {
         var promisedValue = ""
         
-        let promiseA = Promise<Int> { (fulfill, reject, isCancelled) in fulfill(1) }
-        let promiseB = Promise<String> { (fulfill, reject, isCancelled) in fulfill("promised") }
+        let promiseA = Promise<Int> { (fulfill, reject) in execute { fulfill(1) } }
+        let promiseB = Promise<String> { (fulfill, reject) in execute { fulfill("promised") } }
         
-        promiseString = promiseA.then(
-            on: self,
-            whenFulfilled: { (value) -> Result<String> in
-                return .promise(promiseB)
-            },
-            whenRejected: { (reason) -> Result<String> in
-                throw reason
-            }
-            ).then(
-                on: self,
-                whenFulfilled: { (value) -> Result<String> in
-                    promisedValue = value
-                    return .value(value)
-                },
-                whenRejected: { (reason) -> Result<String> in
-                    throw reason
-                }
-        )
-        
-        dispatchNext()
-        dispatchNext()
-        
+        promiseString = promiseA.then(on: self, whenFulfilled: { (value) -> Result<String> in
+            return .promise(promiseB)
+        }, whenRejected: { (reason) -> Result<String> in
+            throw reason
+        }).then(on: self, whenFulfilled: { (value) -> Result<String> in
+            promisedValue = value
+            return .value(value)
+        }, whenRejected: { (reason) -> Result<String> in
+            throw reason
+        })
+
+        dispatch()
+
         XCTAssertEqual(promisedValue, "promised")
     }
     
     func testWhenPromiseResolvedWithAPromiseThenPromise2WillRejectWithReasonOfThatPromise() {
         var promisedReason = TestError.unexpectedRejection
         
-        let promiseA = Promise<Int> { (fulfill, reject, isCancelled) in fulfill(1) }
-        let promiseB = Promise<String> { (fulfill, reject, isCancelled) in reject(TestError.expectedRejection) }
+        let promiseA = Promise<Int> { (fulfill, reject) in fulfill(1) }
+        let promiseB = Promise<String> { (fulfill, reject) in reject(TestError.expectedRejection) }
         
         promiseString = promiseA.then(
             on: self,
@@ -211,16 +200,15 @@ class FranticApparatusTests: XCTestCase, ExecutionContext {
                 }
         )
         
-        dispatchNext()
-        dispatchNext()
-        
+        dispatch()
+
         XCTAssertEqual(promisedReason, TestError.expectedRejection)
     }
     
     func testPromise1OnFulfilledThrowsErrorPromise2MustBeRejectedWithSameReason() {
         var promisedReason = TestError.unexpectedRejection
         
-        let promise = Promise<Int> { (fulfill, reject, isCancelled) in fulfill(1) }
+        let promise = Promise<Int> { (fulfill, reject) in fulfill(1) }
         
         promiseString = promise.then(
             on: self,
@@ -241,16 +229,15 @@ class FranticApparatusTests: XCTestCase, ExecutionContext {
                 }
         )
         
-        dispatchNext()
-        dispatchNext()
-        
+        dispatch()
+
         XCTAssertEqual(promisedReason, TestError.expectedRejection)
     }
     
     func testPromise1OnRejectedThrowsErrorPromise2MustBeRejectedWithSameReason() {
         var promisedReason = TestError.unexpectedRejection
         
-        let promise = Promise<Int> { (fulfill, reject, isCancelled) in reject(TestError.unexpectedRejection) }
+        let promise = Promise<Int> { (fulfill, reject) in reject(TestError.unexpectedRejection) }
         
         promiseString = promise.then(
             on: self,
@@ -271,8 +258,7 @@ class FranticApparatusTests: XCTestCase, ExecutionContext {
                 }
         )
         
-        dispatchNext()
-        dispatchNext()
+        dispatch()
         
         XCTAssertEqual(promisedReason, TestError.expectedRejection)
     }
@@ -281,9 +267,11 @@ class FranticApparatusTests: XCTestCase, ExecutionContext {
         pendingDispatch.append(block)
     }
     
-    func dispatchNext() {
-        let closure = pendingDispatch.removeFirst()
-        closure()
+    func dispatch() {
+        while !pendingDispatch.isEmpty {
+            let closure = pendingDispatch.removeFirst()
+            closure()
+        }
     }
 
     static var allTests = [

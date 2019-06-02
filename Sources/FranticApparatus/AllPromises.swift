@@ -23,47 +23,33 @@
  */
 
 public func all<Value, Promises : Collection>(_ promises: Promises) -> Promise<[Value]> where Promises.Iterator.Element == Promise<Value> {
-    return Promise<[Value]>(pending: promises) { (fulfill, reject) in
-        let all = AllPromises<Int, Value>(
-            count: numericCast(promises.count),
-            fulfill: { (values) in
-                let sortedValues = values.sorted(by: { $0.key < $1.key }).map({ $0.value })
-                
-                fulfill(sortedValues)
-            },
-            reject: reject
-        )
-        
+    return Promise<[Value]> { (fulfill, reject) in
+        let all = AllPromises<Int, Value>(count: numericCast(promises.count), fulfill: { (values) in
+            let sortedValues = values.sorted(by: { $0.key < $1.key }).map({ $0.value })
+            
+            fulfill(sortedValues)
+        }, reject: reject)
+
         for (index, promise) in promises.enumerated() {
-            promise.onResolve(
-                fulfill: { (value) in
-                    all.fulfill(value: value, for: index)
-                },
-                reject: { (reason) in
-                    all.reject(reason: reason, for: index)
-                }
-            )
+            promise.addCallback(context: ThreadContext.defaultContext, whenFulfilled: { (value) in
+                all.fulfill(value: value, for: index)
+            }, whenRejected: { (reason) in
+                all.reject(reason: reason, for: index)
+            })
         }
     }
 }
 
 public func all<Key, Value>(_ promises: [Key:Promise<Value>]) -> Promise<[Key:Value]> {
-    return Promise<[Key:Value]>(pending: promises) { (fulfill, reject) in
-        let all = AllPromises<Key, Value>(
-            count: numericCast(promises.count),
-            fulfill: fulfill,
-            reject: reject
-        )
+    return Promise<[Key:Value]> { (fulfill, reject) in
+        let all = AllPromises<Key, Value>(count: numericCast(promises.count), fulfill: fulfill, reject: reject)
         
         for (key, promise) in promises {
-            promise.onResolve(
-                fulfill: { (value) in
-                    all.fulfill(value: value, for: key)
-                },
-                reject: { (reason) in
-                    all.reject(reason: reason, for: key)
-                }
-            )
+            promise.addCallback(context: ThreadContext.defaultContext, whenFulfilled: { (value) in
+                all.fulfill(value: value, for: key)
+            }, whenRejected: { (reason) in
+                all.reject(reason: reason, for: key)
+            })
         }
     }
 }
@@ -103,7 +89,7 @@ private final class AllPromises<Key : Hashable, Value> {
         if reasons.count == 1 {
             reject(reason)
         }
-
+        
         lock.unlock()
     }
 }
